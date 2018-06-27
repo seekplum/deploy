@@ -13,7 +13,7 @@ alias mv='mv -i'
 
 export ORACLE_HOME=$HOME/packages/oracle
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ORACLE_HOME
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$ORACLE_HOME:$MYSQL_HOME/lib
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$ORACLE_HOME
 
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/GolangProjects
@@ -21,4 +21,5 @@ export GOPATH=$HOME/GolangProjects
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 export PATH=$PATH:$GOPATH/src/github.com/kardianos/govendor
 
+alias rm='echo "This is not the command you are looking for."; false'
 alias cdg="cd $GOPATH/src"

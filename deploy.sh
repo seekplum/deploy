@@ -40,6 +40,7 @@ init() {
 	yum install screen -y
 	yum install -y python-setuptools
     easy_install pip
+    easy_install trash-cli
     pip install supervisor
 	cp config/.bashrc ~/
 
