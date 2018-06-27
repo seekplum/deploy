@@ -94,6 +94,7 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+bindkey \^U backward-kill-line  # 取消zsh中 `ctrl + u` 清除整行
 
 source ~/.bash_profile
 source ~/.bashrc
