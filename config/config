@@ -1,9 +1,3 @@
-Host qdata1
-    HostName 192.168.1.86
-    User root
-    PreferredAuthentications publickey
-    IdentityFile ~/.ssh/seekplum
-
 Host qdata
     HostName 192.168.1.174
     User root
@@ -17,10 +11,10 @@ Host demo
     IdentityFile ~/.ssh/seekplum
 
 Host cloud
-    HostName 192.168.1.157
+    HostName 192.168.1.153
     User root
     PreferredAuthentications publickey
-    IdentityFile ~/.ssh/id_rsa
+    IdentityFile ~/.ssh/seekplum
 
 Host deploy
     HostName 192.168.1.171

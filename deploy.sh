@@ -1,6 +1,8 @@
 #/bin/bash
 
 RETVAL=0
+current_path=`pwd`
+file_path=$(dirname $0)
 
 install_zsh() {
     echo -e '\033[32mInstall zsh\033[0m'
@@ -13,11 +15,15 @@ EOF
 
     # 设置命令行补齐
 	git clone git://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-	cp config/.zshrc ~/
+	scp ${file_path}/config/.zshrc ~/
     chsh -s /bin/zsh
     zsh_bash=~/.zshrc
     echo "source ~/.bash_profile" >> ${zsh_bash}
     echo "source ~/.bashrc" >> ${zsh_bash}
+
+    sed -i '10,12d' ~/.bashrc
+
+    echo -e "\n\033[33m please run 'source ${zsh_bash}' \033[0m"
 }
 
 remove_zsh() {
@@ -36,17 +42,16 @@ remove_docker() {
 }
 
 init() {
-	yum install wget -y
-	yum install screen -y
-	yum install -y python-setuptools
-    easy_install pip
-    easy_install trash-cli
+	yum install -y bzip2 python-setuptools wget screen
+    easy_install pip trash-cli
     pip install supervisor
-	cp config/.bashrc ~/
+	scp ${file_path}/config/.bashrc ~/
 
 	mkdir -p ~/.ssh
-	cp config/config ~/.ssh/
-	cp config/authorized_keys ~/.ssh/
+	scp ${file_path}/config/config ~/.ssh/
+	scp ${file_path}/config/authorized_keys ~/.ssh/
+
+    echo -e "\n\033[33m please run 'source ~/.bashrc' \033[0m"
 }
 
 install_ansible() {
@@ -65,6 +70,7 @@ gpgcheck=1
 gpgkey=https://yum.dockerproject.org/gpg
 EOF
     yum -y install docker-engine
+    systemctl enable docker
     systemctl start docker
 }
 
