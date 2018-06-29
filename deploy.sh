@@ -75,6 +75,9 @@ install_govendor(){
 }
 
 install_go() {
+	mkdir -p ~/GolangProjects
+	mkdir -p ~/GolangProjects/bin
+	mkdir -p ~/GolangProjects/src
     tar zxvf packages/go1.10.3.linux-amd64.tar.gz -C /usr/local
 }
 
