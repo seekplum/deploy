@@ -80,6 +80,14 @@ install_govendor(){
     go build
 }
 
+install_python3() {
+    yum -y install gcc gcc-c++
+    yum -y install zlib zlib-devel
+    yum -y install libffi-devel
+
+    echo -e "\n\033[33m please download 'https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tgz' \033[0m"
+}
+
 install_go() {
 	mkdir -p ~/GolangProjects
 	mkdir -p ~/GolangProjects/bin
@@ -89,7 +97,7 @@ install_go() {
 
 # 打印帮助信息
 print_help() {
-	echo "Usage: bash $0 { init | docker | zsh | ansible | go | govendor | remove_docker | remove_zsh }"
+	echo "Usage: bash $0 { init | python3 | docker | zsh | ansible | go | govendor | remove_docker | remove_zsh }"
     echo "e.g: bash $0 docker"
 }
 
@@ -105,6 +113,9 @@ case "$1" in
 	;;
   go)
 	install_go
+	;;
+  python3)
+	install_python3
 	;;
   ansible)
 	install_ansible
