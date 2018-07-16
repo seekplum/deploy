@@ -21,5 +21,5 @@ export GOPATH=$HOME/GolangProjects
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 export PATH=$PATH:$GOPATH/src/github.com/kardianos/govendor
 
-alias rm='echo "This is not the command you are looking for."; false'
+alias rm='echo -e "\033[33mThis is not the command you are looking for.\033[0m"; false'
 alias cdg="cd $GOPATH/src"
