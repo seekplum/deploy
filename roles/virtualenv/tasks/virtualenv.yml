@@ -1,0 +1,29 @@
+---
+# These tasks install http and the php modules.
+
+- name: Echo env username
+  shell: "echo {{ env_username }}"
+  register: log
+  tags :
+    - virtualenv
+- debug: msg="{{ log }}"
+  tags :
+    - virtualenv
+
+- name: Echo base dir
+  shell: "echo {{ env_base_dir }}"
+  register: log
+  tags :
+    - virtualenv
+- debug: msg="{{ log }}"
+  tags :
+    - virtualenv
+
+- name: Echo env name
+  shell: "echo {{ env_name }}"
+  register: log
+  tags :
+    - virtualenv
+- debug: msg="{{ log }}"
+  tags :
+    - virtualenv

@@ -5,3 +5,4 @@
 *.swap
 *.pid
 .cache/*
+test.py

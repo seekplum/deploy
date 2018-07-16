@@ -1,0 +1,19 @@
+---
+# This playbook deploys the whole application stack in this site.
+
+- name: common
+  hosts: common
+  remote_user: root
+
+  gather_facts: True
+  roles:
+    - {role: common}
+
+- name: virtualenv
+  hosts: virtualenv
+  remote_user: root
+
+  gather_facts: True
+  roles:
+    - {role: common}
+    - {role: virtualenv}

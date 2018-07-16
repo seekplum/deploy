@@ -1,0 +1,21 @@
+---
+# These tasks are responsible for copying the latest dev/production code from
+# the version control system.
+
+- name: Echo Port
+  shell: "echo {{ httpd_port }}"
+  register: log
+  tags :
+    - common
+- debug: msg="{{ log }}"
+  tags :
+    - common
+
+- name: Echo Repository
+  shell: "echo {{ repository }}"
+  register: log
+  tags :
+    - common
+- debug: msg="{{ log }}"
+  tags :
+    - common
