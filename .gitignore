@@ -6,3 +6,4 @@
 *.pid
 .cache/*
 test.py
+*.retry
