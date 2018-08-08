@@ -43,7 +43,7 @@ remove_docker() {
 
 init() {
 	yum install -y bzip2 python-setuptools wget screen
-    easy_install pip trash-cli
+    easy_install --index-url=http://pypi.douban.com/simple  pip trash-cli
     pip install supervisor
 	scp ${file_path}/config/.bashrc ~/
 
