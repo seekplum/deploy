@@ -2,7 +2,6 @@
 
 # User specific aliases and functions
 
-alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 
@@ -18,6 +17,7 @@ export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$ORACLE_HOME
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/GolangProjects
 
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 export PATH=$PATH:$GOPATH/src/github.com/kardianos/govendor
 

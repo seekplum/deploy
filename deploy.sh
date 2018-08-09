@@ -21,7 +21,7 @@ EOF
     echo "source ~/.bash_profile" >> ${zsh_bash}
     echo "source ~/.bashrc" >> ${zsh_bash}
 
-    sed -i '10,12d' ~/.bashrc
+    sed -i '9,11d' ~/.bashrc
 
     echo -e "\n\033[33m please run 'source ${zsh_bash}' \033[0m"
 }
