@@ -1,4 +1,4 @@
-#/bin/bash
+#/usr/bin/env bash
 
 RETVAL=0
 current_path=`pwd`
@@ -6,16 +6,16 @@ file_path=$(dirname $0)
 
 install_zsh() {
     echo -e '\033[32mInstall zsh\033[0m'
-	yum install zsh -y
+    yum install zsh -y
 
-	# 安装 oh-my-zsh主题
-	sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)" <<EOF
+    # 安装 oh-my-zsh主题
+    sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)" <<EOF
 exit
 EOF
 
     # 设置命令行补齐
-	git clone git://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-	scp ${file_path}/config/.zshrc ~/
+    git clone git://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+    scp ${file_path}/config/.zshrc ~/
     chsh -s /bin/zsh
     zsh_bash=~/.zshrc
     echo "source ~/.bash_profile" >> ${zsh_bash}
@@ -42,14 +42,14 @@ remove_docker() {
 }
 
 init() {
-	yum install -y bzip2 python-setuptools wget screen
+    yum install -y bzip2 python-setuptools wget screen
     easy_install --index-url=http://pypi.douban.com/simple  pip trash-cli
     pip install supervisor
-	scp ${file_path}/config/.bashrc ~/
+    scp ${file_path}/config/.bashrc ~/
 
-	mkdir -p ~/.ssh
-	scp ${file_path}/config/config ~/.ssh/
-	scp ${file_path}/config/authorized_keys ~/.ssh/
+    mkdir -p ~/.ssh
+    scp ${file_path}/config/config ~/.ssh/
+    scp ${file_path}/config/authorized_keys ~/.ssh/
 
     echo -e "\n\033[33m please run 'source ~/.bashrc' \033[0m"
 }
@@ -89,49 +89,52 @@ install_python3() {
 }
 
 install_go() {
-	mkdir -p ~/GolangProjects
-	mkdir -p ~/GolangProjects/bin
-	mkdir -p ~/GolangProjects/src
-    tar zxvf packages/go1.10.3.linux-amd64.tar.gz -C /usr/local
+    mkdir -p ~/GolangProjects
+    mkdir -p ~/GolangProjects/bin
+    mkdir -p ~/GolangProjects/src
+    if [ ! -f "${file_path}/packages/go1.10.3.linux-amd64.tar.gz" ];then
+        wget -O ${file_path}/packages/go1.10.3.linux-amd64.tar.gz https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz
+    fi
+    tar zxvf ${file_path}/packages/go1.10.3.linux-amd64.tar.gz  -C /usr/local
 }
 
 # 打印帮助信息
 print_help() {
-	echo "Usage: bash $0 { init | python3 | docker | zsh | ansible | go | govendor | remove_docker | remove_zsh }"
+    echo "Usage: bash $0 { init | python3 | docker | zsh | ansible | go | govendor | remove_docker | remove_zsh }"
     echo "e.g: bash $0 docker"
 }
 
 case "$1" in
   init)
-	init
-	;;
+    init
+    ;;
   docker)
-	install_docker
-	;;
+    install_docker
+    ;;
   zsh)
-	install_zsh
-	;;
+    install_zsh
+    ;;
   go)
-	install_go
-	;;
+    install_go
+    ;;
   python3)
-	install_python3
-	;;
+    install_python3
+    ;;
   ansible)
-	install_ansible
-	;;
+    install_ansible
+    ;;
   govendor)
-	install_govendor
-	;;
+    install_govendor
+    ;;
   remove_zsh)
-	remove_zsh
-	;;
+    remove_zsh
+    ;;
   remove_docker)
-	remove_docker
-	;;
+    remove_docker
+    ;;
   *)  # 匹配都失败执行
-	print_help
-	exit 1
+    print_help
+    exit 1
 esac
 
 exit $RETVAL
