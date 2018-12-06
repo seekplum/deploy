@@ -48,6 +48,9 @@ init() {
     scp ${file_path}/config/.bashrc ~/
 
     mkdir -p ~/.ssh
+    mkdir -p ~/GolangProjects
+    mkdir -p ~/PythonProjects
+    mkdir -p ~/WebProjects
     scp ${file_path}/config/config ~/.ssh/
     scp ${file_path}/config/authorized_keys ~/.ssh/
 
@@ -89,7 +92,6 @@ install_python3() {
 }
 
 install_go() {
-    mkdir -p ~/GolangProjects
     mkdir -p ~/GolangProjects/bin
     mkdir -p ~/GolangProjects/src
     if [ ! -f "${file_path}/packages/go1.10.3.linux-amd64.tar.gz" ];then
