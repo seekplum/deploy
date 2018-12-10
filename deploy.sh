@@ -1,4 +1,5 @@
 #/usr/bin/env bash
+# 在7.4操作系统上生效, 6.x没有测试过
 
 RETVAL=0
 current_path=`pwd`
@@ -42,6 +43,7 @@ remove_docker() {
 }
 
 init() {
+    echo -e '\033[32mInit\033[0m'
     yum install -y git bzip2 python-setuptools wget screen
     easy_install --index-url=http://pypi.douban.com/simple  pip trash-cli
     pip install supervisor
@@ -78,12 +80,14 @@ EOF
 }
 
 install_govendor(){
+    echo -e '\033[32mInstall govendor\033[0m'
     go get -u github.com/kardianos/govendor
     cd $GOPATH/src/github.com/kardianos/govendor
     go build
 }
 
 install_python3() {
+    echo -e '\033[32mInstall Python3\033[0m'
     yum -y install gcc gcc-c++
     yum -y install zlib zlib-devel
     yum -y install libffi-devel
@@ -92,6 +96,7 @@ install_python3() {
 }
 
 install_go() {
+    echo -e '\033[32mInstall Go\033[0m'
     mkdir -p ~/GolangProjects/bin
     mkdir -p ~/GolangProjects/src
     if [ ! -f "${file_path}/packages/go1.10.3.linux-amd64.tar.gz" ];then
@@ -100,43 +105,69 @@ install_go() {
     tar zxvf ${file_path}/packages/go1.10.3.linux-amd64.tar.gz  -C /usr/local
 }
 
+install_node() {
+    # sed -i 's#\"\$NVM_DIR/bash_completion\"#\"$NVM_DIR/xxx\"#g' ~/.bashrc
+    # 删除时只能使用 / , 不能使用 #
+    echo -e '\033[32mInstall node\033[0m'
+    sed -ie "/export NVM_DIR=\"\$HOME\/\.nvm\"/d" ~/.bashrc
+    sed -ie "/\"\$NVM_DIR\/nvm\.sh\"/d" ~/.bashrc
+    sed -ie "/\"\$NVM_DIR\/bash_completion\"/d" ~/.bashrc
+    mkdir -p $HOME/.nvm
+    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+    source ~/.bashrc
+    nvm install v11.4.0
+}
+
 # 打印帮助信息
 print_help() {
-    echo "Usage: bash $0 { init | python3 | docker | zsh | ansible | go | govendor | remove_docker | remove_zsh }"
+    echo "Usage: bash $0 { init | python3 | node | docker | zsh | ansible | go | govendor | remove_docker | remove_zsh }"
     echo "e.g: bash $0 docker"
 }
 
-case "$1" in
-  init)
-    init
-    ;;
-  docker)
-    install_docker
-    ;;
-  zsh)
-    install_zsh
-    ;;
-  go)
-    install_go
-    ;;
-  python3)
-    install_python3
-    ;;
-  ansible)
-    install_ansible
-    ;;
-  govendor)
-    install_govendor
-    ;;
-  remove_zsh)
-    remove_zsh
-    ;;
-  remove_docker)
-    remove_docker
-    ;;
-  *)  # 匹配都失败执行
-    print_help
-    exit 1
-esac
+install_packages() {
+    case "$1" in
+        init)
+            init
+            ;;
+        docker)
+            install_docker
+            ;;
+        zsh)
+            install_zsh
+            ;;
+        go)
+            install_go
+            ;;
+        python3)
+            install_python3
+            ;;
+        node)
+            install_node
+            ;;
+        ansible)
+            install_ansible
+            ;;
+        govendor)
+            install_govendor
+            ;;
+        remove_zsh)
+            remove_zsh
+            ;;
+        remove_docker)
+            remove_docker
+            ;;
+        *)  # 匹配都失败执行
+            print_help
+            exit 1
+    esac
+}
 
+main() {
+    for func_name in $*
+    do
+        install_packages $func_name
+    done
+}
+
+main $*
 exit $RETVAL

@@ -8,6 +8,6 @@
 * go
 
 ```
-Usage: bash deploy.sh { init | docker | zsh | ansible | go | govendor | remove_docker | remove_zsh }
+Usage: bash deploy.sh { init | docker | zsh | ansible | go | govendor | node | remove_docker | remove_zsh }
 e.g: bash deploy.sh docker
 ```
