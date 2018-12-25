@@ -20,6 +20,7 @@ export GOPATH=$HOME/GolangProjects
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 export PATH=$PATH:$GOPATH/src/github.com/kardianos/govendor
+export PATH=$PATH:$GOPATH/src/github.com/jteeuwen/go-bindata/go-bindata
 
 alias rm='echo -e "\033[33mThis is not the command you are looking for.\033[0m"; false'
 alias cdg="cd $GOPATH/src"
