@@ -44,7 +44,7 @@ remove_docker() {
 
 init() {
     echo -e '\033[32mInit\033[0m'
-    yum install -y git bzip2 python-setuptools wget screen make cmake
+    yum install -y git bzip2 python-setuptools wget screen make cmake tree
     easy_install --index-url=http://pypi.douban.com/simple  pip trash-cli
     pip install supervisor
     scp ${file_path}/config/.bashrc ~/
