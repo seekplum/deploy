@@ -1,0 +1,10 @@
+---
+# vars file for install
+
+GO_INSTALL_ROOT: /usr/local/
+GOROOT: "{{GO_INSTALL_ROOT}}/go"
+GOPATH: "{{HOME_ROOT}}/GolangProjects"
+WebProjects: "{{HOME_ROOT}}/WebProjects"
+PythonProjects: "{{HOME_ROOT}}/PythonProjects"
+GO_PACKAGE_PATH: /tmp/go1.10.3.linux-amd64.tar.gz
+GO_DOWNLOAD_URL: https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz

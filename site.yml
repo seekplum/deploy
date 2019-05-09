@@ -1,19 +1,22 @@
 ---
 # This playbook deploys the whole application stack in this site.
 
-- name: common
+- name: install
   hosts: common
-  remote_user: root
-
-  gather_facts: True
   roles:
-    - {role: common}
+    - common
+    - install
+  tags:
+    - install
+    - deploy
+  environment:
+    PIP_INDEX_URL: "https://pypi.douban.com/simple"
 
-- name: virtualenv
-  hosts: virtualenv
-  remote_user: root
-
-  gather_facts: True
+- name: uninstall
+  hosts: common
   roles:
-    - {role: common}
-    - {role: virtualenv}
+    - common
+    - uninstall
+  tags:
+    - uninstall
+    - remove

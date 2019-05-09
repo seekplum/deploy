@@ -1,0 +1,54 @@
+---
+- name: install zsh
+  yum:
+    name: "{{item}}"
+    state: present
+    update_cache: true
+  with_items:
+    - zsh
+  tags:
+    - zsh
+
+- name: install oh-my-zsh
+  block:
+    - name: clean oh-my-zsh
+      file:
+        path: "{{HOME_ROOT}}/.oh-my-zsh/"
+        state: absent
+      tags:
+        - zsh
+
+    - name: download oh-my-zsh
+      shell:
+        cmd: |
+          sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)" <<EOF
+          exit
+          EOF
+
+    - name: download zsh autosuggestions
+      git:
+        repo: git://github.com/zsh-users/zsh-autosuggestions
+        dest: "{{HOME_ROOT}}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+        accept_hostkey: true
+  tags:
+    - zsh
+
+- name: change terminal
+  shell: chsh -s /bin/zsh
+  tags:
+    - zsh
+
+- name: copy zshrc into home
+  copy:
+    src: "{{ role_path }}/files/{{item}}"
+    dest: "{{HOME_ROOT}}"
+    force: true
+  with_items:
+    - .zshrc
+  tags:
+    - zsh
+
+- name: configuare zsh
+  shell: "sed -i '8,10d' {{HOME_ROOT}}/.bashrc"
+  tags:
+    - zsh

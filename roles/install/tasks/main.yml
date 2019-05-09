@@ -1,0 +1,12 @@
+---
+- include: initialize.yml
+- include: zsh.yml
+- include: docker.yml
+- include: golang.yml
+- include: nodejs.yml
+
+- name: install ansible
+  shell: pip install ansible
+  tags:
+    - ansible
+

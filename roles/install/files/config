@@ -1,0 +1,6 @@
+Host seekplum.github.com
+    HostName github.com
+    User seekplum
+    Port 22
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/seekplum

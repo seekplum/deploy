@@ -1,0 +1,28 @@
+---
+- name: copy docker repo
+  copy:
+    src: "{{ role_path }}/files/deploy-docker.repo"
+    dest: /etc/yum.repos.d/
+    force: true
+  tags:
+    - docker
+
+- name: install docker
+  yum:
+    name: "{{item}}"
+    state: present
+    update_cache: true
+  with_items:
+    - docker-engine
+  tags:
+    - docker
+
+- name: start docker
+  service: name={{item.name}} state={{item.state}} enabled={{item.enabled}}
+  register: log
+  with_items:
+    - name: 'docker'
+      enabled: 'yes'
+      state: 'started'
+  tags:
+    - docker

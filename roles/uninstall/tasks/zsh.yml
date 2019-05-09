@@ -1,0 +1,48 @@
+---
+
+- name: change terminal
+  shell: chsh -s /bin/bash
+  tags:
+    - remove_zsh
+
+- name: check /etc/bahsrc exists
+  shell: cat ~/.bashrc | grep "if \[ \-f /etc/bashrc \]; then" | wc -l
+  register: existing_of_etc_bashrc
+  changed_when: false
+  tags:
+    - remove_zsh
+
+- name: change bashrc
+  shell:
+    cmd: |
+      cat >>{{HOME_ROOT}}/.bashrc<<EOF
+      if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+      fi
+      EOF
+  when: existing_of_etc_bashrc.stdout == "0"
+  tags:
+    - remove_zsh
+
+- name: uninstall zsh
+  yum:
+    name: "{{item}}"
+    state: absent
+    update_cache: true
+  with_items:
+    - zsh
+  tags:
+    - remove_zsh
+
+- name: remove zsh directory
+  file:
+    path: "{{item}}"
+    state: absent
+    force: true
+  with_items:
+    - "{{HOME_ROOT}}/.zshrc"
+    - "{{HOME_ROOT}}/.zshrc_history"
+    - "{{HOME_ROOT}}/.zshrc.pre-oh-my-zsh"
+    - "{{HOME_ROOT}}/.oh-my-zsh"
+  tags:
+    - remove_zsh

@@ -1,0 +1,26 @@
+---
+
+- name: stop docker
+  service: name={{item.name}} state={{item.state}} enabled={{item.enabled}}
+  with_items:
+    - name: 'docker'
+      enabled: 'no'
+      state: 'stopped'
+  ignore_errors: True
+  tags:
+    - remove_docker
+
+- name: uninstall docker
+  yum:
+    name: "{{item}}"
+    state: absent
+    update_cache: true
+  with_items:
+    - docker-engine
+  tags:
+    - remove_docker
+
+- name: remove docker directory
+  shell: find / -name "*docker*" | grep -v -E "oh-my-zsh/|/proc|/sys|/run" | xargs rm -rf
+  tags:
+    - remove_docker

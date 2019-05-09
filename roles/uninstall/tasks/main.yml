@@ -1,0 +1,5 @@
+---
+# tasks file for uninstall
+
+- include: zsh.yml
+- include: docker.yml

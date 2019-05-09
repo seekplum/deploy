@@ -7,3 +7,4 @@
 .cache/*
 test.py
 *.retry
+hosts

@@ -1,0 +1,68 @@
+---
+# tasks file for install
+- name: create project dir
+  file:
+    dest: "{{item}}"
+    state: directory
+    mode: 0755
+  with_items:
+    - .ssh
+    - "{{GOPATH}}"
+    - "{{PythonProjects}}"
+    - "{{WebProjects}}"
+  tags:
+    - initialize
+
+- name: copy bashrc script template
+  template:
+    src: .bashrc
+    dest: "{{HOME_ROOT}}"
+    mode: 0554
+  tags:
+    - initialize
+
+- name: copy ssh config into home
+  copy:
+    src: "{{ role_path }}/files/{{item}}"
+    dest: "{{HOME_ROOT}}/.ssh"
+    force: true
+  with_items:
+    - config
+    - authorized_keys
+  tags:
+    - initialize
+
+- name: install packages
+  yum:
+    name: "{{item}}"
+    state: present
+    update_cache: true
+  with_items:
+    - gcc
+    - gcc-c++
+    - zlib
+    - zlib-devel
+    - libffi-devel
+    - rsync
+    - git
+    - bzip2
+    - python-setuptools
+    - wget
+    - screen
+    - make
+    - cmake
+    - tree
+  tags:
+    - initialize
+
+- name: install pip trash-cli
+  shell: "easy_install pip trash-cli"
+  register: result_of_install_pip
+  changed_when: false
+  tags:
+    - initialize
+
+- name: install supervisor
+  shell: pip install supervisor
+  tags:
+    - initialize

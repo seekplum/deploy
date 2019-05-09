@@ -1,0 +1,42 @@
+---
+- name: create golang path
+  file:
+    dest: "{{GOPATH}}/{{item}}"
+    state: directory
+    mode: 0755
+  with_items:
+    - bin
+    - src
+    - pkg
+  tags:
+    - golang
+
+- name: check existing golang packages
+  shell: "test -f {{GO_PACKAGE_PATH}} && echo 0 || echo 1"
+  register: existing_of_go
+  changed_when: false
+  tags:
+    - golang
+
+- name: install golang
+  block:
+    - name: download golang packages
+      get_url:
+        url: "{{GO_DOWNLOAD_URL}}"
+        dest: "{{GO_PACKAGE_PATH}}"
+        force: false
+      when: existing_of_go.stdout == "1"
+
+    - name: unarchive golang
+      unarchive:
+        src: "{{GO_PACKAGE_PATH}}"
+        dest: "{{GO_INSTALL_ROOT}}"
+        remote_src: true
+
+    - name: install govendor
+      shell: "{{item}}"
+      with_items:
+        - "source {{HOME_ROOT}}/.bashrc && go get -u github.com/kardianos/govendor"
+        - "source {{HOME_ROOT}}/.bashrc && cd $GOPATH/src/github.com/kardianos/govendor && go build"
+  tags:
+    - golang
