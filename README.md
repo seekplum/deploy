@@ -1,12 +1,17 @@
 # 快速搭建开发环境
 
-## 脚本安装软件
+## 适用系统
 
-* zsh
-* docker
-* pip
-* ansible
-* go
+* `Red Hat` / `CentOS` 7.4
+
+## 安装软件
+
+* `initialize`: 安装基础软，pip,gcc,rsync,git,wget,screen,tree 等
+* `zsh`: 安装zsh终端，并配置oh-my-zsh主题，命令历史提示
+* `docker`: 安装docker
+* `golang`: 安装golang和govendor
+* `nodejs`: 安装npm和nodejs
+* `ansible`: 安装ansible
 
 ## 编写 `inventory` 文件
 

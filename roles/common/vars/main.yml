@@ -1,3 +1,5 @@
 ---
 # vars file for common
 HOME_ROOT: /root
+TEMP_ROOT: /tmp
+PIP_INDEX_URL: "https://pypi.douban.com/simple"

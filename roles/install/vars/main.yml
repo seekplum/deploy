@@ -1,7 +1,7 @@
 ---
 # vars file for install
 
-GO_INSTALL_ROOT: /usr/local/
+GO_INSTALL_ROOT: /usr/local
 GOROOT: "{{GO_INSTALL_ROOT}}/go"
 GOPATH: "{{HOME_ROOT}}/GolangProjects"
 WebProjects: "{{HOME_ROOT}}/WebProjects"

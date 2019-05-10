@@ -3,6 +3,7 @@
   copy:
     src: "{{ role_path }}/files/deploy-docker.repo"
     dest: /etc/yum.repos.d/
+    mode: 0644
     force: true
   tags:
     - docker

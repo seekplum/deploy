@@ -42,6 +42,7 @@
   copy:
     src: "{{ role_path }}/files/{{item}}"
     dest: "{{HOME_ROOT}}"
+    mode: 0644
     force: true
   with_items:
     - .zshrc

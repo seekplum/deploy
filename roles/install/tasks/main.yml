@@ -9,4 +9,3 @@
   shell: pip install ansible
   tags:
     - ansible
-

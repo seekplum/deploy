@@ -17,10 +17,11 @@
     update_cache: true
   with_items:
     - docker-engine
+    - docker-ce
   tags:
     - remove_docker
 
 - name: remove docker directory
-  shell: find / -name "*docker*" | grep -v -E "oh-my-zsh/|/proc|/sys|/run" | xargs rm -rf
+  shell: find / -name "*docker*" | grep -v -E "oh-my-zsh/|/proc/|/sys/|/run/" | xargs rm -rf
   tags:
     - remove_docker

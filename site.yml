@@ -1,6 +1,15 @@
 ---
 # This playbook deploys the whole application stack in this site.
 
+- name: uninstall
+  hosts: common
+  roles:
+    - common
+    - uninstall
+  tags:
+    - uninstall
+    - remove
+
 - name: install
   hosts: common
   roles:
@@ -10,13 +19,4 @@
     - install
     - deploy
   environment:
-    PIP_INDEX_URL: "https://pypi.douban.com/simple"
-
-- name: uninstall
-  hosts: common
-  roles:
-    - common
-    - uninstall
-  tags:
-    - uninstall
-    - remove
+    PIP_INDEX_URL: "{{PIP_INDEX_URL}}"

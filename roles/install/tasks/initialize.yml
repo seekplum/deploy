@@ -17,7 +17,7 @@
   template:
     src: .bashrc
     dest: "{{HOME_ROOT}}"
-    mode: 0554
+    mode: 0644
   tags:
     - initialize
 
@@ -25,6 +25,7 @@
   copy:
     src: "{{ role_path }}/files/{{item}}"
     dest: "{{HOME_ROOT}}/.ssh"
+    mode: 0644
     force: true
   with_items:
     - config
@@ -38,6 +39,7 @@
     state: present
     update_cache: true
   with_items:
+    - epel-release
     - gcc
     - gcc-c++
     - zlib
