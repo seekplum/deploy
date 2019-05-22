@@ -49,6 +49,7 @@
     - git
     - bzip2
     - python-setuptools
+    - python-devel
     - wget
     - screen
     - make
