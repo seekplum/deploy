@@ -1,12 +1,23 @@
 ---
-- name: update bashrc configuare
-  shell: "{{item}}"
-  with_items:
-    - "sed -ie '/export NVM_DIR=\"{{HOME_ROOT}}\/.nvm\"/d' {{HOME_ROOT}}/.bashrc"
-    - "sed -ie '/\\\"$NVM_DIR\\/nvm.sh\\\"/d' {{HOME_ROOT}}/.bashrc"
-    - "sed -ie '/\\\"$NVM_DIR\\/bash_completion\\\"/d' {{HOME_ROOT}}/.bashrc"
-  tags:
-    - nodejs
+# - name: update bashrc configuare on Linux
+#  shell: "{{item}}"
+#  with_items:
+#    - "sed -ie '/export NVM_DIR=\"{{HOME_ROOT}}\/.nvm\"/d' {{HOME_ROOT}}/.bash_profile"
+#    - "sed -ie '/\\\"$NVM_DIR\\/nvm.sh\\\"/d' {{HOME_ROOT}}/.bash_profile"
+#    - "sed -ie '/\\\"$NVM_DIR\\/bash_completion\\\"/d' {{HOME_ROOT}}/.bash_profile"
+#  tags:
+#    - nodejs
+#   when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+
+# - name: update bashrc configuare on macOS
+#  shell: "{{item}}"
+#  with_items:
+#    - "sed -ie \"\" '/export NVM_DIR=\"{{HOME_ROOT}}\/.nvm\"/d' {{HOME_ROOT}}/.bash_profile"
+#    - "sed -ie \"\" '/\\\"$NVM_DIR\\/nvm.sh\\\"/d' {{HOME_ROOT}}/.bash_profile"
+#    - "sed -ie \"\" '/\\\"$NVM_DIR\\/bash_completion\\\"/d' {{HOME_ROOT}}/.bash_profile"
+#  tags:
+#    - nodejs
+#   when: ansible_os_family == "Darwin"
 
 - name: create nvm dir
   file:
@@ -25,6 +36,6 @@
       shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
 
     - name: install nodejs
-      shell: "source {{HOME_ROOT}}/.bashrc && nvm install v11.4.0"
+      shell: "source {{HOME_ROOT}}/.bash_profile && nvm install v11.4.0"
   tags:
     - nodejs

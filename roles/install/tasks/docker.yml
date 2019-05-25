@@ -1,5 +1,5 @@
 ---
-- name: copy docker repo
+- name: copy docker repo on Redhat
   copy:
     src: "{{ role_path }}/files/deploy-docker.repo"
     dest: /etc/yum.repos.d/
@@ -7,8 +7,9 @@
     force: true
   tags:
     - docker
+  when: ansible_os_family == "RedHat"
 
-- name: install docker
+- name: Install docker on Redhat
   yum:
     name: "{{item}}"
     state: present
@@ -17,8 +18,50 @@
     - docker-engine
   tags:
     - docker
+  when: ansible_os_family == "RedHat"
 
-- name: start docker
+- name: Add gpg key on Ubuntu
+  shell: "{{item}}"
+  with_items:
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  become: yes
+  become_method: sudo
+  tags:
+    - docker
+  when: ansible_os_family == "Debian"
+
+- name: Install docker on Ubuntu
+  apt:
+    pkg: "{{item}}"
+    state: present
+    update_cache: true
+  with_items:
+    - docker
+    - docker.io
+    - docker-ce
+  tags:
+    - docker
+  when: ansible_os_family == "Debian"
+
+- name: Install docker on macOS
+  shell: "brew cask install {{item}}"
+  with_items:
+    - docker
+  tags:
+    - docker
+  when: ansible_os_family == "Darwin"
+
+# - name: install docker-machine docker-compose on macOS
+#   shell: "brew install {{item}}"
+#   with_items:
+#     - docker-machine
+#     - docker-compose
+#   tags:
+#     - docker
+#   when: ansible_os_family == "Darwin"
+
+- name: start docker on ubuntu or Redhat
   service: name={{item.name}} state={{item.state}} enabled={{item.enabled}}
   register: log
   with_items:
@@ -27,3 +70,6 @@
       state: 'started'
   tags:
     - docker
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+
+# TODO: Mac 启动服务

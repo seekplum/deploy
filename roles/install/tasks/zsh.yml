@@ -1,5 +1,5 @@
 ---
-- name: install zsh
+- name: install zsh on Redhat
   yum:
     name: "{{item}}"
     state: present
@@ -8,6 +8,27 @@
     - zsh
   tags:
     - zsh
+  when: ansible_os_family == "RedHat"
+
+- name: install zsh on Ubuntu
+  apt:
+    pkg: "{{item}}"
+    state: present
+    update_cache: true
+  with_items:
+    - zsh
+  tags:
+    - zsh
+  when: ansible_os_family == "Debian"
+
+- name: install zsh on macOS
+  shell: 'if [ $(brew list | grep {{item}} | wc -l) == "0" ]; then brew install {{item}}; else echo {{item}} is installed; fi'
+  with_items:
+    - zsh
+    - zsh-syntax-highlighting
+  tags:
+    - zsh
+  when: ansible_os_family == "Darwin"
 
 - name: install oh-my-zsh
   block:
@@ -15,8 +36,6 @@
       file:
         path: "{{HOME_ROOT}}/.oh-my-zsh/"
         state: absent
-      tags:
-        - zsh
 
     - name: download oh-my-zsh
       shell:
@@ -35,21 +54,29 @@
 
 - name: change terminal
   shell: chsh -s /bin/zsh
+  become: yes
+  become_method: sudo
   tags:
     - zsh
 
-- name: copy zshrc into home
-  copy:
-    src: "{{ role_path }}/files/{{item}}"
+- name: copy zshrc template into home
+  template:
+    src: .zshrc
     dest: "{{HOME_ROOT}}"
     mode: 0644
     force: true
-  with_items:
-    - .zshrc
   tags:
     - zsh
 
-- name: configuare zsh
-  shell: "sed -i '8,10d' {{HOME_ROOT}}/.bashrc"
+- name: configuare zsh on Linux
+  shell: "sed -i '3,6d' {{HOME_ROOT}}/.bash_profile"
   tags:
     - zsh
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+
+# mac的sed用法有区别
+- name: configuare zsh on macOS
+  shell: "sed -i \"\" '3,6d' {{HOME_ROOT}}/.bash_profile"
+  tags:
+    - zsh
+  when: ansible_os_family == "Darwin"

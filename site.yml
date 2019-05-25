@@ -9,6 +9,8 @@
   tags:
     - uninstall
     - remove
+  environment:
+    PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 
 - name: install
   hosts: common
@@ -20,3 +22,4 @@
     - deploy
   environment:
     PIP_INDEX_URL: "{{PIP_INDEX_URL}}"
+    PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"

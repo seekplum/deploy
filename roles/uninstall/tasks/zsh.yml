@@ -2,11 +2,13 @@
 
 - name: change terminal
   shell: chsh -s /bin/bash
+  become: yes
+  become_method: sudo
   tags:
     - remove_zsh
 
 - name: check /etc/bahsrc exists
-  shell: cat ~/.bashrc | grep "if \[ \-f /etc/bashrc \]; then" | wc -l
+  shell: cat ~/.bash_profile | grep "if \[ \-f /etc/bashrc \]; then" | wc -l
   register: existing_of_etc_bashrc
   changed_when: false
   tags:
@@ -15,7 +17,7 @@
 - name: change bashrc
   shell:
     cmd: |
-      cat >>{{HOME_ROOT}}/.bashrc<<EOF
+      cat >>{{HOME_ROOT}}/.bash_profile<<EOF
       if [ -f /etc/bashrc ]; then
         . /etc/bashrc
       fi
@@ -24,7 +26,7 @@
   tags:
     - remove_zsh
 
-- name: uninstall zsh
+- name: uninstall zsh on Redhat
   yum:
     name: "{{item}}"
     state: absent
@@ -33,6 +35,27 @@
     - zsh
   tags:
     - remove_zsh
+  when: ansible_os_family == "RedHat"
+
+- name: uninstall zsh on Ubuntu
+  apt:
+    pkg: "{{item}}"
+    state: absent
+  with_items:
+    - zsh
+  tags:
+    - remove_zsh
+  when: ansible_os_family == "Debian"
+
+- name: uninstall zsh on macOS
+  shell: "brew uninstall {{item}} --force"
+  ignore_errors: True
+  with_items:
+    - zsh
+    - zsh-syntax-highlighting
+  tags:
+    - remove_zsh
+  when: ansible_os_family == "Darwin"
 
 - name: remove zsh directory
   file:
@@ -44,5 +67,7 @@
     - "{{HOME_ROOT}}/.zshrc_history"
     - "{{HOME_ROOT}}/.zshrc.pre-oh-my-zsh"
     - "{{HOME_ROOT}}/.oh-my-zsh"
+  become: yes
+  become_method: sudo
   tags:
     - remove_zsh

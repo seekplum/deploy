@@ -6,6 +6,6 @@
 - include: nodejs.yml
 
 - name: install ansible
-  shell: pip install ansible
+  shell: "pip install ansible -i {{PIP_INDEX_URL}}"
   tags:
     - ansible

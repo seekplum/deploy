@@ -9,8 +9,9 @@
   ignore_errors: True
   tags:
     - remove_docker
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
 
-- name: uninstall docker
+- name: uninstall docker on Redhat
   yum:
     name: "{{item}}"
     state: absent
@@ -20,8 +21,46 @@
     - docker-ce
   tags:
     - remove_docker
+  when: ansible_os_family == "RedHat"
+
+- name: uninstall docker on Ubuntu
+  apt:
+    pkg: "{{item}}"
+    state: absent
+    update_cache: true
+  with_items:
+    - "docker"
+    - "docker-io"
+    - "docker-ce"
+    - "docker-engine"
+  tags:
+    - remove_docker
+  when: ansible_os_family == "Debian"
+
+- name: uninstall docker docker-machine docker-compose on macOS
+  shell: "brew cask uninstall {{item}}  --force || brew uninstall {{item}} --force"
+  with_items:
+    - "docker"
+    - "docker-machine"
+    - "docker-compose"
+  ignore_errors: True
+  tags:
+    - remove_docker
+  when: ansible_os_family == "Darwin"
 
 - name: remove docker directory
-  shell: find / -name "*docker*" | grep -v -E "oh-my-zsh/|/proc/|/sys/|/run/" | xargs rm -rf
+  file:
+    path: "{{item}}"
+    state: absent
+    force: true
+  with_items:
+    - "/var/lib/docker"
+    - "/etc/apparmor.d/docker"
+    - "/var/run/docker.sock"
+    - "{{HOME_ROOT}}/Library/Caches/com.docker.docker"
+    - "{{HOME_ROOT}}/Library/Containers/com.docker.docker"
+    - "{{HOME_ROOT}}/Library/Containers/com.docker.helper"
+  become: yes
+  become_method: sudo
   tags:
     - remove_docker

@@ -1,21 +1,36 @@
 ---
 # tasks file for install
+
+- name: check existing brew on macOS
+  shell: "brew --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: existing_of_brew
+  changed_when: false
+  tags:
+    - initialize
+  when: ansible_os_family == "Darwin"
+
+- name: install brew on macOS
+  shell: 'ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
+  tags:
+    - initialize
+  when: ansible_os_family == "Darwin" and existing_of_brew.stdout == "1"
+
 - name: create project dir
   file:
     dest: "{{item}}"
     state: directory
     mode: 0755
   with_items:
-    - .ssh
+    - "{{HOME_ROOT}}/.ssh"
     - "{{GOPATH}}"
     - "{{PythonProjects}}"
     - "{{WebProjects}}"
   tags:
     - initialize
 
-- name: copy bashrc script template
+- name: copy bash_profile script template
   template:
-    src: .bashrc
+    src: .bash_profile
     dest: "{{HOME_ROOT}}"
     mode: 0644
   tags:
@@ -33,7 +48,7 @@
   tags:
     - initialize
 
-- name: install packages
+- name: install packages on Redhat
   yum:
     name: "{{item}}"
     state: present
@@ -55,17 +70,100 @@
     - make
     - cmake
     - tree
+    - sshpass
+  tags:
+    - initialize
+  when: ansible_os_family == "RedHat"
+
+- name: install packages on Ubuntu
+  apt:
+    pkg: "{{item}}"
+    state: present
+    update_cache: true
+  with_items:
+    - curl
+    - gcc
+    - rsync
+    - git
+    - bzip2
+    - python-setuptools
+    - python-dev
+    - wget
+    - screen
+    - make
+    - cmake
+    - tree
+    - sshpass
+  tags:
+    - initialize
+  when: ansible_os_family == "Debian"
+
+- name: install packages on macOS
+  shell: 'if [ $(brew list | grep {{item}} | wc -l) == "0" ]; then brew install {{item}}; else echo {{item}} is installed; fi'
+  with_items:
+    - wget
+    - tree
+  changed_when: false
+  ignore_errors: True
+  tags:
+    - initialize
+  when: ansible_os_family == "Darwin"
+
+- name: check sshpass installed on macOS
+  shell: "sshpass -V >/dev/null 2>&1 && echo 0 || echo 1"
+  register: existing_of_sshpass_on_mac
+  changed_when: false
+  tags:
+    - initialize
+  when: ansible_os_family == "Darwin"
+
+- name: install sshpass on macOS
+  shell: "brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb"
+  changed_when: false
+  ignore_errors: True
+  tags:
+    - initialize
+  when: ansible_os_family == "Darwin" and existing_of_sshpass_on_mac.stdout == "1"
+
+- name: check pip installed
+  shell: "pip -V >/dev/null 2>&1 && echo 0 || echo 1"
+  register: existing_of_pip
+  changed_when: false
   tags:
     - initialize
 
-- name: install pip trash-cli
-  shell: "easy_install pip trash-cli"
+- name: install pip
+  shell: "easy_install pip"
   register: result_of_install_pip
+  changed_when: false
+  tags:
+    - initialize
+  when: existing_of_pip.stdout == "1"
+
+- name: check trash installed
+  shell: "trash --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: existing_of_trash
+  changed_when: false
+  tags:
+    - initialize
+
+- name: install trash-cli
+  shell: "pip install trash-cli -i {{PIP_INDEX_URL}}"
+  changed_when: false
+  tags:
+    - initialize
+  when: existing_of_trash.stdout == "1"
+
+- name: check supervisor installed
+  shell: "supervisord --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: existing_of_supervisor
   changed_when: false
   tags:
     - initialize
 
 - name: install supervisor
-  shell: pip install supervisor
+  shell: "pip install supervisor -i {{PIP_INDEX_URL}}"
+  changed_when: false
   tags:
     - initialize
+  when: existing_of_supervisor.stdout == "1"

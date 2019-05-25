@@ -11,32 +11,58 @@
   tags:
     - golang
 
-- name: check existing golang packages
+- name: check existing golang packages on Linux
   shell: "test -f {{GO_PACKAGE_PATH}} && echo 0 || echo 1"
-  register: existing_of_go
+  register: existing_of_go_on_linux
   changed_when: false
   tags:
     - golang
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+
+- name: check existing golang packages on macOS
+  shell: "test -f {{GO_PACKAGE_PATH}} && echo 0 || echo 1"
+  register: existing_of_go_on_mac
+  changed_when: false
+  tags:
+    - golang
+  when: ansible_os_family == "Darwin"
 
 - name: install golang
   block:
-    - name: download golang packages
+    - name: download golang packages on Linux
       get_url:
-        url: "{{GO_DOWNLOAD_URL}}"
-        dest: "{{GO_PACKAGE_PATH}}"
+        url: "{{GO_DOWNLOAD_URL_ON_LINUX}}"
+        dest: "{{GO_PACKAGE_PATH_ON_LINUX}}"
         force: false
-      when: existing_of_go.stdout == "1"
+      when: existing_of_go_on_mac.stdout == "1" and (ansible_os_family == "RedHat" or ansible_os_family == "Debian")
 
-    - name: unarchive golang
+    - name: download golang packages on macOS
+      get_url:
+        url: "{{GO_DOWNLOAD_URL_ON_MAC}}"
+        dest: "{{GO_PACKAGE_PATH_ON_MAC}}"
+        force: false
+      when: existing_of_go_on_linux.stdout == "1" and ansible_os_family == "Darwin"
+
+    - name: unarchive golang on Linux
       unarchive:
-        src: "{{GO_PACKAGE_PATH}}"
+        src: "{{GO_PACKAGE_PATH_ON_LINUX}}"
         dest: "{{GO_INSTALL_ROOT}}"
         remote_src: true
+      when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+
+    - name: unarchive golang on macOS
+      unarchive:
+        src: "{{GO_PACKAGE_PATH_ON_MAC}}"
+        dest: "{{GO_INSTALL_ROOT}}"
+        remote_src: true
+      become: yes
+      become_method: sudo
+      when: ansible_os_family == "Darwin"
 
     - name: install govendor
       shell: "{{item}}"
       with_items:
-        - "source {{HOME_ROOT}}/.bashrc && go get -u github.com/kardianos/govendor"
-        - "source {{HOME_ROOT}}/.bashrc && cd $GOPATH/src/github.com/kardianos/govendor && go build"
+        - "source {{HOME_ROOT}}/.bash_profile && go get -u github.com/kardianos/govendor"
+        - "source {{HOME_ROOT}}/.bash_profile && cd $GOPATH/src/github.com/kardianos/govendor && go build"
   tags:
     - golang

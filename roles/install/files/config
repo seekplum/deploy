@@ -1,6 +1,21 @@
+Host ubuntu1
+    HostName 192.168.1.4
+    User root
+    Port 22
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/id_rsa
+
+Host centos1
+    HostName 192.168.1.7
+    User root
+    Port 22
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/id_rsa
+
+# git remote set-url origin git@seekplum.github.com:seekplum/deploy.git
 Host seekplum.github.com
     HostName github.com
     User seekplum
     Port 22
     PreferredAuthentications publickey
-    IdentityFile ~/.ssh/seekplum
+    IdentityFile ~/.ssh/id_rsa
