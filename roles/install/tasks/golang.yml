@@ -27,6 +27,13 @@
     - golang
   when: ansible_os_family == "Darwin"
 
+- name: check golong installed
+  shell: "test -d {{GOROOT}} && echo 0 || echo 1"
+  register: installed_of_go
+  changed_when: False
+  tags:
+    - golang
+
 - name: install golang
   block:
     - name: download golang packages on Linux
@@ -48,20 +55,13 @@
         src: "{{GO_PACKAGE_PATH_ON_LINUX}}"
         dest: "{{GO_INSTALL_ROOT}}"
         remote_src: true
-      when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
-
-    - name: unarchive golang on Linux
-      unarchive:
-        src: "{{GO_PACKAGE_PATH_ON_LINUX}}"
-        dest: "{{GO_INSTALL_ROOT}}"
-        remote_src: true
-      when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+      when: (ansible_os_family == "RedHat" or ansible_os_family == "Debian") and installed_of_go.stdout == "1"
 
     - name: unarchive golang on macOS
       shell: "tar -zxvf {{GO_PACKAGE_PATH_ON_MAC}} -C {{GO_INSTALL_ROOT}}"
       become: yes
       become_method: sudo
-      when: ansible_os_family == "Darwin"
+      when: ansible_os_family == "Darwin" and installed_of_go.stdout == "1"
 
     - name: install govendor
       shell: "{{item}}"

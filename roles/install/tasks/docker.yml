@@ -1,4 +1,11 @@
 ---
+- name: check docker installed
+  shell: "docker --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_docker
+  changed_when: False
+  tags:
+    - docker
+
 - name: copy docker repo on Redhat
   copy:
     src: "{{ role_path }}/files/deploy-docker.repo"
@@ -7,7 +14,7 @@
     force: true
   tags:
     - docker
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" and installed_of_docker.stdout == "1"
 
 - name: Install docker on Redhat
   yum:
@@ -18,7 +25,7 @@
     - docker-engine
   tags:
     - docker
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" and installed_of_docker.stdout == "1"
 
 - name: Add gpg key on Ubuntu
   shell: "{{item}}"
@@ -29,7 +36,7 @@
   become_method: sudo
   tags:
     - docker
-  when: ansible_os_family == "Debian"
+  when: ansible_os_family == "Debian" and installed_of_docker.stdout == "1"
 
 - name: Install docker on Ubuntu
   apt:
@@ -38,11 +45,9 @@
     update_cache: true
   with_items:
     - docker.io
-    - docker-ce
-    - docker-ce-cli
   tags:
     - docker
-  when: ansible_os_family == "Debian"
+  when: ansible_os_family == "Debian" and installed_of_docker.stdout == "1"
 
 - name: Install docker on macOS
   shell: "brew cask install {{item}}"
@@ -50,16 +55,16 @@
     - docker
   tags:
     - docker
-  when: ansible_os_family == "Darwin"
+  when: ansible_os_family == "Darwin" and installed_of_docker.stdout == "1"
 
-# - name: install docker-machine docker-compose on macOS
-#   shell: "brew install {{item}}"
-#   with_items:
-#     - docker-machine
-#     - docker-compose
-#   tags:
-#     - docker
-#   when: ansible_os_family == "Darwin"
+- name: install docker-machine docker-compose on macOS
+  shell: "brew install {{item}}"
+  with_items:
+    - docker-machine
+    - docker-compose
+  tags:
+    - docker
+  when: ansible_os_family == "Darwin" and installed_of_docker.stdout == "1"
 
 - name: start docker on ubuntu or Redhat
   service: name={{item.name}} state={{item.state}} enabled={{item.enabled}}

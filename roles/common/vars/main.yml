@@ -1,5 +1,7 @@
 ---
 # vars file for common
 HOME_ROOT: "{{ansible_user_dir}}" # 登陆用户的 home 目录
+GO_INSTALL_ROOT: "/usr/local"
+GOROOT: "{{GO_INSTALL_ROOT}}/go"
 TEMP_ROOT: "/tmp"
 PIP_INDEX_URL: "https://pypi.douban.com/simple"

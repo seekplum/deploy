@@ -3,3 +3,24 @@
 
 - include: zsh.yml
 - include: docker.yml
+
+- name: uninstall nvm npm and node
+  file:
+    path: "{{HOME_ROOT}}/{{item}}"
+    state: absent
+  with_items:
+    - .nvm
+    - .npm
+    - .node-gyp
+    - .npminstall_tarball
+  tags:
+    - nodejs
+
+- name: uninstall go
+  file:
+    path: "{{GOROOT}}"
+    state: absent
+  become: yes
+  become_method: sudo
+  tags:
+    - golang

@@ -1,4 +1,25 @@
 ---
+- name: check nvm installed
+  shell: "test -d {{HOME_ROOT}}/.nvm && echo 0 || echo 1"
+  register: installed_of_nvm
+  changed_when: False
+  tags:
+    - nodejs
+
+- name: check npm installed
+  shell: "npm --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_npm
+  changed_when: False
+  tags:
+    - nodejs
+
+- name: check node installed
+  shell: "node -v >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_node
+  changed_when: False
+  tags:
+    - nodejs
+
 - name: update bash_profile configuare
   lineinfile:
     dest: "{{HOME_ROOT}}/.bash_profile"
@@ -10,24 +31,23 @@
     - '"\$NVM_DIR/bash_completion"'
   tags:
     - nodejs
+  when: installed_of_nvm.stdout == "1"
 
 - name: install nodejs
   block:
-    - name: clean nvm
-      file:
-        path: "{{HOME_ROOT}}/.nvm"
-        state: absent
-
     - name: create nvm dir
       file:
         dest: "{{HOME_ROOT}}/.nvm"
         state: directory
         mode: 0755
+      when: installed_of_nvm.stdout == "1"
 
     - name: install npm
       shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+      when: installed_of_npm.stdout == "1"
 
     - name: install nodejs
       shell: "source {{HOME_ROOT}}/.bash_profile && nvm install v11.4.0"
+      when: installed_of_node.stdout == "1"
   tags:
     - nodejs

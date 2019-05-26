@@ -1,4 +1,25 @@
 ---
+- name: check zsh installed
+  shell: "zsh --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_zsh
+  changed_when: False
+  tags:
+    - zsh
+
+- name: check oh-my-zsh installed
+  shell: "test -d {{HOME_ROOT}}/.oh-my-zsh/ && echo 0 || echo 1"
+  register: installed_of_oh_my_zsh
+  changed_when: False
+  tags:
+    - zsh
+
+- name: check zsh-autosuggestions installed
+  shell: "test -d {{HOME_ROOT}}/.oh-my-zsh/custom/plugins/zsh-autosuggestions && echo 0 || echo 1"
+  register: installed_of_oh_my_zsh_autosuggestions
+  changed_when: False
+  tags:
+    - zsh
+
 - name: install zsh on Redhat
   yum:
     name: "{{item}}"
@@ -8,7 +29,7 @@
     - zsh
   tags:
     - zsh
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" and installed_of_zsh.stdout == "1"
 
 - name: install zsh on Ubuntu
   apt:
@@ -19,7 +40,7 @@
     - zsh
   tags:
     - zsh
-  when: ansible_os_family == "Debian"
+  when: ansible_os_family == "Debian" and installed_of_zsh.stdout == "1"
 
 - name: install zsh on macOS
   shell: 'if [ $(brew list | grep {{item}} | wc -l) == "0" ]; then brew install {{item}}; else echo {{item}} is installed; fi'
@@ -29,27 +50,24 @@
     - zsh-syntax-highlighting
   tags:
     - zsh
-  when: ansible_os_family == "Darwin"
+  when: ansible_os_family == "Darwin" and installed_of_zsh.stdout == "1"
 
 - name: install oh-my-zsh
   block:
-    - name: clean oh-my-zsh
-      file:
-        path: "{{HOME_ROOT}}/.oh-my-zsh/"
-        state: absent
-
     - name: download oh-my-zsh
       shell:
         cmd: |
           sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)" <<EOF
           exit
           EOF
+      when: installed_of_oh_my_zsh.stdout == "1"
 
     - name: download zsh autosuggestions
       git:
         repo: git://github.com/zsh-users/zsh-autosuggestions
         dest: "{{HOME_ROOT}}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
         accept_hostkey: true
+      when: installed_of_oh_my_zsh_autosuggestions.stdout == "1"
   tags:
     - zsh
 
