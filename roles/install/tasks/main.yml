@@ -1,5 +1,7 @@
 ---
 - include: initialize.yml
+- include: python.yml
+- include: virtualenv.yml
 - include: zsh.yml
 - include: docker.yml
 - include: golang.yml

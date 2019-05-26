@@ -1,0 +1,12 @@
+---
+- name: compile and install python
+  shell: "./configure --prefix={{VIRTUEL_ROOT}}/{{item.directory}}/{{item.name}} && make && make install"
+  args:
+    chdir: "{{TEMP_ROOT}}/Python-{{item.version}}"
+  register: result_of_compile_python
+
+- name: install pip virtualenv
+  command: "{{VIRTUEL_ROOT}}/{{item.directory}}/{{item.name}}/bin/{{item.python}} get-pip.py"
+  args:
+    chdir: "{{TEMP_ROOT}}"
+  register: result_of_install pip

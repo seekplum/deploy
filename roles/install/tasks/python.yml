@@ -1,0 +1,54 @@
+---
+- name: create python directory
+  file:
+    path: "{{VIRTUEL_ROOT}}/{{item.directory}}"
+    state: directory
+  with_items: "{{VIRTUAL_ENVS}}"
+  tags:
+    - python
+
+- name: get python source code
+  include: .download-python.yml
+  with_items: "{{VIRTUAL_ENVS}}"
+  tags:
+    - python
+
+
+- name: check existing get-pip.py
+  shell: "test -f {{PY_PIP_PATH}} && echo 0 || echo 1"
+  register: existing_of_py_pip
+  changed_when: False
+  tags:
+    - python
+
+- name: download get-pip.py
+  get_url:
+    url: https://bootstrap.pypa.io/get-pip.py
+    dest: "{{PY_PIP_PATH}}"
+    force: false
+  tags:
+    - python
+  when: existing_of_py_pip.stdout == "1"
+
+- name: create temp python directory
+  file:
+    path: "{{TEMP_ROOT}}/Python-{{item.version}}"
+    state: directory
+  with_items: "{{VIRTUAL_ENVS}}"
+  tags:
+    - python
+
+- name: unarchive python
+  block:
+  - name: unarchive python
+    shell: "tar -zxvf {{item.path}} -C {{TEMP_ROOT}}/Python-{{item.version}} --strip-components=1"
+    register: result_unarchive_python
+    with_items: "{{VIRTUAL_ENVS}}"
+    tags:
+      - python
+
+- name: install python
+  include: .compile-python.yml
+  with_items: "{{VIRTUAL_ENVS}}"
+  tags:
+    - python

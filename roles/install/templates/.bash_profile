@@ -25,6 +25,8 @@ export LDFLAGS="-L/usr/local/opt/ncurses/lib"
 export CPPFLAGS="-I/usr/local/opt/ncurses/include"
 
 export PIP_INDEX_URL=https://pypi.douban.com/simple/
+export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node # 配置 nvm 源
+
 {% if ansible_os_family == "Darwin" %}
 export PS1="\h@\u: \W \$ " # 终端提示符
 {% else %}

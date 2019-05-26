@@ -1,0 +1,28 @@
+---
+- name: check eisting pyconcreate
+  shell: "test -f {{PYCONCREATE_PATH}} && echo 0 || echo 1"
+  register: existing_of_pyconcreate
+  changed_when: False
+  tags:
+    - virtualenv
+
+- name: download pyconcreate
+  get_url:
+    url: "https://github.com/Falldog/pyconcrete/archive/0.10.2.tar.gz"
+    dest: "{{PYCONCREATE_PATH}}"
+    force: false
+  tags:
+    - virtualenv
+
+- name: unarchive pyconcrete
+  shell: "tar -zxvf {{PYCONCREATE_PATH}} -C {{TEMP_ROOT}}"
+  register: result_of_unarchive_pyconcrete
+  tags:
+    - virtualenv
+
+- name: make env
+  include: .virtualenv.yml
+  with_items: "{{VIRTUAL_ENVS}}"
+  register: make_env
+  tags:
+    - virtualenv

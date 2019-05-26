@@ -13,6 +13,13 @@
   tags:
     - nodejs
 
+- name: check cnpm installed
+  shell: "cnpm --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_cnpm
+  changed_when: False
+  tags:
+    - nodejs
+
 - name: check node installed
   shell: "node -v >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_node
@@ -47,7 +54,11 @@
       when: installed_of_npm.stdout == "1"
 
     - name: install nodejs
-      shell: "source {{HOME_ROOT}}/.bash_profile && nvm install v11.4.0"
+      shell: ". {{HOME_ROOT}}/.bash_profile && nvm install v11.4.0"
       when: installed_of_node.stdout == "1"
+
+    - name: install cnpm
+      shell: ". {{HOME_ROOT}}/.bash_profile && npm install -g cnpm --registry=https://registry.npm.taobao.org"
+      when: installed_of_cnpm.stdout == "1"
   tags:
     - nodejs

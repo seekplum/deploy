@@ -89,6 +89,7 @@
 
 - name: configuare zsh on Linux
   shell: "sed -i '3,6d' {{HOME_ROOT}}/.bash_profile"
+  changed_when: True
   tags:
     - zsh
   when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
@@ -96,6 +97,7 @@
 # mac的sed用法有区别
 - name: configuare zsh on macOS
   shell: "sed -i \"\" '3,6d' {{HOME_ROOT}}/.bash_profile"
+  changed_when: True
   tags:
     - zsh
   when: ansible_os_family == "Darwin"
@@ -107,5 +109,6 @@
     regexp: "{{item}}"
   with_items:
     - 'export PS1="'
+  changed_when: True
   tags:
     - zsh

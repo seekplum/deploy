@@ -34,6 +34,13 @@
   tags:
     - golang
 
+- name: check govendor installed
+  shell: "govendor --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_govendor
+  changed_when: False
+  tags:
+    - golang
+
 - name: install golang
   block:
     - name: download golang packages on Linux
@@ -66,7 +73,8 @@
     - name: install govendor
       shell: "{{item}}"
       with_items:
-        - "source {{HOME_ROOT}}/.bash_profile && go get -u github.com/kardianos/govendor"
-        - "source {{HOME_ROOT}}/.bash_profile && cd $GOPATH/src/github.com/kardianos/govendor && go build"
+        - ". {{HOME_ROOT}}/.bash_profile && go get -u github.com/kardianos/govendor"
+        - ". {{HOME_ROOT}}/.bash_profile && cd $GOPATH/src/github.com/kardianos/govendor && go build"
+      when: installed_of_govendor.stdout == "1"
   tags:
     - golang

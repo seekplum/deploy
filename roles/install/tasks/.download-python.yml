@@ -1,0 +1,10 @@
+- name: check existing python packages
+  shell: "test -f {{item.path}} && echo 0 || echo 1"
+  register: existing_of_python_package
+  changed_when: False
+
+- name: download python packages
+  get_url:
+    url: "https://www.python.org/ftp/python/{{item.version}}/Python-{{item.version}}.tgz"
+    dest: "{{item.path}}"
+  when: existing_of_python_package.stdout == "1"
