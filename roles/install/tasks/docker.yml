@@ -6,6 +6,20 @@
   tags:
     - docker
 
+- name: check docker-machine installed
+  shell: "docker-machine --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_docker_machine
+  changed_when: False
+  tags:
+    - docker
+
+- name: check docker-compose installed
+  shell: "docker-compose --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_docker_compose
+  changed_when: False
+  tags:
+    - docker
+
 - name: copy docker repo on Redhat
   copy:
     src: "{{ role_path }}/files/deploy-docker.repo"
@@ -57,14 +71,17 @@
     - docker
   when: ansible_os_family == "Darwin" and installed_of_docker.stdout == "1"
 
-- name: install docker-machine docker-compose on macOS
-  shell: "brew install {{item}}"
-  with_items:
-    - docker-machine
-    - docker-compose
+- name: install docker-machine on macOS
+  shell: "brew install docker-machine"
   tags:
     - docker
-  when: ansible_os_family == "Darwin" and installed_of_docker.stdout == "1"
+  when: ansible_os_family == "Darwin" and installed_of_docker_machine.stdout == "1"
+
+- name: install docker-machine on macOS
+  shell: "brew install docker-compose"
+  tags:
+    - docker
+  when: ansible_os_family == "Darwin" and installed_of_docker_compose.stdout == "1"
 
 - name: start docker on ubuntu or Redhat
   service: name={{item.name}} state={{item.state}} enabled={{item.enabled}}
