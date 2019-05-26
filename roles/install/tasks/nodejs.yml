@@ -1,37 +1,29 @@
 ---
-# - name: update bashrc configuare on Linux
-#  shell: "{{item}}"
-#  with_items:
-#    - "sed -ie '/export NVM_DIR=\"{{HOME_ROOT}}\/.nvm\"/d' {{HOME_ROOT}}/.bash_profile"
-#    - "sed -ie '/\\\"$NVM_DIR\\/nvm.sh\\\"/d' {{HOME_ROOT}}/.bash_profile"
-#    - "sed -ie '/\\\"$NVM_DIR\\/bash_completion\\\"/d' {{HOME_ROOT}}/.bash_profile"
-#  tags:
-#    - nodejs
-#   when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
-
-# - name: update bashrc configuare on macOS
-#  shell: "{{item}}"
-#  with_items:
-#    - "sed -ie \"\" '/export NVM_DIR=\"{{HOME_ROOT}}\/.nvm\"/d' {{HOME_ROOT}}/.bash_profile"
-#    - "sed -ie \"\" '/\\\"$NVM_DIR\\/nvm.sh\\\"/d' {{HOME_ROOT}}/.bash_profile"
-#    - "sed -ie \"\" '/\\\"$NVM_DIR\\/bash_completion\\\"/d' {{HOME_ROOT}}/.bash_profile"
-#  tags:
-#    - nodejs
-#   when: ansible_os_family == "Darwin"
-
-- name: create nvm dir
-  file:
-    dest: "{{item}}"
-    state: directory
-    mode: 0755
+- name: update bash_profile configuare
+  lineinfile:
+    dest: "{{HOME_ROOT}}/.bash_profile"
+    state: absent
+    regexp: "{{item}}"
   with_items:
-    - "{{HOME_ROOT}}/.nvm"
+    - 'export NVM_DIR='
+    - '"\$NVM_DIR/nvm.sh"'
+    - '"\$NVM_DIR/bash_completion"'
   tags:
     - nodejs
 
-
 - name: install nodejs
   block:
+    - name: clean nvm
+      file:
+        path: "{{HOME_ROOT}}/.nvm"
+        state: absent
+
+    - name: create nvm dir
+      file:
+        dest: "{{HOME_ROOT}}/.nvm"
+        state: directory
+        mode: 0755
+
     - name: install npm
       shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
 

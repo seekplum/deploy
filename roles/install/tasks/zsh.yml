@@ -25,6 +25,7 @@
   shell: 'if [ $(brew list | grep {{item}} | wc -l) == "0" ]; then brew install {{item}}; else echo {{item}} is installed; fi'
   with_items:
     - zsh
+    - zsh-completions
     - zsh-syntax-highlighting
   tags:
     - zsh
@@ -53,7 +54,7 @@
     - zsh
 
 - name: change terminal
-  shell: chsh -s /bin/zsh
+  shell: "chsh -s /bin/zsh {{ansible_ssh_user}}"
   become: yes
   become_method: sudo
   tags:
@@ -80,3 +81,13 @@
   tags:
     - zsh
   when: ansible_os_family == "Darwin"
+
+- name: update bash_profile configuare
+  lineinfile:
+    dest: "{{HOME_ROOT}}/.bash_profile"
+    state: absent
+    regexp: "{{item}}"
+  with_items:
+    - 'export PS1="'
+  tags:
+    - zsh

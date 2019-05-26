@@ -4,7 +4,7 @@
 - name: check existing brew on macOS
   shell: "brew --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_brew
-  changed_when: false
+  changed_when: False
   tags:
     - initialize
   when: ansible_os_family == "Darwin"
@@ -103,7 +103,7 @@
   with_items:
     - wget
     - tree
-  changed_when: false
+  changed_when: False
   ignore_errors: True
   tags:
     - initialize
@@ -112,14 +112,14 @@
 - name: check sshpass installed on macOS
   shell: "sshpass -V >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_sshpass_on_mac
-  changed_when: false
+  changed_when: False
   tags:
     - initialize
   when: ansible_os_family == "Darwin"
 
 - name: install sshpass on macOS
   shell: "brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb"
-  changed_when: false
+  changed_when: False
   ignore_errors: True
   tags:
     - initialize
@@ -128,14 +128,14 @@
 - name: check pip installed
   shell: "pip -V >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_pip
-  changed_when: false
+  changed_when: False
   tags:
     - initialize
 
 - name: install pip
   shell: "easy_install pip"
   register: result_of_install_pip
-  changed_when: false
+  changed_when: False
   tags:
     - initialize
   when: existing_of_pip.stdout == "1"
@@ -143,13 +143,13 @@
 - name: check trash installed
   shell: "trash --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_trash
-  changed_when: false
+  changed_when: False
   tags:
     - initialize
 
 - name: install trash-cli
   shell: "pip install trash-cli -i {{PIP_INDEX_URL}}"
-  changed_when: false
+  changed_when: False
   tags:
     - initialize
   when: existing_of_trash.stdout == "1"
@@ -157,13 +157,13 @@
 - name: check supervisor installed
   shell: "supervisord --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_supervisor
-  changed_when: false
+  changed_when: False
   tags:
     - initialize
 
 - name: install supervisor
   shell: "pip install supervisor -i {{PIP_INDEX_URL}}"
-  changed_when: false
+  changed_when: False
   tags:
     - initialize
   when: existing_of_supervisor.stdout == "1"

@@ -12,17 +12,17 @@
     - golang
 
 - name: check existing golang packages on Linux
-  shell: "test -f {{GO_PACKAGE_PATH}} && echo 0 || echo 1"
+  shell: "test -f {{GO_PACKAGE_PATH_ON_LINUX}} && echo 0 || echo 1"
   register: existing_of_go_on_linux
-  changed_when: false
+  changed_when: False
   tags:
     - golang
   when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
 
 - name: check existing golang packages on macOS
-  shell: "test -f {{GO_PACKAGE_PATH}} && echo 0 || echo 1"
+  shell: "test -f {{GO_PACKAGE_PATH_ON_MAC}} && echo 0 || echo 1"
   register: existing_of_go_on_mac
-  changed_when: false
+  changed_when: False
   tags:
     - golang
   when: ansible_os_family == "Darwin"
@@ -34,14 +34,21 @@
         url: "{{GO_DOWNLOAD_URL_ON_LINUX}}"
         dest: "{{GO_PACKAGE_PATH_ON_LINUX}}"
         force: false
-      when: existing_of_go_on_mac.stdout == "1" and (ansible_os_family == "RedHat" or ansible_os_family == "Debian")
+      when: (ansible_os_family == "RedHat" or ansible_os_family == "Debian") and existing_of_go_on_linux.stdout == "1"
 
     - name: download golang packages on macOS
       get_url:
         url: "{{GO_DOWNLOAD_URL_ON_MAC}}"
         dest: "{{GO_PACKAGE_PATH_ON_MAC}}"
         force: false
-      when: existing_of_go_on_linux.stdout == "1" and ansible_os_family == "Darwin"
+      when:  ansible_os_family == "Darwin" and existing_of_go_on_mac.stdout == "1"
+
+    - name: unarchive golang on Linux
+      unarchive:
+        src: "{{GO_PACKAGE_PATH_ON_LINUX}}"
+        dest: "{{GO_INSTALL_ROOT}}"
+        remote_src: true
+      when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
 
     - name: unarchive golang on Linux
       unarchive:
@@ -51,10 +58,7 @@
       when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
 
     - name: unarchive golang on macOS
-      unarchive:
-        src: "{{GO_PACKAGE_PATH_ON_MAC}}"
-        dest: "{{GO_INSTALL_ROOT}}"
-        remote_src: true
+      shell: "tar -zxvf {{GO_PACKAGE_PATH_ON_MAC}} -C {{GO_INSTALL_ROOT}}"
       become: yes
       become_method: sudo
       when: ansible_os_family == "Darwin"

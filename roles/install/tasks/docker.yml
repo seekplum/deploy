@@ -37,9 +37,9 @@
     state: present
     update_cache: true
   with_items:
-    - docker
     - docker.io
     - docker-ce
+    - docker-ce-cli
   tags:
     - docker
   when: ansible_os_family == "Debian"

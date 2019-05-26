@@ -1,7 +1,7 @@
 ---
 
 - name: change terminal
-  shell: chsh -s /bin/bash
+  shell: "chsh -s /bin/bash {{ansible_ssh_user}}"
   become: yes
   become_method: sudo
   tags:
@@ -10,7 +10,7 @@
 - name: check /etc/bahsrc exists
   shell: cat ~/.bash_profile | grep "if \[ \-f /etc/bashrc \]; then" | wc -l
   register: existing_of_etc_bashrc
-  changed_when: false
+  changed_when: False
   tags:
     - remove_zsh
 
@@ -52,6 +52,7 @@
   ignore_errors: True
   with_items:
     - zsh
+    - zsh-completions
     - zsh-syntax-highlighting
   tags:
     - remove_zsh

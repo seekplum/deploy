@@ -26,9 +26,9 @@ export CPPFLAGS="-I/usr/local/opt/ncurses/include"
 
 export PIP_INDEX_URL=https://pypi.douban.com/simple/
 {% if ansible_os_family == "Darwin" %}
-export PS1="\h: \W \u\$ " # 终端提示符
+export PS1="\h@\u: \W \$ " # 终端提示符
 {% else %}
-export PS1="\[\e[0;33m\]\u\[\e[0m\]@\[\e[0;37m\]\h\[\e[0m\]:\[\e[0;31m\]\w\[\e[0m\]\$ " # 终端提示符
+export PS1="\[\e[0;33m\]\u\[\e[0m\]@\[\e[0;37m\]\h\[\e[0m\]:\[\e[0;31m\] \w \[\e[0m\]\$ " # 终端提示符
 {% endif %}
 export LS_OPTIONS='--color=auto' # 如果没有指定，则自动选择颜色
 export CLICOLOR='Yes' # 是否输出颜色
@@ -36,7 +36,7 @@ export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 export PATH="${PATH}:/usr/local/opt/ncurses/bin"
-export PATH="${PATH}:${HOME}/.nvm/versions/node/v10.0.0/bin"
+export PATH="${PATH}:{{HOME_ROOT}}/.nvm/:{{HOME_ROOT}}/.nvm/versions/node/v10.0.0/bin"
 export PATH="${PATH}:${GOPATH}/src/github.com/kardianos/govendor"
 export PATH="${PATH}:${GOPATH}/src/github.com/golang/dep/cmd/dep/dep"
 export PATH="${PATH}:${GOPATH}/src/github.com/jteeuwen/go-bindata/go-bindata"

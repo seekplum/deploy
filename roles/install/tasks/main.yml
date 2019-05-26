@@ -5,7 +5,15 @@
 - include: golang.yml
 - include: nodejs.yml
 
+- name: check existing ansible
+  shell: "ansible --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: existing_of_ansible
+  changed_when: False
+  tags:
+    - ansible
+
 - name: install ansible
   shell: "pip install ansible -i {{PIP_INDEX_URL}}"
   tags:
     - ansible
+  when: existing_of_ansible.stdout == "1"
