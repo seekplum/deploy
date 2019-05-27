@@ -4,21 +4,21 @@
 GOPATH: "{{HOME_ROOT}}/GolangProjects"
 WebProjects: "{{HOME_ROOT}}/WebProjects"
 PythonProjects: "{{HOME_ROOT}}/PythonProjects"
-GO_PACKAGE_PATH_ON_LINUX: "/tmp/go1.10.3.linux-amd64.tar.gz"
-GO_PACKAGE_PATH_ON_MAC: "/tmp/go1.10.3.darwin-amd64.tar.gz"
+GO_PACKAGE_PATH_ON_LINUX: "{{TEMP_ROOT}}/go1.10.3.linux-amd64.tar.gz"
+GO_PACKAGE_PATH_ON_MAC: "{{TEMP_ROOT}}/go1.10.3.darwin-amd64.tar.gz"
 GO_DOWNLOAD_URL_ON_MAC: "https://dl.google.com/go/go1.10.3.darwin-amd64.tar.gz"
 GO_DOWNLOAD_URL_ON_LINUX: "https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz"
-PYCONCREATE_PATH: "/tmp/pyconcrete-0.10.2.tar.gz"
-PY_PIP_PATH: "/tmp/get-pip.py"
-VIRTUEL_ROOT: "/tmp/pythonenv"
+PYCONCREATE_PATH: "{{TEMP_ROOT}}/pyconcrete-0.10.2.tar.gz"
+PY_PIP_PATH: "{{TEMP_ROOT}}/get-pip.py"
+VIRTUEL_ROOT: "{{TEMP_ROOT}}/pythonenv"
 VIRTUAL_ENVS:
   - directory: python27env
     name: python27
-    path: "/tmp/Python-2.7.16.tar.xz"
+    path: "{{TEMP_ROOT}}/Python-2.7.16.tar.xz"
     version: 2.7.16
     python: python
   - directory: python36env
     name: python36
-    path: "/tmp/Python-3.6.6.tar.xz"
+    path: "{{TEMP_ROOT}}/Python-3.6.6.tar.xz"
     version: 3.6.6
     python: python3

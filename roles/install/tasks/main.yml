@@ -1,8 +1,8 @@
 ---
 - include: initialize.yml
+- include: zsh.yml
 - include: python.yml
 - include: virtualenv.yml
-- include: zsh.yml
 - include: docker.yml
 - include: golang.yml
 - include: nodejs.yml
@@ -15,7 +15,7 @@
     - ansible
 
 - name: install ansible
-  shell: "pip install ansible -i {{PIP_INDEX_URL}}"
+  shell: "pip install ansible"
   tags:
     - ansible
   when: existing_of_ansible.stdout == "1"

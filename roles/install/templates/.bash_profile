@@ -21,10 +21,14 @@ export PYTHONSTARTUP="${HOME}/.pythonrc"
 export PYTHONPROJECTSPATH="{{PythonProjects}}"
 export WEBPROJECTSPATH="{{WebProjects}}"
 
-export LDFLAGS="-L/usr/local/opt/ncurses/lib"
-export CPPFLAGS="-I/usr/local/opt/ncurses/include"
+export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
+export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
+export LDFLAGS="${LDFLAGS} -L/usr/local/opt/sqlite/lib"
+export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/sqlite/include"
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/sqlite/lib/pkgconfig"
 
-export PIP_INDEX_URL=https://pypi.douban.com/simple/
+export PIP_INDEX_URL={{PIP_INDEX_URL}}
 export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node # 配置 nvm 源
 
 {% if ansible_os_family == "Darwin" %}
@@ -43,8 +47,9 @@ export PATH="${PATH}:${GOPATH}/src/github.com/kardianos/govendor"
 export PATH="${PATH}:${GOPATH}/src/github.com/golang/dep/cmd/dep/dep"
 export PATH="${PATH}:${GOPATH}/src/github.com/jteeuwen/go-bindata/go-bindata"
 export PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
-export PATH="${PATH}:${HOME}/pythonenv/python27env/bin"
-export PATH="${PATH}:${HOME}/pythonenv/python36env/bin"
+{% for item in VIRTUAL_ENVS %}
+export PATH="${PATH}:{{VIRTUEL_ROOT}}/{{item.directory}}/bin"
+{% endfor %}
 export PATH="${PATH}:${MYSQL_HOME}/bin:${JAVA_HOME}/bin"
 export PATH="${PATH}:${M2_HOME}/bin"
 export PATH="${PATH}:${HOME}/istio-0.8.0/bin"
@@ -54,12 +59,13 @@ export PATH="${PATH}:/usr/local/Cellar/rabbitmq/3.7.14/sbin/"
 export PATH="${PATH}:${HOME}/packages/apache-maven-3.5.4/bin"
 
 # User specific aliases and functions
-alias senv2='source ${HOME}/pythonenv/python27env/bin/activate'
-alias senv3='source ${HOME}/pythonenv/python36env/bin/activate'
+{% for item in VIRTUAL_ENVS %}
+alias senv{{loop.index+1}}='source {{VIRTUEL_ROOT}}/{{item.directory}}/bin/activate'
+{% endfor %}
 alias senv="senv2"
 
-alias mystart="${HOME}/pythonenv/python27env/bin/supervisord -c ${HOME}/packages/supervisor/supervisord.conf"
-alias mysuper="${HOME}/pythonenv/python27env/bin/supervisorctl -c ${HOME}/packages/supervisor/supervisord.conf"
+alias mystart="{{VIRTUEL_ROOT}}/{{VIRTUAL_ENVS[0].directory}}/bin/supervisord -c ${HOME}/packages/supervisor/supervisord.conf"
+alias mysuper="{{VIRTUEL_ROOT}}/{{VIRTUAL_ENVS[0].directory}}/bin/supervisorctl -c ${HOME}/packages/supervisor/supervisord.conf"
 alias mymysql='${HOME}/packages/mysql/bin/mysql -uroot -proot -S ${HOME}/packages/mysql/data/sock/mysql.sock'
 alias myredis='/Users/seekplum/packages/redis/src/redis-cli'
 
@@ -75,5 +81,13 @@ alias cdw="cd ${WEBPROJECTSPATH}"
 alias cds="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum"
 alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
 alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meizhe2012"
+
+export NVM_DIR="$HOME/.nvm"
+if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+    . "$NVM_DIR/nvm.sh"  # This loads nvm
+fi
+if [[ -s "$NVM_DIR/bash_completion" ]]; then
+    . "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+fi
 
 # source '/usr/local/etc/bash_completion.d/docker-machine-prompt.bash'

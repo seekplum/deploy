@@ -38,15 +38,6 @@
   tags:
     - python
 
-- name: unarchive python
-  block:
-  - name: unarchive python
-    shell: "tar -zxvf {{item.path}} -C {{TEMP_ROOT}}/Python-{{item.version}} --strip-components=1"
-    register: result_unarchive_python
-    with_items: "{{VIRTUAL_ENVS}}"
-    tags:
-      - python
-
 - name: install python
   include: .compile-python.yml
   with_items: "{{VIRTUAL_ENVS}}"

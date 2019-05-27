@@ -22,6 +22,7 @@
     mode: 0755
   with_items:
     - "{{HOME_ROOT}}/.ssh"
+    - "{{HOME_ROOT}}/.pip"
     - "{{GOPATH}}"
     - "{{PythonProjects}}"
     - "{{WebProjects}}"
@@ -32,6 +33,14 @@
   template:
     src: .bash_profile
     dest: "{{HOME_ROOT}}"
+    mode: 0644
+  tags:
+    - initialize
+
+- name: copy pip.conf script template
+  template:
+    src: pip.conf
+    dest: "{{HOME_ROOT}}/.pip"
     mode: 0644
   tags:
     - initialize
@@ -71,6 +80,7 @@
     - cmake
     - tree
     - sshpass
+    - openssl-devel
   tags:
     - initialize
   when: ansible_os_family == "RedHat"
@@ -94,15 +104,34 @@
     - cmake
     - tree
     - sshpass
+    - zlibc
+    - build-essential
+    - libssl-dev
+    - zlib1g-dev
+    - libbz2-dev
+    - libreadline-dev
+    - libsqlite3-dev
+    - llvm
+    - libncurses5-dev
   tags:
     - initialize
   when: ansible_os_family == "Debian"
+
+- name: install xcode-select on macOS
+  shell: 'xcode-select -v >/dev/null 2>&1 ||xcode-select --install'
+  changed_when: False
+  ignore_errors: True
+  tags:
+    - initialize
+  when: ansible_os_family == "Darwin"
 
 - name: install packages on macOS
   shell: 'if [ $(brew list | grep {{item}} | wc -l) == "0" ]; then brew install {{item}}; else echo {{item}} is installed; fi'
   with_items:
     - wget
     - tree
+    - zlib
+    - sqlite
   changed_when: False
   ignore_errors: True
   tags:
@@ -148,7 +177,7 @@
     - initialize
 
 - name: install trash-cli
-  shell: "pip install trash-cli -i {{PIP_INDEX_URL}}"
+  shell: "pip install trash-cli"
   changed_when: False
   tags:
     - initialize
@@ -162,7 +191,7 @@
     - initialize
 
 - name: install supervisor
-  shell: "pip install supervisor -i {{PIP_INDEX_URL}}"
+  shell: "pip install supervisor"
   changed_when: False
   tags:
     - initialize

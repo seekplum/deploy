@@ -27,19 +27,6 @@
   tags:
     - nodejs
 
-- name: update bash_profile configuare
-  lineinfile:
-    dest: "{{HOME_ROOT}}/.bash_profile"
-    state: absent
-    regexp: "{{item}}"
-  with_items:
-    - 'export NVM_DIR='
-    - '"\$NVM_DIR/nvm.sh"'
-    - '"\$NVM_DIR/bash_completion"'
-  tags:
-    - nodejs
-  when: installed_of_nvm.stdout == "1"
-
 - name: install nodejs
   block:
     - name: create nvm dir
