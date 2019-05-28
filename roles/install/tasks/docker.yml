@@ -86,6 +86,7 @@
 - name: start docker on ubuntu or Redhat
   service: name={{item.name}} state={{item.state}} enabled={{item.enabled}}
   register: log
+  ignore_errors: True
   with_items:
     - name: 'docker'
       enabled: 'yes'
