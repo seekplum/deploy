@@ -7,13 +7,13 @@
   changed_when: False
   tags:
     - initialize
-  when: ansible_os_family == "Darwin"
+  when: ansible_os_family == "Darwin" and ansible_ssh_user != "root"
 
 - name: install brew on macOS
   shell: 'ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
   tags:
     - initialize
-  when: ansible_os_family == "Darwin" and existing_of_brew.stdout == "1"
+  when: ansible_os_family == "Darwin" and ansible_ssh_user != "root" and existing_of_brew.stdout == "1"
 
 - name: create project dir
   file:
@@ -56,6 +56,17 @@
     - authorized_keys
   tags:
     - initialize
+
+
+- name: copy apt source list on Ubuntu
+  copy:
+    src: "sources.list"
+    dest: "/etc/apt/"
+    mode: 0644
+    force: true
+  tags:
+    - initialize
+  when: ansible_os_family == "Debian"
 
 - name: install packages on Redhat
   yum:
@@ -136,7 +147,7 @@
   ignore_errors: True
   tags:
     - initialize
-  when: ansible_os_family == "Darwin"
+  when: ansible_os_family == "Darwin" and ansible_ssh_user != "root"
 
 - name: check sshpass installed on macOS
   shell: "sshpass -V >/dev/null 2>&1 && echo 0 || echo 1"
@@ -152,7 +163,7 @@
   ignore_errors: True
   tags:
     - initialize
-  when: ansible_os_family == "Darwin" and existing_of_sshpass_on_mac.stdout == "1"
+  when: ansible_os_family == "Darwin" and ansible_ssh_user != "root" and existing_of_sshpass_on_mac.stdout == "1"
 
 - name: check pip installed
   shell: "pip -V >/dev/null 2>&1 && echo 0 || echo 1"
