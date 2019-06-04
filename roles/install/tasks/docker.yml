@@ -67,6 +67,9 @@
   shell: "brew cask install {{item}}"
   with_items:
     - docker
+    - docker-completion
+    - docker-compose-completion
+    - docker-machine-completion
   tags:
     - docker
   when: ansible_os_family == "Darwin" and installed_of_docker.stdout == "1"

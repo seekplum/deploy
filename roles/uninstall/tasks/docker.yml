@@ -43,6 +43,9 @@
     - "docker"
     - "docker-machine"
     - "docker-compose"
+    - "docker-completion"
+    - "docker-compose-completion"
+    - "docker-machine-completion"
   ignore_errors: True
   tags:
     - remove_docker
