@@ -1,8 +1,8 @@
 ---
 - include: initialize.yml
 - include: zsh.yml
-- include: python.yml
-- include: virtualenv.yml
+# - include: python.yml
+# - include: virtualenv.yml
 - include: docker.yml
 - include: golang.yml
 - include: nodejs.yml
