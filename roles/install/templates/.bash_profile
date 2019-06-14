@@ -89,5 +89,3 @@ fi
 if [ -s "$NVM_DIR/bash_completion" ]; then
     . "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 fi
-
-# source '/usr/local/etc/bash_completion.d/docker-machine-prompt.bash'
