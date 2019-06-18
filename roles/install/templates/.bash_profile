@@ -8,8 +8,11 @@ export MYSQL_HOME="${HOME}/packages/mysql"
 export ORACLE_HOME="${HOME}/packages/oracle"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${ORACLE_HOME}"
 export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}:${ORACLE_HOME}:${MYSQL_HOME}/lib"
-
+{% if ansible_os_family == "Darwin" %}
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home"
+{% else %}
+export JAVA_HOME="{{JAVA_HOME}}"
+{% endif %}
 export CLASS_PATH="${JAVA_HOME}/lib"
 
 export M2_HOME="${HOME}/packages/apache-maven-3.5.4"

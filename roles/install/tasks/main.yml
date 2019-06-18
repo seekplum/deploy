@@ -5,6 +5,7 @@
 # - include: virtualenv.yml
 - include: docker.yml
 - include: golang.yml
+- include: java.yml
 - include: nodejs.yml
 
 - name: check existing ansible
