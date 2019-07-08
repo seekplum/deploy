@@ -194,16 +194,16 @@
     - initialize
   when: existing_of_trash.stdout == "1"
 
-- name: check supervisor installed
-  shell: "supervisord --version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: existing_of_supervisor
-  changed_when: False
-  tags:
-    - initialize
-
-- name: install supervisor
-  shell: "pip install supervisor"
-  changed_when: False
-  tags:
-    - initialize
-  when: existing_of_supervisor.stdout == "1"
+#- name: check supervisor installed
+#  shell: "supervisord --version >/dev/null 2>&1 && echo 0 || echo 1"
+#  register: existing_of_supervisor
+#  changed_when: False
+#  tags:
+#    - initialize
+#
+#- name: install supervisor
+#  shell: "pip install supervisor"
+#  changed_when: False
+#  tags:
+#    - initialize
+#  when: existing_of_supervisor.stdout == "1"

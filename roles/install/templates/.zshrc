@@ -111,6 +111,6 @@ if [[ -f ~/.bash_profile ]]; then
 	. ~/.bash_profile
 fi
 
-if [[ -f ~/.bashrc ]]; then
-	. ~/.bashrc
-fi
+# if [[ -f ~/.bashrc ]]; then
+# 	. ~/.bashrc
+# fi
