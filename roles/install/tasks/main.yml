@@ -1,22 +1,22 @@
 ---
 - include: initialize.yml
 - include: zsh.yml
-# - include: python.yml
-# - include: virtualenv.yml
+- include: python.yml
+- include: virtualenv.yml
 - include: docker.yml
-#- include: golang.yml
-#- include: java.yml
-#- include: nodejs.yml
+- include: golang.yml
+- include: java.yml
+- include: nodejs.yml
 
-#- name: check existing ansible
-#  shell: "ansible --version >/dev/null 2>&1 && echo 0 || echo 1"
-#  register: existing_of_ansible
-#  changed_when: False
-#  tags:
-#    - ansible
-#
-#- name: install ansible
-#  shell: "pip install ansible"
-#  tags:
-#    - ansible
-#  when: existing_of_ansible.stdout == "1"
+- name: check existing ansible
+  shell: "ansible --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: existing_of_ansible
+  changed_when: False
+  tags:
+    - ansible
+
+- name: install ansible
+  shell: "pip install ansible"
+  tags:
+    - ansible
+  when: existing_of_ansible.stdout == "1"

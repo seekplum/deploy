@@ -55,7 +55,7 @@ ansible-playbook -i hosts site.yml --private-key ~/.ssh/id_rsa -t uninstall
 * 执行安装操作
 
 ```bash
-ansible-playbook -i hosts site.yml --private-key ~/.ssh/id_rsa -t install
+ansible-playbook -i hosts site.yml --private-key ~/.ssh/id_rsa -t install --skip-tags "initialize,zsh,python,virtualenv,docker,golang,java,nodejs,ansible"
 ```
 
 * -i: 指定运行的主机, 如 `-i hosts`

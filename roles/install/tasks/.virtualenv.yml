@@ -1,11 +1,11 @@
 ---
 - name: check existing of env
-  shell: "test -f {{VIRTUEL_ROOT}}/{{item.directory}}/{{item.name}}/bin/activate && echo 0 || echo 1"
+  shell: "test -f {{VIRTUEL_ROOT}}/{{item.directory}}/bin/activate && echo 0 || echo 1"
   register: result_of_check_env
   changed_when: false
 
 - name: check existing of pyconcrete of env
-  shell: "test -f {{VIRTUEL_ROOT}}/{{item.directory}}/{{item.name}}/bin/pyconcrete-admin.py && echo 0 || echo 1"
+  shell: "test -f {{VIRTUEL_ROOT}}/{{item.directory}}/bin/pyconcrete-admin.py && echo 0 || echo 1"
   register: result_of_check_pyconcrete
   changed_when: false
 

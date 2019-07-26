@@ -31,6 +31,7 @@
   with_items:
     - "docker"
     - "docker-io"
+    - "docker.io"
     - "docker-ce"
     - "docker-engine"
   tags:

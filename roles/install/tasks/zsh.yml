@@ -84,6 +84,7 @@
     dest: "{{HOME_ROOT}}"
     mode: 0644
     force: true
+    backup: true # 进行备份
   tags:
     - zsh
 

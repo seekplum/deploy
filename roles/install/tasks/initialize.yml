@@ -34,6 +34,8 @@
     src: .bash_profile
     dest: "{{HOME_ROOT}}"
     mode: 0644
+    force: true
+    backup: true # 进行备份
   tags:
     - initialize
 
@@ -50,7 +52,7 @@
     src: "{{ role_path }}/files/{{item}}"
     dest: "{{HOME_ROOT}}/.ssh"
     mode: 0644
-    force: true
+    force: false # 避免原主机文件被覆盖
   with_items:
     - config
     - authorized_keys

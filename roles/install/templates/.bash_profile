@@ -24,10 +24,13 @@ export PYTHONSTARTUP="${HOME}/.pythonrc"
 export PYTHONPROJECTSPATH="{{PythonProjects}}"
 export WEBPROJECTSPATH="{{WebProjects}}"
 
-export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
-export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
+export LDFLAGS="-L/usr/local/opt/zlib/lib"
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/sqlite/lib"
+export LDFLAGS="${LDFLAGS} -L/usr/local/opt/openssl/lib"
+export CPPFLAGS="-I/usr/local/opt/openssl/include"
+export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/sqlite/include"
+export CFLAGS="${CFLAGS} -I/usr/local/opt/openssl/include"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/sqlite/lib/pkgconfig"
 
@@ -84,6 +87,9 @@ alias cdw="cd ${WEBPROJECTSPATH}"
 alias cds="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum"
 alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
 alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meizhe2012"
+
+alias start_vm='VBoxManage startvm "ubuntu1" --type headless; VBoxManage startvm "ubuntu2" --type headless; VBoxManage startvm "ubuntu3" --type headless'
+alias stop_vm='VBoxManage controlvm "ubuntu1" poweroff; VBoxManage controlvm "ubuntu2" poweroff; VBoxManage controlvm "ubuntu3" poweroff'
 
 export NVM_DIR="$HOME/.nvm"
 if [ -s "$NVM_DIR/nvm.sh" ]; then
