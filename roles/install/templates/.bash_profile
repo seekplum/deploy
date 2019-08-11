@@ -91,6 +91,14 @@ alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meizhe2012"
 alias start_vm='VBoxManage startvm "ubuntu1" --type headless; VBoxManage startvm "ubuntu2" --type headless; VBoxManage startvm "ubuntu3" --type headless'
 alias stop_vm='VBoxManage controlvm "ubuntu1" poweroff; VBoxManage controlvm "ubuntu2" poweroff; VBoxManage controlvm "ubuntu3" poweroff'
 
+# virtualenvwrappe 配置
+export WORKON_HOME=${HOME}/.virtualenvs
+export VIRTUALENVWRAPPER_SCRIPT=/usr/local/bin/virtualenvwrapper.sh
+export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python
+export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
+source ${VIRTUALENVWRAPPER_SCRIPT}
+
 export NVM_DIR="$HOME/.nvm"
 if [ -s "$NVM_DIR/nvm.sh" ]; then
     . "$NVM_DIR/nvm.sh"  # This loads nvm
