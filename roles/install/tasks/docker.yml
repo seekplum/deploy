@@ -30,13 +30,19 @@
     - docker
   when: ansible_os_family == "RedHat" and installed_of_docker.stdout == "1"
 
+- name: Add docker source on Redhat
+  shell: "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+  tags:
+    - docker
+  when: ansible_os_family == "RedHat" and installed_of_docker.stdout == "1"
+
 - name: Install docker on Redhat
   yum:
     name: "{{item}}"
     state: present
     update_cache: true
   with_items:
-    - docker-engine
+    - docker-ce
   tags:
     - docker
   when: ansible_os_family == "RedHat" and installed_of_docker.stdout == "1"

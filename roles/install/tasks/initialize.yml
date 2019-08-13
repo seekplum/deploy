@@ -39,6 +39,9 @@
     - tree
     - sshpass
     - openssl-devel
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
   tags:
     - initialize
   when: ansible_os_family == "RedHat"

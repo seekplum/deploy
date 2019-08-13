@@ -14,7 +14,7 @@
     - .node-gyp
     - .npminstall_tarball
   tags:
-    - nodejs
+    - remove_nodejs
 
 - name: uninstall go
   file:
@@ -23,4 +23,4 @@
   become: yes
   become_method: sudo
   tags:
-    - golang
+    - remove_golang

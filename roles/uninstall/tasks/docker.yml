@@ -19,6 +19,16 @@
   with_items:
     - docker-engine
     - docker-ce
+    - docker-ce-cli
+    - docker
+    - docker-client
+    - docker-client-latest
+    - docker-common
+    - docker-latest
+    - docker-latest-logrotate
+    - docker-logrotate
+    - docker-selinux
+    - docker-engine-selinux
   tags:
     - remove_docker
   when: ansible_os_family == "RedHat"
