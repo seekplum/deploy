@@ -105,6 +105,8 @@ bindkey \^U backward-kill-line  # 取消zsh中 `ctrl + u` 清除整行
 
 # 安装docker后可以配置 $(__docker_machine_ps1),同时soure docker-machine-prompt.bash
 # source '/usr/local/etc/bash_completion.d/docker-machine-prompt.bash'
+# kubectl命令补全
+# source <(kubectl completion zsh)
 export PS1='%M@%n ${ret_status} %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)'
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
