@@ -1,0 +1,4 @@
+{
+  "registry-mirrors": ["https://registry.docker-cn.com"],
+  "exec-opts": ["native.cgroupdriver=systemd"]
+}

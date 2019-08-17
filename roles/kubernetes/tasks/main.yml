@@ -1,0 +1,4 @@
+---
+# tasks file for kubernetes
+
+- include: kubeadm.yml

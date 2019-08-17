@@ -1,0 +1,200 @@
+---
+- name: "清除hosts配置"
+  shell: 'sed -ie "/^{{ item.ip }}.*/d" /etc/hosts'
+  with_items: "{{ NODES }}"
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "配置hosts"
+  shell: 'echo {{ item.ip }}  {{ item.name }} >> /etc/hosts'
+  with_items: "{{ NODES }}"
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "关闭防火墙"
+  shell: 'ufw disable'
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "修改docker启动配置"
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+    mode: 0644
+    force: true
+    backup: true # 进行备份
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "临时关闭交换分区"
+  shell: "{{item}}"
+  with_items:
+    - swapoff -a
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "获取交换分区名字"
+  shell: cat /etc/fstab | grep " swap " | awk '{print $1}'
+  register: swap_name
+  changed_when: False
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "永久关闭交换分区"
+  shell: sed -ie "s#^{{ swap_name.stdout }}#\#&#g" /etc/fstab
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and not swap_name.stdout.startswith("#")
+
+
+- name: "添加阿里源"
+  shell: "curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -"
+  changed_when: False
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "修改k8s源内容"
+  shell:
+    cmd: |
+      tee /etc/apt/sources.list.d/kubernetes.list <<EOF
+      deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
+      EOF
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "安装kubeadm"
+  apt:
+    pkg: "{{item}}"
+    state: present
+    update_cache: true
+  with_items:
+    - kubelet
+    - kubectl
+    - kubeadm
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "获取kubeadm版本"
+  shell: kubeadm version | grep -E -o 'GitVersion:"(v[0-9\.]+)"' | grep -E -o '(v[0-9\.]+)'
+  register: kubeadm_version
+  changed_when: False
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "生成配置文件"
+  shell: kubeadm config print init-defaults ClusterConfiguration > /tmp/kubeadm.conf
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "修改配置文件"
+  shell: "{{item}}"
+  with_items:
+    - 'sed -ie "s#^imageRepository.*#imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers#g" /tmp/kubeadm.conf'
+    - 'sed -ie "s#^kubernetesVersion.*#kubernetesVersion: {{ kubeadm_version.stdout }}#g" /tmp/kubeadm.conf'
+    - 'sed -ie "s#advertiseAddress.*#advertiseAddress: {{ ansible_default_ipv4.address }}#g" /tmp/kubeadm.conf'
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "重启Docker"
+  shell: systemctl daemon-reload && systemctl restart docker
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "拉取镜像"
+  shell: kubeadm config images pull --config /tmp/kubeadm.conf
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "删除重复的文件"
+  file:
+    path: "{{item}}"
+    state: absent
+    force: true
+  with_items:
+    - "/etc/kubernetes/manifests/kube-apiserver.yaml"
+    - "/etc/kubernetes/manifests/kube-controller-manager.yaml"
+    - "/etc/kubernetes/manifests/kube-scheduler.yaml"
+    - "/etc/kubernetes/manifests/etcd.yaml"
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "Master修改server"
+  shell: 'sed -ie "s#server: https://.*:6443#server: https://{{ansible_default_ipv4.address}}:6443#g" {{item}}'
+  with_items:
+    - '/etc/kubernetes/kubelet.conf'
+    - '/etc/kubernetes/controller-manager.conf'
+    - '/etc/kubernetes/scheduler.conf'
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "Master初始化"
+  shell: "{{item}}"
+  with_items:
+    - netstat -alnp | grep -E ":6443 |:10251 |:10252 |:10250 " | awk '{print $7}' | cut -d"/" -f1 | xargs kill -9
+    - kubeadm init --config /tmp/kubeadm.conf --ignore-preflight-errors=Swap
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "Master初始化后操作"
+  shell: "{{item}}"
+  with_items:
+    - "mkdir -p $HOME/.kube"
+    - "cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
+    - "chown $(id -u):$(id -g) $HOME/.kube/config"
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "Master安装Pod网络"
+  shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "生成kubeadm token"
+  shell: kubeadm token create
+  register: kubeadm_tokekn
+  changed_when: False
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "生成kubeadm hash"
+  shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  register: kubeadm_hash
+  changed_when: False
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "生成kubeadm join命令"
+  shell: "echo kubeadm join {{groups['masters'][0]}}:6443 --token {{kubeadm_tokekn.stdout}} --discovery-token-ca-cert-hash sha256:{{kubeadm_hash.stdout}}"
+  register: kubeadm_join_cmd
+  changed_when: False
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "输出join命令"
+  debug: var=kubeadm_join_cmd.stdout
+  with_items: kubeadm_join_cmd.results
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']

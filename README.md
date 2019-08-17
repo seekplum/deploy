@@ -32,9 +32,17 @@ sudo pip install ansible -i https://pypi.douban.com/simple/
 ```bash
 cat >hosts<<EOF
 [common]
-192.168.1.4 ansible_ssh_user=root ansible_connection=ssh
-192.168.1.7 ansible_ssh_user=root ansible_connection=ssh
+192.168.1.5 ansible_ssh_user=root ansible_connection=ssh
 127.0.0.1  ansible_ssh_user=seekplum ansible_connection=local
+
+[masters]
+192.168.1.5 ansible_ssh_user=root ansible_connection=ssh
+
+
+[slaves]
+192.168.1.6 ansible_ssh_user=root ansible_connection=ssh
+192.168.1.7 ansible_ssh_user=root ansible_connection=ssh
+
 EOF
 ```
 
@@ -56,6 +64,10 @@ ansible-playbook -i hosts site.yml --private-key ~/.ssh/id_rsa -t uninstall --sk
 
 ```bash
 ansible-playbook -i hosts site.yml --private-key ~/.ssh/id_rsa -t install --skip-tags "configure,initialize,zsh,python,virtualenv,docker,golang,java,nodejs,ansible"
+```
+
+```bash
+ansible-playbook -i hosts site.yml --private-key ~/.ssh/id_rsa -t kubernetes --skip-tags "remove_zsh,remove_docker,remove_nodejs,remove_golang,configure,initialize,zsh,python,virtualenv,docker,golang,java,nodejs,ansible"
 ```
 
 * -i: 指定运行的主机, 如 `-i hosts`
