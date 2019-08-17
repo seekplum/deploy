@@ -1,0 +1,68 @@
+---
+- name: "获取kubeadm token"
+  shell: kubeadm token list | awk '{if(NR>1)print}' | head -n 1 | awk '{print $1}'
+  register: get_kubeadm_token
+  changed_when: False
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- set_fact: "kubeadm_token={{get_kubeadm_token.stdout}}"
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "生成kubeadm token"
+  shell: kubeadm token create
+  register: create_kubeadm_token
+  changed_when: False
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters'] and kubeadm_token == ""
+
+- set_fact: "kubeadm_token={{create_kubeadm_token.stdout}}"
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters'] and kubeadm_token == ""
+
+- name: "输出token"
+  debug: var=kubeadm_token
+  with_items: kubeadm_token
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "生成kubeadm join命令"
+  shell: "echo kubeadm join --token={{kubeadm_token}} {{groups['masters'][0]}}:6443 --discovery-token-unsafe-skip-ca-verification"
+  register: kubeadm_join_token
+  changed_when: False
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "输出join命令"
+  debug: var=kubeadm_join_token.stdout
+  with_items: kubeadm_join_token.results
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "设置加入节点命令"
+  set_fact: kubeadm_join_token_cmd={{ kubeadm_join_token.stdout }}
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "slave节点加入kubernetes"
+  shell: '{{ hostvars[groups["masters"][0]]["kubeadm_join_token_cmd"] }}'
+  register: slave_kubeadm_join_result
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['slaves'] and hostvars[groups["masters"][0]]["kubeadm_join_token_cmd"] != ""
+
+- name: "输出slave join结果"
+  debug: var=slave_kubeadm_join_result.stdout
+  with_items: slave_kubeadm_join_result.results
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['slaves']

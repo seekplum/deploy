@@ -1,5 +1,6 @@
 ---
 # tasks file for kubernetes
 
-- include: remove_kubeadm.yml
-- include: kubeadm.yml
+- include: kubeadm_uninstall.yml
+- include: kubeadm_install.yml
+- include: kubeadm_join.yml

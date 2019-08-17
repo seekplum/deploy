@@ -1,10 +1,2 @@
 ---
 # vars file for kubernetes
-
-NODES:
-  - ip: 192.168.1.5
-    name: ubuntu1
-  - ip: 192.168.1.6
-    name: ubuntu2
-  - ip: 192.168.1.7
-    name: ubuntu3

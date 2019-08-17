@@ -1,14 +1,20 @@
 ---
 - name: "清除hosts配置"
-  shell: 'sed -i "/^{{ item.ip }}.*/d" /etc/hosts'
-  with_items: "{{ NODES }}"
+  shell: 'sed -i "/^{{ item }}.*/d" /etc/hosts'
+  with_items:
+    - '{{groups["masters"][0]}}'
+    - '{{groups["slaves"][0]}}'
+    - '{{groups["slaves"][1]}}'
   tags:
     - kubeadm
   when: ansible_os_family == "Debian"
 
 - name: "配置hosts"
-  shell: 'echo {{ item.ip }}  {{ item.name }} >> /etc/hosts'
-  with_items: "{{ NODES }}"
+  shell: 'echo {{item}} {{ hostvars[item].ansible_hostname }} >> /etc/hosts'
+  with_items:
+    - '{{groups["masters"][0]}}'
+    - '{{groups["slaves"][0]}}'
+    - '{{groups["slaves"][1]}}'
   tags:
     - kubeadm
   when: ansible_os_family == "Debian"
@@ -177,7 +183,7 @@
   shell: "{{item}}"
   with_items:
     - "mkdir -p $HOME/.kube"
-    - "cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
+    - "scp /etc/kubernetes/admin.conf $HOME/.kube/config"
     - "chown $(id -u):$(id -g) $HOME/.kube/config"
   tags:
     - kubeadm
@@ -188,54 +194,3 @@
   tags:
     - kubeadm
   when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
-
-- name: "获取kubeadm token"
-  shell: kubeadm token list | awk '{if(NR>1)print}' | head -n 1 | awk '{print $1}'
-  register: kubeadm_tokekn
-  changed_when: False
-  tags:
-    - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
-
-- name: "生成kubeadm token"
-  shell: kubeadm token create
-  register: kubeadm_tokekn
-  changed_when: False
-  tags:
-    - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters'] and kubeadm_tokekn.stdout == ""
-
-- name: "生成kubeadm hash"
-  shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
-  register: kubeadm_hash
-  changed_when: False
-  tags:
-    - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
-
-- name: "生成kubeadm join命令"
-  shell: "echo kubeadm join --token={{kubeadm_tokekn.stdout}} {{groups['masters'][0]}}:6443 --discovery-token-unsafe-skip-ca-verification"
-  register: kubeadm_join_token
-  changed_when: False
-  tags:
-    - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
-
-- name: "输出join命令"
-  debug: var=kubeadm_join_token.stdout
-  with_items: kubeadm_join_token.results
-  tags:
-    - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
-
-- name: "设置加入节点命令"
-  set_fact: kubeadm_join_token_cmd={{ kubeadm_join_token.stdout }}
-  tags:
-    - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
-
-- name: "slave节点加入kubernetes"
-  shell: "{{ kubeadm_join_token_cmd }}"
-  tags:
-    - kubeadm
-  when: ansible_os_family == "Debian" and {{kubeadm_join_token_cmd}} and ansible_default_ipv4.address in groups['slaves']
