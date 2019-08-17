@@ -1,0 +1,54 @@
+---
+- name: "重置配置"
+  shell: kubeadm reset -f
+  ignore_errors: True
+  tags:
+    - remove_kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "卸载kubeadm"
+  apt:
+    pkg: "{{item}}"
+    state: absent
+  with_items:
+    - kubelet
+    - kubectl
+    - kubeadm
+  tags:
+    - remove_kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "删除文件"
+  file:
+    path: "{{item}}"
+    state: absent
+    force: true
+  with_items:
+    - "/etc/kubernetes/"
+    - "${HOME}/.kube/"
+    - "/etc/systemd/system/kubelet.service.d"
+    - "/etc/cni"
+    - "/opt/cni"
+    - "/var/lib/kubelet"
+    - "/etc/systemd/system/multi-user.target.wants/kubelet.service"
+    - "/var/lib/systemd/deb-systemd-helper-masked/kubelet.service"
+    - "/etc/apt/sources.list.d/kubernetes.list"
+    - "/var/cache/apt/archives/kubeadm_*_amd64.deb"
+    - "/var/lib/dpkg/info/kubeadm.list"
+    - "/var/cache/apt/archives/kubernetes-cni_*_amd64.deb"
+    - "/var/lib/dpkg/info/kubernetes-cni.md5sums"
+    - "/var/lib/dpkg/info/kubernetes-cni.list"
+    - "/etc/apt/sources.list.d/kubernetes.list.save"
+    - "/usr/share/sosreport/sos/plugins/"
+    - "/usr/libexec/kubernetes"
+    - "/var/cache/apt/archives/kubeadm_*_amd64.deb"
+    - "/var/lib/dpkg/info/kubeadm.list"
+    - "/var/cache/apt/archives/kubelet_*_amd64.deb"
+    - "/var/lib/dpkg/info/kubelet.postrm"
+    - "/var/lib/dpkg/info/kubelet.list"
+    - "/var/lib/systemd/deb-systemd-helper-enabled/multi-user.target.wants/kubelet.service"
+    - "/var/lib/systemd/deb-systemd-helper-enabled/kubelet.service.dsh-also"
+    - "/etc/systemd/system/kubelet.service"
+  tags:
+    - remove_kubeadm
+  when: ansible_os_family == "Debian"

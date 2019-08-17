@@ -66,8 +66,10 @@ ansible-playbook -i hosts site.yml --private-key ~/.ssh/id_rsa -t uninstall --sk
 ansible-playbook -i hosts site.yml --private-key ~/.ssh/id_rsa -t install --skip-tags "configure,initialize,zsh,python,virtualenv,docker,golang,java,nodejs,ansible"
 ```
 
+* kubeadm安装kubernets 
+
 ```bash
-ansible-playbook -i hosts site.yml --private-key ~/.ssh/id_rsa -t kubernetes --skip-tags "remove_zsh,remove_docker,remove_nodejs,remove_golang,configure,initialize,zsh,python,virtualenv,docker,golang,java,nodejs,ansible"
+ansible-playbook -i hosts site.yml --private-key ~/.ssh/id_rsa -t kubernetes --skip-tags "remove_zsh,remove_docker,remove_nodejs,remove_golang,configure,initialize,zsh,python,virtualenv,docker,golang,java,nodejs,ansible,remove_kubeadm"
 ```
 
 * -i: 指定运行的主机, 如 `-i hosts`

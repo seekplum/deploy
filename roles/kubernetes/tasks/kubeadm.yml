@@ -1,6 +1,6 @@
 ---
 - name: "清除hosts配置"
-  shell: 'sed -ie "/^{{ item.ip }}.*/d" /etc/hosts'
+  shell: 'sed -i "/^{{ item.ip }}.*/d" /etc/hosts'
   with_items: "{{ NODES }}"
   tags:
     - kubeadm
@@ -47,7 +47,7 @@
   when: ansible_os_family == "Debian"
 
 - name: "永久关闭交换分区"
-  shell: sed -ie "s#^{{ swap_name.stdout }}#\#&#g" /etc/fstab
+  shell: sed -i "s#^{{ swap_name.stdout }}#\#&#g" /etc/fstab
   tags:
     - kubeadm
   when: ansible_os_family == "Debian" and not swap_name.stdout.startswith("#")
@@ -100,15 +100,28 @@
 - name: "修改配置文件"
   shell: "{{item}}"
   with_items:
-    - 'sed -ie "s#^imageRepository.*#imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers#g" /tmp/kubeadm.conf'
-    - 'sed -ie "s#^kubernetesVersion.*#kubernetesVersion: {{ kubeadm_version.stdout }}#g" /tmp/kubeadm.conf'
-    - 'sed -ie "s#advertiseAddress.*#advertiseAddress: {{ ansible_default_ipv4.address }}#g" /tmp/kubeadm.conf'
+    - 'sed -i "s#^imageRepository.*#imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers#g" /tmp/kubeadm.conf'
+    - 'sed -i "s#^kubernetesVersion.*#kubernetesVersion: {{ kubeadm_version.stdout }}#g" /tmp/kubeadm.conf'
+    - 'sed -i "s#advertiseAddress.*#advertiseAddress: {{ ansible_default_ipv4.address }}#g" /tmp/kubeadm.conf'
   tags:
     - kubeadm
   when: ansible_os_family == "Debian"
 
 - name: "重启Docker"
   shell: systemctl daemon-reload && systemctl restart docker
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "重启kubelet"
+  shell: systemctl daemon-reload && systemctl enable kubelet && systemctl restart kubelet
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "修改kubelet cgroup类型"
+  shell: 'sed -i "s/--cgroup-driver=[a-zA-Z]*/--cgroup-driver=systemd/g" /var/lib/kubelet/kubeadm-flags.env'
+  ignore_errors: True
   tags:
     - kubeadm
   when: ansible_os_family == "Debian"
@@ -134,7 +147,8 @@
   when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
 
 - name: "Master修改server"
-  shell: 'sed -ie "s#server: https://.*:6443#server: https://{{ansible_default_ipv4.address}}:6443#g" {{item}}'
+  shell: 'sed -i "s#server: https://.*:6443#server: https://{{ansible_default_ipv4.address}}:6443#g" {{item}}'
+  ignore_errors: True
   with_items:
     - '/etc/kubernetes/kubelet.conf'
     - '/etc/kubernetes/controller-manager.conf'
@@ -145,12 +159,19 @@
 
 - name: "Master初始化"
   shell: "{{item}}"
+  register: kubeadm_init
   with_items:
     - netstat -alnp | grep -E ":6443 |:10251 |:10252 |:10250 " | awk '{print $7}' | cut -d"/" -f1 | xargs kill -9
     - kubeadm init --config /tmp/kubeadm.conf --ignore-preflight-errors=Swap
   tags:
     - kubeadm
   when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "输出初始化信息"
+  debug: msg={{ kubeadm_init }}
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
 
 - name: "Master初始化后操作"
   shell: "{{item}}"
@@ -163,7 +184,15 @@
   when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
 
 - name: "Master安装Pod网络"
-  shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')
+  shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "获取kubeadm token"
+  shell: kubeadm token list | awk '{if(NR>1)print}' | head -n 1 | awk '{print $1}'
+  register: kubeadm_tokekn
+  changed_when: False
   tags:
     - kubeadm
   when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
@@ -174,7 +203,7 @@
   changed_when: False
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters'] and kubeadm_tokekn.stdout == ""
 
 - name: "生成kubeadm hash"
   shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
@@ -185,16 +214,28 @@
   when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
 
 - name: "生成kubeadm join命令"
-  shell: "echo kubeadm join {{groups['masters'][0]}}:6443 --token {{kubeadm_tokekn.stdout}} --discovery-token-ca-cert-hash sha256:{{kubeadm_hash.stdout}}"
-  register: kubeadm_join_cmd
+  shell: "echo kubeadm join --token={{kubeadm_tokekn.stdout}} {{groups['masters'][0]}}:6443 --discovery-token-unsafe-skip-ca-verification"
+  register: kubeadm_join_token
   changed_when: False
   tags:
     - kubeadm
   when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
 
 - name: "输出join命令"
-  debug: var=kubeadm_join_cmd.stdout
-  with_items: kubeadm_join_cmd.results
+  debug: var=kubeadm_join_token.stdout
+  with_items: kubeadm_join_token.results
   tags:
     - kubeadm
   when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "设置加入节点命令"
+  set_fact: kubeadm_join_token_cmd={{ kubeadm_join_token.stdout }}
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+
+- name: "slave节点加入kubernetes"
+  shell: "{{ kubeadm_join_token_cmd }}"
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian" and {{kubeadm_join_token_cmd}} and ansible_default_ipv4.address in groups['slaves']
