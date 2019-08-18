@@ -1,2 +1,7 @@
 ---
 # vars file for kubernetes
+
+KUBEADM_CONFIG_PATH: "/tmp/kubeadm.conf"
+CNI_PLUGINS_DIRECTOR_ON_LINUX: "/opt/cni/bin"
+CNI_PLUGINS_PATH_ON_LINUX: "/tmp/cni-plugins-linux-amd64-v0.8.2.tgz"
+CNI_PLUGINS_URL_ON_LINUX: "https://github.com/containernetworking/plugins/releases/download/v0.8.2/cni-plugins-linux-amd64-v0.8.2.tgz"

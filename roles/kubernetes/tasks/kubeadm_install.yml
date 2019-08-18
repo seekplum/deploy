@@ -98,7 +98,7 @@
   when: ansible_os_family == "Debian"
 
 - name: "生成配置文件"
-  shell: kubeadm config print init-defaults ClusterConfiguration > /tmp/kubeadm.conf
+  shell: "kubeadm config print init-defaults ClusterConfiguration > {{KUBEADM_CONFIG_PATH}}"
   tags:
     - kubeadm
   when: ansible_os_family == "Debian"
@@ -106,9 +106,9 @@
 - name: "修改配置文件"
   shell: "{{item}}"
   with_items:
-    - 'sed -i "s#^imageRepository.*#imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers#g" /tmp/kubeadm.conf'
-    - 'sed -i "s#^kubernetesVersion.*#kubernetesVersion: {{ kubeadm_version.stdout }}#g" /tmp/kubeadm.conf'
-    - 'sed -i "s#advertiseAddress.*#advertiseAddress: {{ ansible_default_ipv4.address }}#g" /tmp/kubeadm.conf'
+    - 'sed -i "s#^imageRepository.*#imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers#g" {{KUBEADM_CONFIG_PATH}}'
+    - 'sed -i "s#^kubernetesVersion.*#kubernetesVersion: {{ kubeadm_version.stdout }}#g" {{KUBEADM_CONFIG_PATH}}'
+    - 'sed -i "s#advertiseAddress.*#advertiseAddress: {{ ansible_default_ipv4.address }}#g" {{KUBEADM_CONFIG_PATH}}'
   tags:
     - kubeadm
   when: ansible_os_family == "Debian"
@@ -133,7 +133,7 @@
   when: ansible_os_family == "Debian"
 
 - name: "拉取镜像"
-  shell: kubeadm config images pull --config /tmp/kubeadm.conf
+  shell: "kubeadm config images pull --config {{KUBEADM_CONFIG_PATH}}"
   tags:
     - kubeadm
   when: ansible_os_family == "Debian"
@@ -163,12 +163,41 @@
     - kubeadm
   when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
 
+- name: "检查CNI插件是否已经下载"
+  shell: "test -f {{CNI_PLUGINS_PATH_ON_LINUX}} && echo 0 || echo 1"
+  register: existing_of_cni_plugins
+  changed_when: False
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "安装CNI插件"
+  block:
+    - name: "创建目录"
+      shell: "mkdir -p {{CNI_PLUGINS_DIRECTOR_ON_LINUX}}"
+
+    - name: "下载CNI插件"
+      get_url:
+        url: "{{CNI_PLUGINS_URL_ON_LINUX}}"
+        dest: "{{CNI_PLUGINS_PATH_ON_LINUX}}"
+        force: false
+      when: existing_of_cni_plugins.stdout == "1"
+
+    - name: "解压CNI插件"
+      unarchive:
+        src: "{{CNI_PLUGINS_PATH_ON_LINUX}}"
+        dest: "{{CNI_PLUGINS_DIRECTOR_ON_LINUX}}"
+        remote_src: true
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
 - name: "Master初始化"
   shell: "{{item}}"
   register: kubeadm_init
   with_items:
-    - netstat -alnp | grep -E ":6443 |:10251 |:10252 |:10250 " | awk '{print $7}' | cut -d"/" -f1 | xargs kill -9
-    - kubeadm init --config /tmp/kubeadm.conf --ignore-preflight-errors=Swap
+    - "netstat -alnp | grep -E ':6443 |:10251 |:10252 |:10250 ' | awk '{print $7}' | cut -d'/' -f1 | grep -v '-' | xargs kill -9"
+    - "kubeadm init --config {{KUBEADM_CONFIG_PATH}} --ignore-preflight-errors=Swap"
   ignore_errors: True
   tags:
     - kubeadm
