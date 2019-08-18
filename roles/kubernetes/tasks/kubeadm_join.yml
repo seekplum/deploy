@@ -30,7 +30,7 @@
   with_items: kubeadm_token
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian"
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
 
 - name: "生成kubeadm join命令"
   shell: "echo kubeadm join --token={{kubeadm_token}} {{groups['masters'][0]}}:6443 --discovery-token-unsafe-skip-ca-verification"

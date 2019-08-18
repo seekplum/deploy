@@ -178,7 +178,7 @@
   debug: msg={{ kubeadm_init }}
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
 
 - name: "Master初始化后操作"
   shell: "{{item}}"
