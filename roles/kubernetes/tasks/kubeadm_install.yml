@@ -169,6 +169,7 @@
   with_items:
     - netstat -alnp | grep -E ":6443 |:10251 |:10252 |:10250 " | awk '{print $7}' | cut -d"/" -f1 | xargs kill -9
     - kubeadm init --config /tmp/kubeadm.conf --ignore-preflight-errors=Swap
+  ignore_errors: True
   tags:
     - kubeadm
   when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
