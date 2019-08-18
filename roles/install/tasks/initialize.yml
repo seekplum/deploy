@@ -53,6 +53,7 @@
     update_cache: true
   with_items:
     - curl
+    - jq
     - gcc
     - rsync
     - git
