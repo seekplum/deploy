@@ -73,7 +73,8 @@ alias senv="senv2"
 alias mystart="{{VIRTUEL_ROOT}}/{{VIRTUAL_ENVS[0].directory}}/bin/supervisord -c ${HOME}/packages/supervisor/supervisord.conf"
 alias mysuper="{{VIRTUEL_ROOT}}/{{VIRTUAL_ENVS[0].directory}}/bin/supervisorctl -c ${HOME}/packages/supervisor/supervisord.conf"
 alias mymysql='${HOME}/packages/mysql/bin/mysql -uroot -proot -S ${HOME}/packages/mysql/data/sock/mysql.sock'
-alias myredis='/Users/seekplum/packages/redis/src/redis-cli'
+alias mysqlserver='${HOME}/packages/mysql/support-files/mysql.server'
+alias myredis='${HOME}/packages/redis/src/redis-cli'
 
 alias ll='ls -l'
 alias cp='cp -i'
