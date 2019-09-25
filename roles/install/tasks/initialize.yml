@@ -75,6 +75,7 @@
     - libsqlite3-dev
     - llvm
     - libncurses5-dev
+    - python-pip
   tags:
     - initialize
   when: ansible_os_family == "Debian"

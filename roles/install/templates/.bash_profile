@@ -89,9 +89,6 @@ alias cds="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum"
 alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
 alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meizhe2012"
 
-alias start_vm='VBoxManage startvm "ubuntu1" --type headless; VBoxManage startvm "ubuntu2" --type headless; VBoxManage startvm "ubuntu3" --type headless'
-alias stop_vm='VBoxManage controlvm "ubuntu1" poweroff; VBoxManage controlvm "ubuntu2" poweroff; VBoxManage controlvm "ubuntu3" poweroff'
-
 # virtualenvwrappe 配置
 export WORKON_HOME=${HOME}/.virtualenvs
 export VIRTUALENVWRAPPER_SCRIPT=/usr/local/bin/virtualenvwrapper.sh
