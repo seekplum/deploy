@@ -41,7 +41,7 @@
       when: installed_of_npm.stdout == "1"
 
     - name: install nodejs
-      shell: ". {{HOME_ROOT}}/.bash_profile && nvm install v11.4.0"
+      shell: ". {{HOME_ROOT}}/.bash_profile && nvm install {{NODE_VERSION}}"
       when: installed_of_node.stdout == "1"
 
     - name: install cnpm

@@ -48,7 +48,7 @@ export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 export PATH="${PATH}:/usr/local/opt/ncurses/bin"
-export PATH="${PATH}:{{HOME_ROOT}}/.nvm/:{{HOME_ROOT}}/.nvm/versions/node/v10.0.0/bin"
+export PATH="${PATH}:{{HOME_ROOT}}/.nvm/:{{HOME_ROOT}}/.nvm/versions/node/{{NODE_VERSION}}/bin"
 export PATH="${PATH}:${GOPATH}/src/github.com/kardianos/govendor"
 export PATH="${PATH}:${GOPATH}/src/github.com/golang/dep/cmd/dep/dep"
 export PATH="${PATH}:${GOPATH}/src/github.com/jteeuwen/go-bindata/go-bindata"
