@@ -4,7 +4,7 @@ HOME_ROOT: "{{ansible_user_dir}}" # 登陆用户的 home 目录
 SOFT_INSTALL_ROOT: "/usr/local"
 GOROOT: "{{SOFT_INSTALL_ROOT}}/go"
 JAVA_HOME: "{{SOFT_INSTALL_ROOT}}/java"
-TEMP_ROOT: "/tmp"
+TEMP_ROOT: "{{HOME_ROOT}}"
 PIP_INDEX_URL: "https://pypi.tuna.tsinghua.edu.cn/simple"
 PIP_TRUSTED_HOST: "pypi.tuna.tsinghua"
 PIP_EXTRA_INDEX_URL: "https://pypi.org/simple"
