@@ -76,8 +76,11 @@
     - llvm
     - libncurses5-dev
     - python-pip
+    - software-properties-common
   tags:
     - initialize
+  become: yes
+  become_method: sudo
   when: ansible_os_family == "Debian"
 
 - name: install xcode-select on macOS
