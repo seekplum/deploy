@@ -1,0 +1,39 @@
+version: 1
+
+# users org
+dn: ou=users,dc=seekplum,dc=io
+objectClass: top
+objectClass: organizationalUnit
+ou: users
+
+# group org
+dn: ou=groups,dc=seekplum,dc=io
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+# define users here
+dn: cn=hjd,ou=users,dc=seekplum,dc=io
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: hjd
+sn:: 6buE5YmR5Yas
+mail: hjd@qq.com
+userPassword: {SSHA}xUOp9Msdy6+umHRAl3mDX85F4uW83bbS
+
+# should also modify here if insert new user
+dn: cn=Users,ou=groups,dc=seekplum,dc=io
+objectClass: top
+objectClass: groupOfUniqueNames
+cn: Users
+uniqueMember: cn=hjd,ou=users,dc=seekplum,dc=io
+uniqueMember: cn=zhangsan,ou=users,dc=seekplum,dc=io
+
+# define admin here
+dn: cn=Admin,ou=groups,dc=seekplum,dc=io
+objectClass: top
+objectClass: groupOfUniqueNames
+cn: Admin
+uniqueMember: cn=hjd,ou=users,dc=seekplum,dc=io
