@@ -21,6 +21,11 @@
     state: present
     update_cache: true
   with_items:
+    - python2-pip
+    - python3-pip
+    - zip
+    - unzip
+    - util-linux-user
     - epel-release
     - gcc
     - gcc-c++
@@ -30,8 +35,8 @@
     - rsync
     - git
     - bzip2
-    - python-setuptools
-    - python-devel
+#    - python-setuptools
+#    - python-devel
     - wget
     - screen
     - make
