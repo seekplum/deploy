@@ -47,6 +47,8 @@
     - yum-utils
     - device-mapper-persistent-data
     - lvm2
+    - haveged
+    - the_silver_searcher
   tags:
     - initialize
   when: ansible_os_family == "RedHat"
@@ -82,6 +84,8 @@
     - libncurses5-dev
     - python-pip
     - software-properties-common
+    - haveged
+    - silversearcher-ag
   tags:
     - initialize
   become: yes
@@ -103,6 +107,7 @@
     - tree
     - zlib
     - sqlite
+    - the_silver_searcher
   changed_when: False
   ignore_errors: True
   tags:
