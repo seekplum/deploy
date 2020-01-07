@@ -1,0 +1,53 @@
+version: "3"
+services:
+  ldap:
+    image: osixia/openldap:1.1.9
+    environment:
+      LDAP_ORGANISATION: "seekplum.io"
+      LDAP_DOMAIN: "seekplum.io"
+      LDAP_ADMIN_PASSWORD: "seekplum"
+      LDAP_TLS: "false"
+      LDAP_READONLY_USER: "true"
+      LDAP_READONLY_USER_USERNAME: "guest"
+      LDAP_READONLY_USER_PASSWORD: "123456"
+    ports:
+      - 389:389
+      - 636:636
+    volumes:
+      - ${VOLUMES_ROOT}/slapd/database:/var/lib/ldap
+      - ${VOLUMES_ROOT}/slapd/config:/etc/ldap/slapd.d
+    restart: on-failure
+  ldapadmin:
+    image: osixia/phpldapadmin
+    depends_on:
+      - ldap
+    links:
+      - ldap:ldap
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+      PHPLDAPADMIN_HTTPS: "false"
+    ports:
+      - 8089:80
+    restart: on-failure
+  gerrit:
+    image: openfrontier/gerrit
+    depends_on:
+      - ldap
+    ports:
+      - 8088:8080
+      - 29418:29418
+    volumes:
+      - ${VOLUMES_ROOT}/gerrit:/var/gerrit/review_site
+    environment:
+      WEBURL: http://${LDAP_SERVER_IP}:8088
+      GITWEB_TYPE: gitiles
+      AUTH_TYPE: LDAP
+      LDAP_SERVER: ldap://${LDAP_SERVER_IP}
+      LDAP_ACCOUNTBASE: dc=seekplum,dc=io
+      LDAP_ACCOUNTPATTERN: (cn=$${username})
+      LDAP_ACCOUNTSSHUSERNAME: $${cn}
+      LDAP_ACCOUNTFULLNAME: $${sn}
+      LDAP_USERNAME: cn=guest,dc=seekplum,dc=io
+      LDAP_PASSWORD: 123456
+      GERRIT_INIT_ARGS: --install-plugin=download-commands
+    restart: on-failure

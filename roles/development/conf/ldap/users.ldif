@@ -29,7 +29,6 @@ objectClass: top
 objectClass: groupOfUniqueNames
 cn: Users
 uniqueMember: cn=hjd,ou=users,dc=seekplum,dc=io
-uniqueMember: cn=zhangsan,ou=users,dc=seekplum,dc=io
 
 # define admin here
 dn: cn=Admin,ou=groups,dc=seekplum,dc=io

@@ -1,5 +1,11 @@
+#!/usr/bin/env bash
+
+set -x
+
 docker stop ldap ldapadmin gerrit > /dev/null 2>&1 || echo "stop container"
 docker rm ldap ldapadmin gerrit > /dev/null 2>&1 || echo "delete container"
+
+set -e
 
 export LDAP_SERVER_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | grep -v "172." | grep -v "10.244" | awk '{print $2}' | cut -d":" -f 2)
 export VOLUMES_ROOT="/tmp/data"
@@ -27,11 +33,11 @@ docker run -d  \
 sleep 2
 
 # 创建用户组
-ldapadd -c -h ${LDAP_SERVER_IP} -p 389 -w seekplum -D 'cn=admin,dc=seekplum,dc=io' -f users.ldif
+ldapadd -c -h ${LDAP_SERVER_IP} -p 389 -w seekplum -D 'cn=admin,dc=seekplum,dc=io' -f conf/ldap/users.ldif
 
 # 创建用户
-bash ldap.sh create zhangsan 123456 张三
-bash ldap.sh create lisi 123456 李四
+bash bin/ldap.sh create zhangsan 123456 张三
+bash bin/ldap.sh create lisi 123456 李四
 
 # 检查用户名密码是否正确
 ldapwhoami -h ${LDAP_SERVER_IP} -p 389 -D 'cn=admin,dc=seekplum,dc=io' -w seekplum
@@ -66,6 +72,8 @@ docker run -d \
     -e LDAP_PASSWORD='123456' \
     -e GERRIT_INIT_ARGS='--install-plugin=download-commands' \
     openfrontier/gerrit
+
+set +e
 
 gerrit_code=0
 count=0
