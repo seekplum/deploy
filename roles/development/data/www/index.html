@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>开发环境</title>
+
+    <!-- CSS Here -->
+    <style>
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /*margin-top: calc(50% - 296px);*/
+        }
+
+        .container ul > li {
+            list-style-type: none;
+        }
+
+        .disabled {
+            cursor: not-allowed !important;
+            /*pointer-events: none;*/
+            opacity: 0.5;
+            filter: alpha(opacity=50);
+            -webkit-box-shadow: none;
+            box-shadow: none;
+        }
+
+        .development {
+            width: 120px;
+            height: 22px;
+            font-size: 12px;
+            border-radius: 3px;
+            border: 1px solid #0088df;
+            line-height: 22px;
+            text-align: center;
+            margin-bottom: 8px;
+            display: inline-block;
+            color: #0088df;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .development:hover {
+            background-color: #0088df;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="container">
+        <ul>
+            <li>
+                <a href="http://seekplum.com" class="development">首页</a>
+            </li>
+            <li>
+                <a href="http://hello.seekplum.com" class="development" target="_blank">Hello</a>
+            </li>
+            <li>
+                <a href="http://gerrit.seekplum.com" class="development" target="_blank">Gerrit</a>
+            </li>
+            <li>
+                <a href="http://ldap.seekplum.com" class="development" target="_blank">LdapAdmin</a>
+            </li>
+            <li>
+                <a href="http://gitea.seekplum.com" class="development disabled" target="_blank">Gitea</a>
+            </li>
+            <li>
+                <a href="http://drone.seekplum.com" class="development disabled" target="_blank">Drone</a>
+            </li>
+            <li>
+                <a href="http://sentry.seekplum.com" class="development disabled" target="_blank">Sentry</a>
+            </li>
+            <li>
+                <a href="http://jenkins.seekplum.com" class="development disabled" target="_blank">Jenkins</a>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+<!-- JavaScript Files Here -->
+<script type="text/javascript" src=""></script>
+<script>
+    window.onload = function () {
+        // 取消按钮点击效果
+        document.querySelectorAll(".disabled").forEach(function (el) {
+            el.addEventListener("click", function (event) {
+                event.preventDefault();
+            })
+        });
+
+        // 设置距离顶部距离
+        let container = document.getElementsByClassName("container")[0];
+        let distance = Math.floor((document.documentElement.clientHeight - container.offsetHeight) * 0.382);
+        container.style.marginTop = distance + "px";
+    }
+</script>
+</html>
