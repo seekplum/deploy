@@ -10,39 +10,37 @@ services:
       LDAP_READONLY_USER: "true"
       LDAP_READONLY_USER_USERNAME: "guest"
       LDAP_READONLY_USER_PASSWORD: "123456"
-    ports:
-      - 389:389
-      - 636:636
     volumes:
       - ${VOLUMES_ROOT}/slapd/database:/var/lib/ldap
       - ${VOLUMES_ROOT}/slapd/config:/etc/ldap/slapd.d
     restart: on-failure
+    networks:
+      develop-network:
+        aliases:
+          - ldap-host
   ldapadmin:
     image: osixia/phpldapadmin:0.9.0
     depends_on:
       - ldap
-    links:
-      - ldap:ldap
     environment:
-      PHPLDAPADMIN_LDAP_HOSTS: ldap
+      PHPLDAPADMIN_LDAP_HOSTS: "ldap-host"
       PHPLDAPADMIN_HTTPS: "false"
-    ports:
-      - 127.0.0.1:8089:80
     restart: on-failure
+    networks:
+      develop-network:
+        aliases:
+          - ldapadmin-host
   gerrit:
     image: openfrontier/gerrit
     depends_on:
       - ldap
-    ports:
-      - 127.0.0.1:8088:8080
-      - 29418:29418
     volumes:
       - ${VOLUMES_ROOT}/gerrit:/var/gerrit/review_site
     environment:
       WEBURL: http://gerrit.seekplum.com
       GITWEB_TYPE: gitiles
       AUTH_TYPE: LDAP
-      LDAP_SERVER: ldap://ldap.seekplum.com
+      LDAP_SERVER: ldap://ldap-host
       LDAP_ACCOUNTBASE: dc=seekplum,dc=io
       LDAP_ACCOUNTPATTERN: (cn=$${username})
       LDAP_ACCOUNTSSHUSERNAME: $${cn}
@@ -51,12 +49,24 @@ services:
       LDAP_PASSWORD: 123456
       GERRIT_INIT_ARGS: --install-plugin=download-commands
     restart: on-failure
+    networks:
+      develop-network:
+        aliases:
+          - gerrit-host
   nginx:
     image: nginx:alpine
-    network_mode: host
+#    network_mode: host  # MacOSX不支持host模式
+    ports:
+      - 8080:80
     volumes:
       - ./conf/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./conf/nginx/inc.d:/etc/nginx/inc.d:ro
       - ./data/www:/var/www:ro
       - ${VOLUMES_ROOT}/nginx/logs:/var/log/nginx
     restart: always
+    networks:
+      - develop-network
+
+networks:
+  develop-network:
+    driver: bridge
