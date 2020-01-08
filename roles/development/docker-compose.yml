@@ -67,6 +67,36 @@ services:
       develop-network:
         aliases:
           - gerrit-host
+  gitea2:
+    image: gitea/gitea:1.10.2
+    depends_on:
+      - ldap
+      - gitea
+    restart: on-failure
+    user: git
+    command: ["/bin/sh", "/init-gitea.sh"]
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - ${VOLUMES_ROOT}/gitea:/data
+      - ./bin/init-gitea.sh:/init-gitea.sh
+    networks:
+      - develop-network
+  gitea:
+    image: gitea/gitea:1.10.2
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - TZ=Asia/Shanghai
+    restart: always
+    volumes:
+      - ${VOLUMES_ROOT}/gitea:/data
+    networks:
+      develop-network:
+        aliases:
+          - gitea-host
   nginx:
     image: nginx:alpine
 #    network_mode: host  # MacOSX不支持host模式
