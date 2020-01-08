@@ -20,6 +20,7 @@ docker run -d  \
     -p 636:636  \
     -v ${VOLUMES_ROOT}/slapd/database:/var/lib/ldap  \
     -v ${VOLUMES_ROOT}/slapd/config:/etc/ldap/slapd.d  \
+    -v ${file_path}/conf/ldap/bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif \
     -e LDAP_ORGANISATION='seekplum.io'  \
     -e LDAP_DOMAIN='seekplum.io'  \
     -e LDAP_ADMIN_PASSWORD='seekplum'  \
