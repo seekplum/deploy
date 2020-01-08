@@ -7,6 +7,8 @@ docker rm ldap ldapadmin gerrit > /dev/null 2>&1 || echo "delete container"
 
 set -e
 
+file_path="$( cd "$( dirname "$BASH_SOURCE[0]" )" && pwd )"
+
 export LDAP_SERVER_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | grep -v "172." | grep -v "10.244" | awk '{print $2}' | cut -d":" -f 2)
 export VOLUMES_ROOT="/tmp/data"
 
@@ -16,8 +18,6 @@ rm -rf ${VOLUMES_ROOT}
 docker run -d  \
     -p 389:389  \
     -p 636:636  \
-    --network bridge  \
-    --hostname openldap-host  \
     -v ${VOLUMES_ROOT}/slapd/database:/var/lib/ldap  \
     -v ${VOLUMES_ROOT}/slapd/config:/etc/ldap/slapd.d  \
     -e LDAP_ORGANISATION='seekplum.io'  \
@@ -28,11 +28,12 @@ docker run -d  \
     -e LDAP_READONLY_USER_USERNAME='guest'  \
     -e LDAP_READONLY_USER_PASSWORD='123456'  \
     --name ldap  \
-    osixia/openldap:1.1.9
+    osixia/openldap:1.3.0 \
+    --copy-service
 
 sleep 2
 
-# 创建用户组
+# 创建用户组, -c 选项是忽略所有错误，继续执行
 ldapadd -c -h ${LDAP_SERVER_IP} -p 389 -w seekplum -D 'cn=admin,dc=seekplum,dc=io' -f conf/ldap/users.ldif
 
 # 创建用户
@@ -54,7 +55,7 @@ docker run -d  \
     -e PHPLDAPADMIN_HTTPS=false  \
     --name ldapadmin  \
     osixia/phpldapadmin
-    
+
 docker run -d \
     --name gerrit \
     -p 8088:8080 \
