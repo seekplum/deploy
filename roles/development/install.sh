@@ -20,7 +20,6 @@ docker run -d  \
     -p 636:636  \
     -v ${VOLUMES_ROOT}/slapd/database:/var/lib/ldap  \
     -v ${VOLUMES_ROOT}/slapd/config:/etc/ldap/slapd.d  \
-    -v ${file_path}/conf/ldap/bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif \
     -e LDAP_ORGANISATION='seekplum.io'  \
     -e LDAP_DOMAIN='seekplum.io'  \
     -e LDAP_ADMIN_PASSWORD='seekplum'  \
@@ -55,7 +54,7 @@ docker run -d  \
     -e PHPLDAPADMIN_LDAP_HOSTS=ldap  \
     -e PHPLDAPADMIN_HTTPS=false  \
     --name ldapadmin  \
-    osixia/phpldapadmin
+    osixia/phpldapadmin:0.9.0
 
 docker run -d \
     --name gerrit \
@@ -73,7 +72,7 @@ docker run -d \
     -e LDAP_USERNAME='cn=guest,dc=seekplum,dc=io' \
     -e LDAP_PASSWORD='123456' \
     -e GERRIT_INIT_ARGS='--install-plugin=download-commands' \
-    openfrontier/gerrit
+    openfrontier/gerrit:3.0.0
 
 set +e
 
@@ -86,4 +85,5 @@ while [ ${gerrit_code} -ne 200 ]
         let "count++"
     done
 
+echo "count: ${count}"
 echo -e "\nhttp://${LDAP_SERVER_IP}:8088"

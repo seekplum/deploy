@@ -13,9 +13,12 @@ services:
       LDAP_READONLY_USER: "true"
       LDAP_READONLY_USER_USERNAME: "guest"
       LDAP_READONLY_USER_PASSWORD: "123456"
+      LDAP_SERVER_IP: ldap-host
     volumes:
       - ${VOLUMES_ROOT}/slapd/database:/var/lib/ldap
       - ${VOLUMES_ROOT}/slapd/config:/etc/ldap/slapd.d
+      - ./bin/ldap.sh:/tmp/ldap.sh
+      - ./conf/ldap/users.ldif:/tmp/users.ldif
     restart: on-failure
     command:
       - --copy-service
@@ -37,7 +40,7 @@ services:
         aliases:
           - ldapadmin-host
   gerrit:
-    image: openfrontier/gerrit
+    image: openfrontier/gerrit:3.0.0
     depends_on:
       - ldap
     volumes:
