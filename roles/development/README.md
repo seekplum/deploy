@@ -15,3 +15,11 @@ bash ./install.sh
 ```bash
 bash ./deploy.sh
 ```
+
+## DRONE_SECRET
+
+由下面命令生成的
+
+```bash
+openssl rand -hex 16
+```
