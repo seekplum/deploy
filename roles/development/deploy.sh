@@ -17,7 +17,7 @@ docker-compose up -d
 
 if [[ "$1" == "clear_volumes" ]]; then
     # 创建用户
-    docker-compose exec ldap ldapadd -c -H ldap://ldap-host -w seekplum -D 'cn=admin,dc=seekplum,dc=io' -f /tmp/users.ldif
+    docker-compose exec ldap ldapadd -c -H ldap://ldap -w seekplum -D 'cn=admin,dc=seekplum,dc=io' -f /tmp/users.ldif
     docker-compose exec ldap bash /tmp/ldap.sh create zhangsan 123456 张三
     docker-compose exec ldap bash /tmp/ldap.sh create lisi 123456 李四
 

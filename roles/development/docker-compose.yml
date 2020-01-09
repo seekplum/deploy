@@ -13,7 +13,7 @@ services:
       LDAP_READONLY_USER: "true"
       LDAP_READONLY_USER_USERNAME: "guest"
       LDAP_READONLY_USER_PASSWORD: "123456"
-      LDAP_SERVER_IP: ldap-host
+      LDAP_SERVER_IP: ldap
     volumes:
       - ${VOLUMES_ROOT}/slapd/database:/var/lib/ldap
       - ${VOLUMES_ROOT}/slapd/config:/etc/ldap/slapd.d
@@ -23,22 +23,14 @@ services:
     command:
       - --copy-service
       - --loglevel=debug
-    networks:
-      develop-network:
-        aliases:
-          - ldap-host
   ldapadmin:
     image: osixia/phpldapadmin:0.9.0
     depends_on:
       - ldap
     environment:
-      PHPLDAPADMIN_LDAP_HOSTS: "ldap-host"
+      PHPLDAPADMIN_LDAP_HOSTS: "ldap"
       PHPLDAPADMIN_HTTPS: "false"
     restart: on-failure
-    networks:
-      develop-network:
-        aliases:
-          - ldapadmin-host
   gerrit:
     image: openfrontier/gerrit:3.0.0
     depends_on:
@@ -49,7 +41,7 @@ services:
       WEBURL: http://gerrit.seekplum.com
       GITWEB_TYPE: gitiles
       AUTH_TYPE: LDAP
-      LDAP_SERVER: ldap://ldap-host
+      LDAP_SERVER: ldap://ldap
       LDAP_ACCOUNTBASE: dc=seekplum,dc=io
       LDAP_ACCOUNTPATTERN: (cn=$${username})
       LDAP_ACCOUNTSSHUSERNAME: $${cn}
@@ -59,14 +51,10 @@ services:
       GERRIT_INIT_ARGS: --install-plugin=download-commands
     restart: on-failure
     healthcheck:
-      test: "if [ `curl -I -m 10 -o /dev/null -s -w %{http_code} http://gerrit-host:8080` -ne 200 ]; then exit 1; else exit 0; fi;"
+      test: "if [ `curl -I -m 10 -o /dev/null -s -w %{http_code} http://gerrit:8080` -ne 200 ]; then exit 1; else exit 0; fi;"
       interval: 5s
       timeout: 1s
       retries: 14
-    networks:
-      develop-network:
-        aliases:
-          - gerrit-host
   gitea2:
     image: gitea/gitea:1.10.2
     depends_on:
@@ -82,8 +70,6 @@ services:
     volumes:
       - ${VOLUMES_ROOT}/gitea:/data
       - ./bin/init-gitea.sh:/init-gitea.sh
-    networks:
-      - develop-network
   gitea:
     image: gitea/gitea:1.10.2
     environment:
@@ -93,10 +79,6 @@ services:
     restart: always
     volumes:
       - ${VOLUMES_ROOT}/gitea:/data
-    networks:
-      develop-network:
-        aliases:
-          - gitea-host
   drone-server:
     image: drone/drone:1.6.4
     depends_on:
@@ -104,7 +86,7 @@ services:
     volumes:
       - ${VOLUMES_ROOT}/drone:/data
     external_links:
-      - gitea-host:gitea.seekplum.com
+      - gitea:gitea.seekplum.com
     restart: always
     environment:
       - DRONE_GIT_ALWAYS_AUTH=false
@@ -118,10 +100,6 @@ services:
       - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
       - DRONE_AGENTS_ENABLED=true
       - DRONE_USER_CREATE=username:hjd,admin:true
-    networks:
-      develop-network:
-        aliases:
-          - drone-host
   drone-agent:
     image: drone/agent:1.6.2
     depends_on:
@@ -145,9 +123,3 @@ services:
       - ./data/www:/var/www:ro
       - ${VOLUMES_ROOT}/nginx/logs:/var/log/nginx
     restart: always
-    networks:
-      - develop-network
-
-networks:
-  develop-network:
-    driver: bridge
