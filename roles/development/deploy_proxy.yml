@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: universal-proxy
+spec:
+  selector:
+    matchLabels:
+      app: universal-proxy
+  replicas: 1
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: universal-proxy
+    spec:
+      containers:
+      - image: universal_proxy:latest
+        imagePullPolicy: IfNotPresent # Never or IfNotPresent 镜像需要在 minikube 节点上存在
+        name: universal-proxy
+        env:
+          - name: SERVER_PORT
+            value: "8088"
+        ports:
+        - containerPort: 8088
+          hostPort: 8088 # 需要访问 minikube 节点的 IP, 如 curl http://192.168.99.100:8088/test
+        # volumeMounts:
+        # - mountPath: /code
+        #   name: proxy-code
+      # volumes:
+      # - name: proxy-code
+      #   hostPath:
+      #     path: /Users/seekplum/PythonProjects/github.com/seekplum/universal_proxy
+      #     type: Directory
