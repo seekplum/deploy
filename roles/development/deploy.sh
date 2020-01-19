@@ -28,4 +28,5 @@ if [[ "$1" == "clear_volumes" ]]; then
     echo "1.在 gitea 的 hjd 用户的 设置 -> 应用 中创建 OAuth2 应用程序, 重定向URI为 http://drone.seekplum.com/login"
     echo "2.修改 .env 中的 DRONE_GITEA_CLIENT_ID、DRONE_GITEA_CLIENT_SECRET 变量"
     echo "3.执行 docker-compose up -d drone-server drone-agent"
+    echo "4.按照说明文档更新Jenkins配置"
 fi

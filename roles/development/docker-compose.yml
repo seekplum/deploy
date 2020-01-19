@@ -112,6 +112,16 @@ services:
       - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
       - DRONE_RUNNER_CAPACITY=2
       - DRONE_RUNNER_NAME=seekplum
+  jenkins:
+    image: jenkins/jenkins:lts
+    volumes:
+      - ${VOLUMES_ROOT}/jenkins:/var/jenkins_home
+    external_links:
+      - ldap:ldap.seekplum.com
+    environment:
+      LDAP_INHIBIT_INFER_ROOTDN: "false"
+      LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"
+    restart: on-failure
   nginx:
     image: nginx:alpine
 #    network_mode: host  # MacOSX不支持host模式

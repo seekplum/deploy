@@ -23,3 +23,12 @@ bash ./deploy.sh
 ```bash
 openssl rand -hex 16
 ```
+
+## Jenkins
+
+启动后需要手动配置 `LDAP` 登录
+
+* 1.安装 `LDAP` 插件
+* 2.配置LDAP服务, 配置见下图
+
+![jenkins-配置](.images/jenkins-配置.jpg)
