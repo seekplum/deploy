@@ -1,4 +1,24 @@
-version: "3"
+version: "3.4"
+
+x-defaults: &defaults
+  restart: unless-stopped
+  build:
+    context: ./sentry
+#  image: sentry:9.1.2-onbuild  # build 后的镜像
+  depends_on:
+    - redis
+    - postgres
+    - memcached
+    - smtp
+  env_file: .env
+  environment:
+    SENTRY_MEMCACHED_HOST: memcached
+    SENTRY_REDIS_HOST: redis
+    SENTRY_POSTGRES_HOST: postgres
+    SENTRY_EMAIL_HOST: smtp
+  volumes:
+    - ${VOLUMES_ROOT}/sentry-data:/var/lib/sentry/files
+
 services:
   ldap:
     image: osixia/openldap:1.3.0
@@ -60,7 +80,7 @@ services:
     depends_on:
       - ldap
       - gitea
-    restart: on-failure
+    restart: on-failure:1
     user: git
     command: ["/bin/sh", "/init-gitea.sh"]
     environment:
@@ -133,3 +153,33 @@ services:
       - ./data/www:/var/www:ro
       - ${VOLUMES_ROOT}/nginx/logs:/var/log/nginx
     restart: always
+  smtp:
+    restart: unless-stopped
+    image: tianon/exim4
+
+  memcached:
+    restart: unless-stopped
+    image: memcached:1.5-alpine
+
+  redis:
+    restart: unless-stopped
+    image: redis:3.2-alpine
+
+  postgres:
+    restart: unless-stopped
+    image: postgres:9.5
+    volumes:
+      - ${VOLUMES_ROOT}/sentry-postgres:/var/lib/postgresql/data
+
+  sentry-web:
+    <<: *defaults
+    external_links:
+      - ldap:ldap.seekplum.com
+
+  cron:
+    <<: *defaults
+    command: run cron
+
+  worker:
+    <<: *defaults
+    command: run worker

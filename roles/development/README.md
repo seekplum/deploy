@@ -32,3 +32,11 @@ openssl rand -hex 16
 * 2.配置LDAP服务, 配置见下图
 
 ![jenkins-配置](.images/jenkins-配置.jpg)
+
+## Sentry
+
+```bash
+git clone git@github.com:getsentry/onpremise.git
+
+git checkout 9.1.2
+```
