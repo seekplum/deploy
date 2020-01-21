@@ -47,13 +47,13 @@ git checkout 9.1.2
 
 ```javascript
 function FindProxyForURL(url, host) {
-    if (dnsDomainIs(host, "seekplum.com")
-            || dnsDomainIs(host, "hello.seekplum.com")
-            || dnsDomainIs(host, "ldap.seekplum.com")
-            || dnsDomainIs(host, "gerrit.seekplum.com")
-            || dnsDomainIs(host, "git.seekplum.com")
-            || dnsDomainIs(host, "sentry.seekplum.com")
-            || dnsDomainIs(host, "drone.seekplum.com")) {
+    if (dnsDomainIs(host, "seekplum.top")
+            || dnsDomainIs(host, "hello.seekplum.top")
+            || dnsDomainIs(host, "ldap.seekplum.top")
+            || dnsDomainIs(host, "gerrit.seekplum.top")
+            || dnsDomainIs(host, "git.seekplum.top")
+            || dnsDomainIs(host, "sentry.seekplum.top")
+            || dnsDomainIs(host, "drone.seekplum.top")) {
         return "PROXY 127.0.0.1:8080";
     }
     return "DIRECT";
@@ -62,6 +62,6 @@ function FindProxyForURL(url, host) {
 
 ## 访问
 
-配置代理后在浏览器输入 `seekplum.com` 则可以看到如下界面
+配置代理后在浏览器输入 `seekplum.top` 则可以看到如下界面
 
 ![开发环境](.images/developments.jpg)

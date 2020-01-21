@@ -112,7 +112,7 @@ function post_deploy() {
     if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
         echo "0.执行 bash -x $0 create_user 创建用户"
     fi
-    echo "1.在 gitea 的 hjd 用户的 设置 -> 应用 中创建 OAuth2 应用程序, 重定向URI为 http://drone.seekplum.com/login"
+    echo "1.在 gitea 的 hjd 用户的 设置 -> 应用 中创建 OAuth2 应用程序, 重定向URI为 http://drone.seekplum.top/login"
     echo "2.修改 ${ENV_FILE} 中的 DRONE_GITEA_CLIENT_ID、DRONE_GITEA_CLIENT_SECRET 变量"
     echo "3.执行 bash -x $0 drone_server 部署 Drone"
     echo "4.按照说明文档更新 Jenkins 配置"

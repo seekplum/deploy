@@ -58,7 +58,7 @@ services:
     volumes:
       - ${VOLUMES_ROOT}/gerrit:/var/gerrit/review_site
     environment:
-      WEBURL: http://gerrit.seekplum.com
+      WEBURL: http://gerrit.seekplum.top
       GITWEB_TYPE: gitiles
       AUTH_TYPE: LDAP
       LDAP_SERVER: ldap://ldap
@@ -106,15 +106,15 @@ services:
     volumes:
       - ${VOLUMES_ROOT}/drone:/data
     external_links:
-      - gitea:gitea.seekplum.com
+      - gitea:gitea.seekplum.top
     restart: always
     environment:
       - DRONE_GIT_ALWAYS_AUTH=false
-      - DRONE_GITEA_SERVER=http://gitea.seekplum.com:3000 # 需要在浏览器中和容器中都能访问
+      - DRONE_GITEA_SERVER=http://gitea.seekplum.top:3000 # 需要在浏览器中和容器中都能访问
       - DRONE_GITEA_CLIENT_ID=${DRONE_GITEA_CLIENT_ID}
       - DRONE_GITEA_CLIENT_SECRET=${DRONE_GITEA_CLIENT_SECRET}
       - DRONE_RUNNER_CAPACITY=2
-      - DRONE_SERVER_HOST=drone.seekplum.com
+      - DRONE_SERVER_HOST=drone.seekplum.top
       - DRONE_SERVER_PROTO=http
       - DRONE_TLS_AUTOCERT=false
       - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
@@ -128,7 +128,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
     environment:
-      - DRONE_RPC_SERVER=http://drone.seekplum.com
+      - DRONE_RPC_SERVER=http://drone.seekplum.top
       - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
       - DRONE_RUNNER_CAPACITY=2
       - DRONE_RUNNER_NAME=seekplum
@@ -136,8 +136,6 @@ services:
     image: jenkins/jenkins:lts
     volumes:
       - ${VOLUMES_ROOT}/jenkins:/var/jenkins_home
-    external_links:
-      - ldap:ldap.seekplum.com
     environment:
       LDAP_INHIBIT_INFER_ROOTDN: "false"
       LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"
@@ -174,7 +172,7 @@ services:
   sentry-web:
     <<: *defaults
     external_links:
-      - ldap:ldap.seekplum.com
+      - ldap:ldap.seekplum.top
 
   cron:
     <<: *defaults
