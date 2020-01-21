@@ -10,3 +10,4 @@ test.py
 test.*
 hosts
 password
+roles/development/conf/nginx/conf.d

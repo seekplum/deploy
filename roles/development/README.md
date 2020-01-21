@@ -13,7 +13,7 @@ bash ./install.sh
 通过 `docker-compose` 启动所有服务
 
 ```bash
-bash ./deploy.sh
+bash ./deploy.sh deploy clear_volumes
 ```
 
 ## DRONE_SECRET
@@ -40,3 +40,28 @@ git clone git@github.com:getsentry/onpremise.git
 
 git checkout 9.1.2
 ```
+
+## SwitchyOmega
+
+新建一个情景模式，类型选择 `PAC情景模式`，填入以下内容保存即可
+
+```javascript
+function FindProxyForURL(url, host) {
+    if (dnsDomainIs(host, "seekplum.com")
+            || dnsDomainIs(host, "hello.seekplum.com")
+            || dnsDomainIs(host, "ldap.seekplum.com")
+            || dnsDomainIs(host, "gerrit.seekplum.com")
+            || dnsDomainIs(host, "git.seekplum.com")
+            || dnsDomainIs(host, "sentry.seekplum.com")
+            || dnsDomainIs(host, "drone.seekplum.com")) {
+        return "PROXY 127.0.0.1:8080";
+    }
+    return "DIRECT";
+}
+```
+
+## 访问
+
+配置代理后在浏览器输入 `seekplum.com` 则可以看到如下界面
+
+![开发环境](.images/developments.jpg)
