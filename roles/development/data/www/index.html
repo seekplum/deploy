@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>开发环境</title>
+    <link rel="shortcut icon" href="./favicon.ico"/>
+    <title>踏雪寻梅的自留地</title>
 
     <!-- CSS Here -->
     <style>
@@ -45,8 +47,20 @@
             background-color: #0088df;
             color: #FFFFFF;
         }
+
+        .copyright > a {
+            color: #333333;
+        }
+
+        .copyright {
+            position: fixed;
+            text-align: center;
+            bottom: 10px;
+            width: 100%;
+        }
     </style>
 </head>
+
 <body>
 <div>
     <div class="container">
@@ -55,7 +69,7 @@
                 <a href="http://seekplum.top" class="development">首页</a>
             </li>
             <li>
-                <a href="http://hello.seekplum.top" class="development" target="_blank">Hello</a>
+                <a href="http://blog.seekplum.top" class="development" target="_blank">Blog</a>
             </li>
             <li>
                 <a href="http://gerrit.seekplum.top" class="development" target="_blank">Gerrit</a>
@@ -78,6 +92,11 @@
         </ul>
     </div>
 </div>
+<div class="copyright">
+    <span>@2020 踏雪寻梅</span>
+    <a href="http://www.beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备20003929号</a>
+<!--    <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=1234" target="_blank" rel="noopener noreferrer">xxx</a>-->
+</div>
 </body>
 <!-- JavaScript Files Here -->
 <script type="text/javascript" src=""></script>
@@ -96,4 +115,5 @@
         container.style.marginTop = distance + "px";
     }
 </script>
+
 </html>
