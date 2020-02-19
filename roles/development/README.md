@@ -48,7 +48,7 @@ git checkout 9.1.2
 ```javascript
 function FindProxyForURL(url, host) {
     if (dnsDomainIs(host, "seekplum.top")
-            || dnsDomainIs(host, "hello.seekplum.top")
+            || dnsDomainIs(host, "blog.seekplum.top")
             || dnsDomainIs(host, "ldap.seekplum.top")
             || dnsDomainIs(host, "gerrit.seekplum.top")
             || dnsDomainIs(host, "git.seekplum.top")
