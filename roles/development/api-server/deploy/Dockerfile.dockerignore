@@ -1,0 +1,16 @@
+.git/
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+
+**/.idea/
+**/.vscode/
+**/deploy/requirements.txt
+**/*.pyc
+**/*.log
+**/test.py
+**/.coverage
+**/.pytest_cache/
+**/.benchmarks/
+**/config.json

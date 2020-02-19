@@ -1,0 +1,22 @@
+-c requirements.txt
+
+##
+## 本地开发环境, 增加 formatter / linter / mock / test 工具
+##
+
+# formatter
+autoflake
+black
+
+# linter
+flake8
+flake8-bugbear
+pylint
+
+# mock
+mock
+
+# test
+pytest
+pytest-cov
+pytest-xdist

@@ -1,0 +1,14 @@
+-c requirements-dev.txt
+
+##
+## 管理员维护使用工具集
+##
+
+# 维护 requirements.txt 的工具包
+pip-tools
+
+# 删除包及其依赖
+pip-autoremove
+
+# 绘制包依赖树
+pipdeptree

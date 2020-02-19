@@ -1,0 +1,9 @@
+-i https://pypi.tuna.tsinghua.edu.cn/simple
+
+Flask
+gevent
+gunicorn
+six
+requests
+simplejson
+gitpython
