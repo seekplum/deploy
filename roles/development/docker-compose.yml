@@ -144,7 +144,7 @@ services:
     image: nginx:alpine
 #    network_mode: host  # MacOSX不支持host模式
     ports:
-      - 8080:80
+      - 80:80
     volumes:
       - ./conf/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./conf/nginx/inc.d:/etc/nginx/inc.d:ro
