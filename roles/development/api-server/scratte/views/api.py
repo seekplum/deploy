@@ -32,8 +32,9 @@ def log_request():
         ))
 
 
-@api_server.route("/update/blog")
+@api_server.route("/update/blog", methods=["POST"])
 def update_blog():
+    # Github的webhooks是POST请求
     if os.path.exists(config.BLOG_ROOT):
         # pull
         repo = git.Repo(config.BLOG_ROOT)
