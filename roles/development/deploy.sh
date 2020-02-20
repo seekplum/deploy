@@ -73,7 +73,7 @@ function deploy_sentry() {
     # 启动Sentry服务
     compose_up sentry-web
     docker-compose up -d cron worker
-    docker-compose restart nginx
+    docker-compose exec nginx nginx -s reload
 
     # 创建管理员用户
     docker-compose run --rm sentry-web createuser --email admin@qq.com --password seekplum --superuser
@@ -105,7 +105,20 @@ function create_user() {
 function drone_server() {
     compose_up drone-server
     docker-compose up -d drone-agent
-    docker-compose restart nginx
+    docker-compose exec nginx nginx -s reload
+}
+
+function deploy_api() {
+    compose_up api
+    docker-compose exec nginx nginx -s reload
+    if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
+        docker-compose run --rm init_blog
+    fi
+}
+
+function deploy_blog() {
+    compose_up blog
+    docker-compose exec nginx nginx -s reload
 }
 
 function post_deploy() {
@@ -122,6 +135,8 @@ function install() {
     mkdir -p ${VOLUMES_ROOT}
 
     compose_up ldapadmin gerrit gitea jenkins
+    # jenkins的运行用户是 1000:1000, 但默认目录权限是 root:root
+    sudo chown -R $(whoami):$(groups | awk '{print $1}') ${VOLUMES_ROOT}/jenkins
     docker-compose up -d ldap nginx
     if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
         docker-compose run --rm gitea2
@@ -129,12 +144,14 @@ function install() {
 }
 
 function print_help() {
-    echo "Usage: bash $0 {pre_check|install|uninstall|create_user|deploy_sentry|deploy}"
+    echo "Usage: bash $0 {pre_check|install|uninstall|create_user|deploy_sentry|deploy_blog|deploy_api|deploy}"
     echo "e.g: $0 uninstall ${CLEAR_VOLUMES}"
     echo "e.g: $0 pre_check"
     echo "e.g: $0 install ${CLEAR_VOLUMES}"
     echo "e.g: $0 crate_user"
     echo "e.g: $0 deploy_sentry"
+    echo "e.g: $0 deploy_blog"
+    echo "e.g: $0 deploy_api"
     echo "e.g: $0 deploy"
 }
 
@@ -158,14 +175,23 @@ case "$1" in
         drone_server
         ;;
   deploy_sentry)
+        pre_check
         deploy_sentry
+        ;;
+  deploy_blog)
+        deploy_blog
+        ;;
+  deploy_api)
+        deploy_api ${@:2}
         ;;
   deploy)
         uninstall ${@:2}
-        pre_check
         install ${@:2}
         create_user ${@:2}
-        deploy_sentry
+        # sentry 需要的配置比较高，暂时不部署
+        # deploy_sentry
+        deploy_api ${@:2}
+        deploy_blog
         post_deploy
         ;;
   "")

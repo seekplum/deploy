@@ -181,3 +181,36 @@ services:
   worker:
     <<: *defaults
     command: run worker
+
+  api:
+    image: api-server:develop
+    build:
+      context: ./api-server
+      dockerfile: deploy/Dockerfile
+    environment:
+      - GIT_PYTHON_REFRESH=quiet
+      - LOG_REQUEST=yes
+      - SERVER_PORT=8099
+      - BLOG_ROOT=/opt/blog/seekplum.github.io
+    restart: on-failure
+    volumes:
+      - ${VOLUMES_ROOT}/blog:/opt/blog
+      - ./data/config:/root/.ssh/config
+#    command: python wsgi.py
+
+  init_blog:
+    image: tutum/curl:alpine
+    depends_on: 
+      - api
+    command: curl -X POST http://api:8099/api/update/blog
+  
+  blog:
+    image: blog:develop
+    build:
+      context: ./blog
+    environment: 
+      - LANG=C.UTF-8
+    restart: on-failure
+    volumes:
+      - ${VOLUMES_ROOT}/blog/seekplum.github.io:/opt/blog
+#    command: jekyll serve --trace --host=0.0.0.0
