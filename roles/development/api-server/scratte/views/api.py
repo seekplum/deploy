@@ -37,12 +37,24 @@ def update_blog():
     # Github的webhooks是POST请求
     if os.path.exists(config.BLOG_ROOT):
         # pull
+        branch = request.values.get("branch", "master")
+        logger.info("pull {}, branch: {}".format(config.BLOG_ROOT, branch))
         repo = git.Repo(config.BLOG_ROOT)
         remote = repo.remote()
-        remote.pull()
+        remote.pull(branch)
     else:
+        # env = {"GIT_SSL_NO_VERIFY": "true"}
+        kwargs = dict()
+        depth = request.values.get("depth", None)
+        if depth:
+            kwargs.update(depth=str(depth))
+        branch = request.values.get("branch", "")
+        if branch:
+            kwargs.update(branch=branch)
+        env = None
+        logger.info("clone {} to {}, env:{}, kwargs: {}".format(config.BLOG_REMOTE, config.BLOG_ROOT, env, kwargs))
         # clone
-        git.Repo.clone_from(config.BLOG_REMOTE, config.BLOG_ROOT, env={"GIT_SSL_NO_VERIFY": True})
+        git.Repo.clone_from(config.BLOG_REMOTE, config.BLOG_ROOT, env=env, **kwargs)
     return successful_ret(msg="update github repository success!")
 
 
