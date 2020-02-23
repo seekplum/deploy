@@ -1,5 +1,6 @@
 {
   "registry-mirrors": [
+    "https://dockerhub.azk8s.cn/",
     "https://kfwkfulq.mirror.aliyuncs.com",
     "https://2lqq34jg.mirror.aliyuncs.com",
     "https://pee6w651.mirror.aliyuncs.com",
