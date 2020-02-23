@@ -1,2 +1,8 @@
 Host *github.com
-  StrictHostKeyChecking no
+    HostName github.com
+    User seekplum
+    Port 22
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/id_rsa
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
