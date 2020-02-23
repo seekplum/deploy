@@ -192,10 +192,12 @@ services:
       - LOG_REQUEST=yes
       - SERVER_PORT=8099
       - BLOG_ROOT=/opt/blog/seekplum.github.io
+      - BLOG_REMOTE=git@github.com:seekplum/seekplum.github.io.git
     restart: on-failure
     volumes:
       - ${VOLUMES_ROOT}/blog:/opt/blog
-      - ./data/config:/root/.ssh/config
+      - ./data/config:/root/.ssh/config:ro
+      - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
 #    command: python wsgi.py
 
   init_blog:
