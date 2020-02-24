@@ -5,8 +5,9 @@ set -e
 file_path="$( cd "$( dirname "$BASH_SOURCE[0]" )" && pwd )"
 
 ENV_FILE='.env'
-# 从 .env 中获取变量
-VOLUMES_ROOT=`grep "VOLUMES_ROOT" ${ENV_FILE} | cut -d"=" -f2`
+# 从 .env 中获取变量，需要和 .env 中保持一致
+# VOLUMES_ROOT=`grep "VOLUMES_ROOT" ${ENV_FILE} | cut -d"=" -f2`
+VOLUMES_ROOT=~/data/develop
 CLEAR_VOLUMES="clear_volumes"
 
 MIN_DOCKER_VERSION='17.05.0'
