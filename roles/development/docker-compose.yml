@@ -55,6 +55,8 @@ services:
     image: openfrontier/gerrit:3.0.0
     depends_on:
       - ldap
+    ports: 
+      - "29418:29418"
     volumes:
       - ${VOLUMES_ROOT}/gerrit:/var/gerrit/review_site
     environment:
@@ -96,6 +98,8 @@ services:
       - USER_UID=1000
       - USER_GID=1000
       - TZ=Asia/Shanghai
+    ports:
+      - "2222:22" # git ssh登录端口，注意不要不要和系统的ssh登录端口重复了，同时要注意端口是否开放了
     restart: always
     volumes:
       - ${VOLUMES_ROOT}/gitea:/data
