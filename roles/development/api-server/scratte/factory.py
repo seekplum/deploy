@@ -3,8 +3,10 @@
 import importlib
 import pkgutil
 import logging
+import json
 import time
 import logging.config
+import uuid
 
 from datetime import datetime
 
@@ -18,6 +20,8 @@ from scratte.helpers.jsonhelper import failure_ret
 APP_NAME = 'scratte'
 PACKAGE_NAME = APP_NAME
 PACKAGE_PATH = APP_NAME
+
+logger = logging.getLogger(__name__)
 
 
 def configure_logging():
@@ -53,9 +57,25 @@ def configure_before_handlers(app):
     def before_all_requests():
         g.ts = int(time.time() * 1000)
         g.now = datetime.now()
+        # 生成唯一ID 关联请求参数和调用结果
+        g.request_id = uuid.uuid4().hex
+        if config.LOG_REQUEST:
+            logger.info("request_id: {}, path: {}, method: {}, headers: {}, args: {}, data: {}, form: {}".format(
+                g.request_id,
+                request.path,
+                request.method,
+                # 处理参数中的中文打印乱码情况
+                json.dumps({k: v for k, v in request.headers}, ensure_ascii=False),
+                json.dumps(request.args.to_dict(), ensure_ascii=False),
+                json.dumps(request.json or {}, ensure_ascii=False),
+                json.dumps(request.form.to_dict(), ensure_ascii=False),
+            ))
 
     @app.after_request
     def after_request_callback(resp):
+        if config.LOG_REQUEST:
+            logger.info("request_id: {}, response: {}".format(
+                g.request_id, json.dumps(resp.json or {}, ensure_ascii=False)))
         handle_time = int(time.time() * 1000) - g.ts
         resp.headers['_t'] = str(handle_time)
         return resp

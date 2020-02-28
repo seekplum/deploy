@@ -4,10 +4,7 @@ import json
 import logging
 import datetime
 
-from flask import request
 from flask import Response
-
-from scratte.settings import config
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +23,6 @@ class JsonEncoder(json.JSONEncoder):
 def jsonify_ret(*args, **kwargs):
     """jsonify with support for MongoDB ObjectId
     """
-    if config.LOG_REQUEST:
-        logger.info(
-            "path: {}, method: {}, args: {}, kwargs: {}".format(
-                request.path,
-                request.method,
-                # 处理参数中的中文打印乱码情况
-                json.dumps(args, ensure_ascii=False),
-                json.dumps(kwargs, ensure_ascii=False),
-            ))
     response = json.dumps(dict(*args, **kwargs), cls=JsonEncoder)
     return Response(response, mimetype='application/json')
 
