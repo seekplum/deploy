@@ -1,6 +1,22 @@
 ---
+- name: "获取节点配置"
+  shell: "echo {{ansible_hostname}} Master: {{groups['masters']}}, Slaves: {{groups['slaves']}}"
+  register: kubeadm_nodes
+
+- name: "检查当前节点是否为Master节点"
+  set_fact: is_master_node={{ansible_default_ipv4.address in groups['masters'] or ansible_hostname in groups['masters']}}
+  tags:
+    - join_kubeadm
+  when: ansible_os_family == "Debian"
+
+- name: "输出节点配置"
+  debug: msg="{{ kubeadm_nodes }} Is Master Node {{ is_master_node }}"
+  tags:
+    - kubeadm
+  when: ansible_os_family == "Debian"
+
 - name: "清除hosts配置"
-  shell: 'sed -i "/^{{ item }}.*/d" /etc/hosts'
+  shell: 'sed -i "/^{{ hostvars[item].ansible_default_ipv4.address }}.*/d" /etc/hosts'
   with_items:
     - '{{groups["masters"][0]}}'
     - '{{groups["slaves"][0]}}'
@@ -10,7 +26,7 @@
   when: ansible_os_family == "Debian"
 
 - name: "配置hosts"
-  shell: 'echo {{item}} {{ hostvars[item].ansible_hostname }} >> /etc/hosts'
+  shell: 'echo {{ hostvars[item].ansible_default_ipv4.address }} {{ hostvars[item].ansible_hostname }} >> /etc/hosts'
   with_items:
     - '{{groups["masters"][0]}}'
     - '{{groups["slaves"][0]}}'
@@ -150,7 +166,7 @@
     - "/etc/kubernetes/manifests/etcd.yaml"
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+  when: ansible_os_family == "Debian" and is_master_node
 
 - name: "Master修改server"
   shell: 'sed -i "s#server: https://.*:6443#server: https://{{ansible_default_ipv4.address}}:6443#g" {{item}}'
@@ -161,7 +177,7 @@
     - '/etc/kubernetes/scheduler.conf'
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+  when: ansible_os_family == "Debian" and is_master_node
 
 - name: "检查CNI插件是否已经下载"
   shell: "test -f {{CNI_PLUGINS_PATH_ON_LINUX}} && echo 0 || echo 1"
@@ -201,13 +217,13 @@
   ignore_errors: True
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+  when: ansible_os_family == "Debian" and is_master_node
 
 - name: "输出初始化信息"
   debug: msg={{ kubeadm_init }}
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+  when: ansible_os_family == "Debian" and is_master_node
 
 - name: "Master初始化后操作"
   shell: "{{item}}"
@@ -217,10 +233,10 @@
     - "chown $(id -u):$(id -g) $HOME/.kube/config"
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+  when: ansible_os_family == "Debian" and is_master_node
 
 - name: "Master安装Pod网络"
   shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and ansible_default_ipv4.address in groups['masters']
+  when: ansible_os_family == "Debian" and is_master_node
