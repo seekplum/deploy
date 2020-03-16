@@ -33,6 +33,17 @@
   tags:
     - configure
 
+- name: copy vim configure into home
+  copy:
+    src: "{{ role_path }}/files/{{item}}"
+    dest: "{{HOME_ROOT}}"
+    mode: 0644
+    force: false # 避免原主机文件被覆盖
+  with_items:
+    - .vimrc
+  tags:
+    - configure
+
 - name: copy ssh config into home
   copy:
     src: "{{ role_path }}/files/{{item}}"
