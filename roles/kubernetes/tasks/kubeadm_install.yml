@@ -16,7 +16,7 @@
   when: ansible_os_family == "Debian"
 
 - name: "清除hosts配置"
-  shell: 'sed -i "/^{{ hostvars[item].ansible_default_ipv4.address }}.*/d" /etc/hosts'
+  shell: 'sed -i "/^{{ hostvars[item].ansible_default_ipv4.address }}.*$/d" /etc/hosts; sed -i "/^.*{{ hostvars[item].ansible_hostname }}$/d" /etc/hosts'
   with_items:
     - '{{groups["masters"][0]}}'
     - '{{groups["slaves"][0]}}'
