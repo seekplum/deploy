@@ -98,9 +98,9 @@
     state: present
     update_cache: true
   with_items:
-    - kubelet
-    - kubectl
-    - kubeadm
+    - kubeadm=1.15.11-00
+    - kubelet=1.15.11-00
+    - kubectl=1.15.11-00
   tags:
     - kubeadm
   when: ansible_os_family == "Debian"
