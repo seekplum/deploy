@@ -65,6 +65,7 @@
   with_items:
     - "start_vm.sh"
     - "stop_vm.sh"
+    - "replace_config.sh"
   tags:
     - configure
   when: ansible_os_family == "Darwin"
@@ -78,6 +79,7 @@
   with_items:
     - "start_vm.sh"
     - "stop_vm.sh"
+    - "replace_config.sh"
   tags:
     - configure
   when: ansible_os_family == "Darwin"
