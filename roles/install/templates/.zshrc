@@ -117,4 +117,5 @@ fi
 # if [[ -f ~/.bashrc ]]; then
 # 	. ~/.bashrc
 # fi
-export PS1='%M@%n ${ret_status} %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)'
+export PS1='%M@%n %{$fg[cyan]%}%c%{$reset_color%}$(__docker_machine_ps1) $(git_prompt_info)${ret_status}%{$reset_color%}'
+

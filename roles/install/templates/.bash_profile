@@ -87,7 +87,7 @@ alias cdw="cd ${WEBPROJECTSPATH}"
 
 alias cds="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum"
 alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
-alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meizhe2012"
+alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meizhe/meizhe2012"
 
 # virtualenvwrappe 配置
 export WORKON_HOME=${HOME}/.virtualenvs
