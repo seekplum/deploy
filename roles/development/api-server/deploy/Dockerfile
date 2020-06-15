@@ -7,7 +7,7 @@ RUN set -xe \
     && apt-get update \
     && apt-get install -y git \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo "Asia/Shanghai" > /etc/timezone \
-    && pip install -r /tmp/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    && pip install -r /tmp/requirements.txt -i https://mirrors.aliyun.com/pypi/simple \
     && rm -f /tmp/requirements.txt
 # 1024 * 1024 * 1024 * 50
 RUN git config --global http.postBuffer 53687091200

@@ -195,11 +195,11 @@ class _OpenStackDeploy(_Singleton):
         cmd = textwrap.dedent("""\
         cat >~/.pip/pip.conf<<EOF
         [global]
-        index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+        index-url = https://mirrors.aliyun.com/pypi/simple
         extra-index-url = https://pypi.org/simple
         timeout = 300
         trusted-host =
-            pypi.tuna.tsinghua.edu.cn
+            mirrors.aliyun.com.edu.cn
             pypi.org
         EOF
         """)
