@@ -34,7 +34,6 @@ export CFLAGS="${CFLAGS} -I/usr/local/opt/openssl/include"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/sqlite/lib/pkgconfig"
 
-export PIP_INDEX_URL={{PIP_INDEX_URL}}
 export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node # 配置 nvm 源
 
 {% if ansible_os_family == "Darwin" %}
@@ -64,8 +63,7 @@ export PATH="${PATH}:${HOME}/packages/mongodb/bin/"
 export PATH="${PATH}:/usr/local/Cellar/rabbitmq/3.7.14/sbin/"
 export PATH="${PATH}:${HOME}/packages/apache-maven-3.5.4/bin"
 
-# User specific aliases and functions
-{% for item in VIRTUAL_ENVS %}
+# User specific aliases and functions{% for item in VIRTUAL_ENVS %}
 alias senv{{loop.index+1}}='source {{VIRTUEL_ROOT}}/{{item.directory}}/bin/activate'
 {% endfor %}
 alias senv="senv2"
@@ -87,14 +85,15 @@ alias cdw="cd ${WEBPROJECTSPATH}"
 
 alias cds="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum"
 alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
-alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meizhe/meizhe2012"
+alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe2012"
+alias cdd="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe-docs"
 
 # virtualenvwrappe 配置
 export WORKON_HOME=${HOME}/.virtualenvs
 export VIRTUALENVWRAPPER_SCRIPT=/usr/local/bin/virtualenvwrapper.sh
 export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python
 export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
-export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
+# export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
 source ${VIRTUALENVWRAPPER_SCRIPT}
 
 export NVM_DIR="$HOME/.nvm"

@@ -2,6 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
+# 目前使用的版本commit id为 1343ab67edd8a81b75aceca77ddb526be87a20c1
 export ZSH="{{HOME_ROOT}}/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
@@ -105,10 +106,13 @@ bindkey \^U backward-kill-line  # 取消zsh中 `ctrl + u` 清除整行
 
 # 安装docker后可以配置 $(__docker_machine_ps1),同时soure docker-machine-prompt.bash
 # source '/usr/local/etc/bash_completion.d/docker-machine-prompt.bash'
+
 # kubectl命令补全
 # source <(kubectl completion zsh)
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
+
+# helm 命令补全
+# export PATH="/usr/local/opt/helm@2/bin:$PATH"
+# source <(helm completion zsh)
 
 if [[ -f ~/.bash_profile ]]; then
 	. ~/.bash_profile
@@ -117,5 +121,6 @@ fi
 # if [[ -f ~/.bashrc ]]; then
 # 	. ~/.bashrc
 # fi
-export PS1='%M@%n %{$fg[cyan]%}%c%{$reset_color%}$(__docker_machine_ps1) $(git_prompt_info)${ret_status}%{$reset_color%}'
 
+# 可以查看当前Shell配置 cat ~/.oh-my-zsh/themes/${ZSH_THEME}.zsh-theme 
+export PS1='%n %{$fg[cyan]%}%c%{$reset_color%}$(__docker_machine_ps1) $(git_prompt_info)%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )%{$reset_color%}'
