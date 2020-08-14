@@ -44,7 +44,9 @@ export PS1="\[\e[0;33m\]\u\[\e[0m\]@\[\e[0;37m\]\h\[\e[0m\]:\[\e[0;31m\] \w \[\e
 export LS_OPTIONS='--color=auto' # 如果没有指定，则自动选择颜色
 export CLICOLOR='Yes' # 是否输出颜色
 export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
-
+# 自定义使用Python版本
+export PYTHON_VERSION=3.7.5
+export PYTHON_VIRTUEL_ROOT={{VIRTUEL_ROOT}}/${PYTHON_VERSION}
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 export PATH="${PATH}:/usr/local/opt/ncurses/bin"
 export PATH="${PATH}:{{HOME_ROOT}}/.nvm/:{{HOME_ROOT}}/.nvm/versions/node/{{NODE_VERSION}}/bin"
@@ -52,9 +54,7 @@ export PATH="${PATH}:${GOPATH}/src/github.com/kardianos/govendor"
 export PATH="${PATH}:${GOPATH}/src/github.com/golang/dep/cmd/dep/dep"
 export PATH="${PATH}:${GOPATH}/src/github.com/jteeuwen/go-bindata/go-bindata"
 export PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
-{% for item in VIRTUAL_ENVS %}
-export PATH="${PATH}:{{VIRTUEL_ROOT}}/{{item.directory}}/bin"
-{% endfor %}
+export PATH="${PATH}:${PYTHON_VIRTUEL_ROOT}/bin"
 export PATH="${PATH}:${MYSQL_HOME}/bin:${JAVA_HOME}/bin"
 export PATH="${PATH}:${M2_HOME}/bin"
 export PATH="${PATH}:${HOME}/istio-0.8.0/bin"
@@ -63,13 +63,11 @@ export PATH="${PATH}:${HOME}/packages/mongodb/bin/"
 export PATH="${PATH}:/usr/local/Cellar/rabbitmq/3.7.14/sbin/"
 export PATH="${PATH}:${HOME}/packages/apache-maven-3.5.4/bin"
 
-# User specific aliases and functions{% for item in VIRTUAL_ENVS %}
-alias senv{{loop.index+1}}='source {{VIRTUEL_ROOT}}/{{item.directory}}/bin/activate'
-{% endfor %}
-alias senv="senv2"
+alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
+alias senv="senv3"
 
-alias mystart="{{VIRTUEL_ROOT}}/{{VIRTUAL_ENVS[0].directory}}/bin/supervisord -c ${HOME}/packages/supervisor/supervisord.conf"
-alias mysuper="{{VIRTUEL_ROOT}}/{{VIRTUAL_ENVS[0].directory}}/bin/supervisorctl -c ${HOME}/packages/supervisor/supervisord.conf"
+alias mystart="${PYTHON_VIRTUEL_ROOT}/bin/supervisord -c ${HOME}/packages/supervisor/supervisord.conf"
+alias mysuper="${PYTHON_VIRTUEL_ROOT}/bin/supervisorctl -c ${HOME}/packages/supervisor/supervisord.conf"
 alias mymysql='${HOME}/packages/mysql/bin/mysql -uroot -proot -S ${HOME}/packages/mysql/data/sock/mysql.sock'
 alias mysqlserver='${HOME}/packages/mysql/support-files/mysql.server'
 alias myredis='${HOME}/packages/redis/src/redis-cli'
@@ -90,9 +88,9 @@ alias cdd="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe-docs"
 
 # virtualenvwrappe 配置
 export WORKON_HOME=${HOME}/.virtualenvs
-export VIRTUALENVWRAPPER_SCRIPT=/usr/local/bin/virtualenvwrapper.sh
-export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python
-export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+export VIRTUALENVWRAPPER_SCRIPT=${HOME}/.pyenv/versions/3.7.5/bin/virtualenvwrapper.sh
+export VIRTUALENVWRAPPER_PYTHON=${HOME}/.pyenv/versions/3.7.5/bin/python
+export VIRTUALENVWRAPPER_VIRTUALENV=${HOME}/.pyenv/versions/3.7.5/bin/virtualenv
 # export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
 source ${VIRTUALENVWRAPPER_SCRIPT}
 

@@ -108,6 +108,7 @@
     - zlib
     - sqlite
     - the_silver_searcher
+    - pyenv
   changed_when: False
   ignore_errors: True
   tags:
