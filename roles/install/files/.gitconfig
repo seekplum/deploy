@@ -1,0 +1,19 @@
+# This is Git's per-user configuration file.
+# 代码库统一使用utf-8
+[gui]  
+    encoding = utf-8  
+# log编码
+[i18n]
+    commitencoding = utf-8
+# 支持中文路径
+[svn]
+    pathnameencoding = utf-8
+[user]
+	name = huangjiandong
+	email = huangjiandong@meideng.net
+# Please adapt and uncomment the following lines:
+#	name = huangjiandong
+#	email = huangjiandong@meideng.net
+[core]
+	ignorecase = false
+        quotepath = false
