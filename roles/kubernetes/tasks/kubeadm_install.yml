@@ -114,7 +114,7 @@
   when: ansible_os_family == "Debian"
 
 - name: "生成配置文件"
-  shell: "kubeadm config print init-defaults ClusterConfiguration > {{KUBEADM_CONFIG_PATH}}"
+  shell: "kubeadm config print init-defaults > {{KUBEADM_CONFIG_PATH}}"
   tags:
     - kubeadm
   when: ansible_os_family == "Debian"
