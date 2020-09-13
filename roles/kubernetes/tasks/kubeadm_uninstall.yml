@@ -49,6 +49,7 @@
     - "/var/lib/systemd/deb-systemd-helper-enabled/multi-user.target.wants/kubelet.service"
     - "/var/lib/systemd/deb-systemd-helper-enabled/kubelet.service.dsh-also"
     - "/etc/systemd/system/kubelet.service"
+    - "/var/lib/etcd"
   tags:
     - remove_kubeadm
   when: ansible_os_family == "Debian"
