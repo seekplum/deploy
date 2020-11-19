@@ -21,11 +21,11 @@
     state: present
     update_cache: true
   with_items:
-    - python2-pip
+    # - python2-pip
     - python3-pip
     - zip
     - unzip
-    - util-linux-user
+    # - util-linux-user
     - epel-release
     - gcc
     - gcc-c++
@@ -47,8 +47,8 @@
     - yum-utils
     - device-mapper-persistent-data
     - lvm2
-    - haveged
-    - the_silver_searcher
+    # - haveged
+    # - the_silver_searcher
   tags:
     - initialize
   when: ansible_os_family == "RedHat"
@@ -153,12 +153,12 @@
   tags:
     - initialize
 
-- name: install trash-cli
-  shell: "pip install trash-cli"
-  changed_when: False
-  tags:
-    - initialize
-  when: existing_of_trash.stdout == "1"
+# - name: install trash-cli
+#   shell: "pip install trash-cli"
+#   changed_when: False
+#   tags:
+#     - initialize
+#   when: existing_of_trash.stdout == "1"
 
 #- name: check supervisor installed
 #  shell: "supervisord --version >/dev/null 2>&1 && echo 0 || echo 1"

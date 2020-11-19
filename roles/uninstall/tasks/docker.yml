@@ -44,6 +44,8 @@
     - "docker.io"
     - "docker-ce"
     - "docker-engine"
+  become: yes
+  become_method: sudo
   tags:
     - remove_docker
   when: ansible_os_family == "Debian"
