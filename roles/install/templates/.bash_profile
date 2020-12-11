@@ -86,6 +86,10 @@ alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
 alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe2012"
 alias cdd="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe-docs"
 
+# pyenv 配置
+export PYENV_ROOT="${HOME}/.pyenv"
+export PATH="${PYENV_ROOT}/bin:${PATH}"
+
 # virtualenvwrappe 配置
 export WORKON_HOME=${HOME}/.virtualenvs
 export VIRTUALENVWRAPPER_SCRIPT=${HOME}/.pyenv/versions/3.7.5/bin/virtualenvwrapper.sh

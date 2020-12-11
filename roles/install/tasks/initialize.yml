@@ -156,6 +156,22 @@
   tags:
     - initialize
 
+- name: check pyenv installed
+  shell: "test -d {{HOME_ROOT}}/.pyenv && echo 0 || echo 1"
+  register: installed_of_pyenv
+  changed_when: False
+  tags:
+    - initialize
+
+- name: download pyenv
+  git:
+    repo: git://github.com/pyenv/pyenv
+    dest: "{{HOME_ROOT}}/.pyenv"
+    accept_hostkey: true
+  when: installed_of_pyenv.stdout == "1"
+  tags:
+    - initialize
+
 # - name: install trash-cli
 #   shell: "pip install trash-cli"
 #   changed_when: False
