@@ -86,6 +86,9 @@
     - software-properties-common
     - haveged
     - silversearcher-ag
+    - apt-transport-https
+    - ca-certificates
+    - gnupg-agent
   tags:
     - initialize
   become: yes

@@ -43,7 +43,11 @@
     - "docker-io"
     - "docker.io"
     - "docker-ce"
+    - "docker-ce-cli"
     - "docker-engine"
+    - "containerd.io"
+    - "containerd"
+    - "runc"
   become: yes
   become_method: sudo
   tags:
