@@ -213,7 +213,7 @@
   register: kubeadm_init
   with_items:
     - "netstat -alnp | grep -E ':6443 |:10251 |:10252 |:10250 ' | awk '{print $7}' | cut -d'/' -f1 | grep -v '-' | xargs kill -9"
-    - "kubeadm init --config {{KUBEADM_CONFIG_PATH}} --ignore-preflight-errors=Swap"
+    - "kubeadm init --config {{KUBEADM_CONFIG_PATH}}"
   ignore_errors: True
   tags:
     - kubeadm
