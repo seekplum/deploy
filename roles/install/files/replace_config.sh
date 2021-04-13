@@ -1,13 +1,23 @@
 #!/bin/sh
 
-ip_prefixs=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | cut -d"." -f1-3)
+ip_prefixs=()
+
+# 获取当前网段IP前缀
+ip_prefixs+=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | cut -d"." -f1-3)
+
+# 外部指定的网段
+for prefix in $@
+do
+    ip_prefixs+="
+    $prefix"
+done
 
 for prefix in ${ip_prefixs}
-do 
+do
     for ip in $(pping -p ${prefix})
     do
         hostname=$(sshpass -p seekplum ssh -o ConnectTimeout=1 -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@${ip} hostname 2>/dev/null)
-        if [ $? = 0 ]; then 
+        if [ $? = 0 ]; then
             echo "${hostname} ${ip}"
             if [[ "`uname`" = "Darwin" ]]; then
                 sed -i "" "/Host ${hostname}/{n;s/    HostName.*/    HostName ${ip}/;}" ~/.ssh/config
