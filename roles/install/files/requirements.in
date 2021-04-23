@@ -1,0 +1,8 @@
+virtualenv
+virtualenvwrapper
+pip-tools
+importlib-metadata
+importlib-resources
+plum_tools
+trash-cli
+supervisor
