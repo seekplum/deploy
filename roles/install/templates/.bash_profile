@@ -45,6 +45,7 @@ export LS_OPTIONS='--color=auto' # 如果没有指定，则自动选择颜色
 export CLICOLOR='Yes' # 是否输出颜色
 export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
 # 自定义使用Python版本
+export PYENV_ROOT="${HOME}/.pyenv"
 export PYTHON_VERSION=3.7.5
 export PYTHON_VIRTUEL_ROOT={{VIRTUEL_ROOT}}/${PYTHON_VERSION}
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
@@ -62,6 +63,8 @@ export PATH="${PATH}:${HOME}/packages/redis/src/"
 export PATH="${PATH}:${HOME}/packages/mongodb/bin/"
 export PATH="${PATH}:/usr/local/Cellar/rabbitmq/3.7.14/sbin/"
 export PATH="${PATH}:${HOME}/packages/apache-maven-3.5.4/bin"
+export PATH="${PYENV_ROOT}/bin:${PATH}"
+export PATH="${HOME}/.poetry/bin:${PATH}"
 
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
 alias senv="senv3"
@@ -104,4 +107,8 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
 fi
 if [ -s "$NVM_DIR/bash_completion" ]; then
     . "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+fi
+
+if which pyenv > /dev/null;
+  then eval "$(pyenv init -)";
 fi
