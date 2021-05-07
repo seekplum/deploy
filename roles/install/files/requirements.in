@@ -6,3 +6,4 @@ importlib-resources
 plum_tools
 trash-cli
 supervisor
+ansible
