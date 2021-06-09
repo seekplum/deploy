@@ -9,7 +9,7 @@ docker-py = "*"
 invoke = "*"
 
 [packages]
-ansible = "~=2.3.1.0"
+ansible = "~=2.9.20"
 
 [requires]
 python_version = "2.7"
