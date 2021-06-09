@@ -93,6 +93,10 @@ virtualenv==20.0.17
     #   virtualenvwrapper
 virtualenvwrapper==4.8.4
     # via -r requirements.in
+you-get==0.4.1527
+    # via -r requirements.in
+youtube-dl==2021.6.6
+    # via -r requirements.in
 zipp==1.2.0
     # via
     #   importlib-metadata
