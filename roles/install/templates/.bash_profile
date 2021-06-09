@@ -19,6 +19,7 @@ export M2_HOME="${HOME}/packages/apache-maven-3.5.4"
 
 export GOROOT="{{GOROOT}}"
 export GOPATH="{{GOPATH}}"
+export GOPROXY=https://mirrors.aliyun.com/goproxy/
 
 export PYTHONSTARTUP="${HOME}/.pythonrc"
 export PYTHONPROJECTSPATH="{{PythonProjects}}"
