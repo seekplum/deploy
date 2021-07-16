@@ -101,6 +101,23 @@
     - kubeadm
   when: is_centos_os
 
+- name: "配置k8s内核参数"
+  shell:
+    cmd: |
+      cat >/etc/sysctl.d/k8s.conf<<EOF
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      vm.swappiness=0
+      EOF
+  tags:
+    - kubeadm
+  when: is_linux_os
+
+- name: "生效内核参数"
+  shell: sysctl --system
+  tags:
+    - kubeadm
+  when: is_linux_os
 
 - name: "RedHat安装kubeadm"
   yum:
