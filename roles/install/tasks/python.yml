@@ -8,7 +8,7 @@
     - python
 
 - name: get python source code
-  include: .download-python.yml
+  include_tasks: .download-python.yml
   with_items: "{{VIRTUAL_ENVS}}"
   tags:
     - python
@@ -39,7 +39,7 @@
     - python
 
 - name: install python
-  include: .compile-python.yml
+  include_tasks: .compile-python.yml
   with_items: "{{VIRTUAL_ENVS}}"
   tags:
     - python

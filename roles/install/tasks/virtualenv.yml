@@ -21,7 +21,7 @@
     - virtualenv
 
 - name: make env
-  include: .virtualenv.yml
+  include_tasks: .virtualenv.yml
   with_items: "{{VIRTUAL_ENVS}}"
   register: make_env
   tags:
