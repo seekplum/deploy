@@ -20,11 +20,20 @@
     - kubeadm
   when: is_linux_os
 
-- name: "关闭防火墙"
+- name: "Ubuntu关闭防火墙"
   shell: 'ufw disable'
   tags:
     - kubeadm
   when: is_ubuntu_os
+
+- name: "RedHat关闭防火墙"
+  service:
+    name: "firewalld"
+    state: "stopped"
+    enabled: "no"
+  tags:
+    - kubeadm
+  when: is_centos_os
 
 - name: "修改docker启动配置"
   copy:
@@ -60,14 +69,14 @@
   when: is_linux_os and not swap_name.stdout.startswith("#")
 
 
-- name: "添加阿里源"
+- name: "Ubuntu添加阿里源"
   shell: "curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -"
   changed_when: False
   tags:
     - kubeadm
   when: is_ubuntu_os
 
-- name: "修改k8s源内容"
+- name: "Ubuntu修改k8s源内容"
   shell:
     cmd: |
       tee /etc/apt/sources.list.d/kubernetes.list <<EOF
@@ -77,8 +86,36 @@
     - kubeadm
   when: is_ubuntu_os
 
+- name: "RedHat添加阿里源"
+  shell:
+    cmd: |
+      cat >/etc/yum.repos.d/kubernetes.repo<<EOF
+      [kubernetes]
+      name=kubernetes
+      baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+      gpgcheck=0
+      enable=1
+      EOF
+  changed_when: False
+  tags:
+    - kubeadm
+  when: is_centos_os
 
-- name: "安装kubeadm"
+
+- name: "RedHat安装kubeadm"
+  yum:
+    name: "{{item}}"
+    state: present
+    update_cache: true
+  with_items:
+    - kubelet
+    - kubectl
+    - kubeadm
+  tags:
+    - kubeadm
+  when: is_centos_os
+
+- name: "Ubuntu安装kubeadm"
   apt:
     pkg: "{{item}}"
     state: present
