@@ -3,6 +3,8 @@
 
 HOME_ROOT: "{{ansible_user_dir}}" # 登陆用户的 home 目录
 KUBEADM_CONFIG_PATH: "{{HOME_ROOT}}/kubeadm.conf"
+CNI_PLUGINS_VERSION: "v0.9.1"
 CNI_PLUGINS_DIRECTOR_ON_LINUX: "/opt/cni/bin"
-CNI_PLUGINS_PATH_ON_LINUX: "{{HOME_ROOT}}/cni-plugins-linux-amd64-v0.8.2.tgz"
-CNI_PLUGINS_URL_ON_LINUX: "https://github.com/containernetworking/plugins/releases/download/v0.8.2/cni-plugins-linux-amd64-v0.8.2.tgz"
+CNI_PLUGINS_NAME_ON_LINUX: "cni-plugins-linux-amd64-{{CNI_PLUGINS_VERSION}}.tgz"
+CNI_PLUGINS_PATH_ON_LINUX: "{{HOME_ROOT}}/{{CNI_PLUGINS_NAME_ON_LINUX}}"
+CNI_PLUGINS_URL_ON_LINUX: "https://github.com/containernetworking/plugins/releases/download/{{CNI_PLUGINS_VERSION}}/{{CNI_PLUGINS_NAME_ON_LINUX}}"
