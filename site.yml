@@ -28,6 +28,7 @@
 - name: kubernetes
   hosts: masters,slaves
   roles:
+    - common
     - kubernetes
   tags:
     - k8s

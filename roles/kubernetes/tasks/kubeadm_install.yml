@@ -1,19 +1,4 @@
 ---
-- name: "获取节点配置"
-  shell: "echo {{ansible_hostname}} Master: {{groups['masters']}}, Slaves: {{groups['slaves']}}"
-  register: kubeadm_nodes
-
-- name: "检查当前节点是否为Master节点"
-  set_fact: is_master_node={{ansible_default_ipv4.address in groups['masters'] or ansible_hostname in groups['masters']}}
-  tags:
-    - join_kubeadm
-  when: ansible_os_family == "Debian"
-
-- name: "输出节点配置"
-  debug: msg="{{ kubeadm_nodes }} Is Master Node {{ is_master_node }}"
-  tags:
-    - kubeadm
-  when: ansible_os_family == "Debian"
 
 - name: "清除hosts配置"
   shell: 'sed -i "/^{{ hostvars[item].ansible_default_ipv4.address }}.*$/d" /etc/hosts; sed -i "/^.*{{ hostvars[item].ansible_hostname }}$/d" /etc/hosts'

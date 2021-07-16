@@ -1,0 +1,29 @@
+---
+- name: "检查当前节点操作系统"
+  set_fact:
+    is_linux_os: '{{ ansible_os_family == "RedHat" or ansible_os_family == "Debian" }}'
+    is_centos_os: '{{ ansible_os_family == "RedHat" }}'
+    is_ubuntu_os: '{{ ansible_os_family == "Debian" }}'
+    is_mac_os: '{{ ansible_os_family == "Darwin" }}'
+  tags:
+    - common
+
+- name: "输出节点操作系统"
+  debug:
+    msg: "[{{ ansible_hostname }}] is_linux_os: {{ is_linux_os }}, is_ubuntu_os: {{ is_ubuntu_os }}, is_centos_os: {{ is_centos_os }}, is_mac_os: {{ is_mac_os }}"
+  tags:
+    - common
+
+- name: "检查当前节点类型"
+  set_fact:
+    is_common_node: '{{"common" in group_names}}'
+    is_master_node: '{{"masters" in group_names}}'
+    is_slaves_node: '{{"slaves" in group_names}}'
+  tags:
+    - common
+
+- name: "输出节点类型"
+  debug:
+    msg: "[{{ ansible_hostname }}] Group Names: {{group_names}}, Is Common Node {{is_common_node}}, Is Master Node {{ is_master_node }}, Is Slaves Node {{ is_slaves_node }}."
+  tags:
+    - common

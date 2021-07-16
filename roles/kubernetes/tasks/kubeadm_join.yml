@@ -1,22 +1,4 @@
 ---
-- name: "检查当前节点是否为Master节点"
-  set_fact: is_master_node={{ansible_default_ipv4.address in groups['masters'] or ansible_hostname in groups['masters']}}
-  tags:
-    - join_kubeadm
-  when: ansible_os_family == "Debian"
-
-- name: "检查当前节点是否为Slaves节点"
-  set_fact: is_slaves_node={{ansible_default_ipv4.address in groups['slaves'] or ansible_hostname in groups['slaves']}}
-  tags:
-    - join_kubeadm
-  when: ansible_os_family == "Debian"
-
-- name: "输出节点配置"
-  debug: msg="Is Master Node {{ is_master_node }}, Is Slaves Node {{ is_slaves_node }}"
-  tags:
-    - kubeadm
-  when: ansible_os_family == "Debian"
-
 - name: "获取kubeadm token"
   shell: kubeadm token list | awk '{if(NR>1)print}' | head -n 1 | awk '{print $1}'
   register: get_kubeadm_token
