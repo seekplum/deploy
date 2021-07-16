@@ -196,14 +196,9 @@
     - kubeadm
   when: is_linux_os and existing_of_flags == "0"
 
-# - name: "脚本方式拉取镜像"
-#   script: "pull-images.sh"
-#   tags:
-#     - kubeadm
-#   when: is_linux_os
-
-- name: "拉取镜像"
-  shell: "kubeadm config images pull --config {{KUBEADM_CONFIG_PATH}}"
+- name: "脚本方式拉取镜像"
+  script: "pull-images.sh"
+  changed_when: False
   tags:
     - kubeadm
   when: is_linux_os
