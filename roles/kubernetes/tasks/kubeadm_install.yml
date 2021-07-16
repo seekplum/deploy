@@ -290,3 +290,25 @@
   tags:
     - kubeadm
   when: is_master_node
+
+- name: "修复coredns角色异常"
+  # https://github.com/coredns/helm/issues/9
+  shell: kubectl get clusterrole system:coredns -o yaml | sed '$a- apiGroups:\n  - discovery.k8s.io\n  resources:\n  - endpointslices\n  verbs:\n  - list\n  - watch' |  kubectl replace -f -
+  tags:
+    - kubeadm
+  when: is_master_node
+
+- name: "修复组件健康状态异常"
+  shell: sed -i "s/- --port=0/# &/g" /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml
+  tags:
+    - kubeadm
+  when: is_master_node
+
+- name: "重启kubelet"
+  service:
+    name: "kubelet"
+    state: "restarted"
+    enabled: "yes"
+  tags:
+    - kubeadm
+  when: is_master_node
