@@ -4,7 +4,7 @@
   ignore_errors: True
   tags:
     - remove_kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "卸载kubeadm"
   apt:
@@ -16,7 +16,8 @@
     - kubeadm
   tags:
     - remove_kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_ubuntu_os
+
 
 - name: "删除文件"
   file:
@@ -52,4 +53,4 @@
     - "/var/lib/etcd"
   tags:
     - remove_kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os

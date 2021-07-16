@@ -8,7 +8,7 @@
     - '{{groups["slaves"][1]}}'
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "配置hosts"
   shell: 'echo {{ hostvars[item].ansible_default_ipv4.address }} {{ hostvars[item].ansible_hostname }} >> /etc/hosts'
@@ -18,13 +18,13 @@
     - '{{groups["slaves"][1]}}'
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "关闭防火墙"
   shell: 'ufw disable'
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_ubuntu_os
 
 - name: "修改docker启动配置"
   copy:
@@ -35,7 +35,7 @@
     backup: true # 进行备份
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "临时关闭交换分区"
   shell: "{{item}}"
@@ -43,7 +43,7 @@
     - swapoff -a
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "获取交换分区名字"
   shell: cat /etc/fstab | grep " swap " | awk '{print $1}'
@@ -51,13 +51,13 @@
   changed_when: False
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "永久关闭交换分区"
   shell: sed -i "s#^{{ swap_name.stdout }}#\#&#g" /etc/fstab
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and not swap_name.stdout.startswith("#")
+  when: is_linux_os and not swap_name.stdout.startswith("#")
 
 
 - name: "添加阿里源"
@@ -65,7 +65,7 @@
   changed_when: False
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_ubuntu_os
 
 - name: "修改k8s源内容"
   shell:
@@ -75,7 +75,8 @@
       EOF
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_ubuntu_os
+
 
 - name: "安装kubeadm"
   apt:
@@ -88,7 +89,7 @@
     - kubeadm
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_ubuntu_os
 
 - name: "获取kubeadm版本"
   shell: kubeadm version | grep -E -o 'GitVersion:"(v[0-9\.]+)"' | grep -E -o '(v[0-9\.]+)'
@@ -96,13 +97,13 @@
   changed_when: False
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "生成配置文件"
   shell: "kubeadm config print init-defaults > {{KUBEADM_CONFIG_PATH}}"
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "修改配置文件"
   shell: "{{item}}"
@@ -112,38 +113,46 @@
     - 'sed -i "s#advertiseAddress.*#advertiseAddress: {{ ansible_default_ipv4.address }}#g" {{KUBEADM_CONFIG_PATH}}'
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "重启Docker"
   shell: systemctl daemon-reload && systemctl restart docker
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "重启kubelet"
   shell: systemctl daemon-reload && systemctl enable kubelet && systemctl restart kubelet
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
+
+- name: "检查kubeadm-flags.env文件是否存在"
+  shell: "test -f /var/lib/kubelet/kubeadm-flags.env && echo 0 || echo 1"
+  register: existing_of_flags
+  changed_when: False
+  tags:
+    - kubeadm
+  when: is_linux_os
 
 - name: "修改kubelet cgroup类型"
   shell: 'sed -i "s/--cgroup-driver=[a-zA-Z]*/--cgroup-driver=systemd/g" /var/lib/kubelet/kubeadm-flags.env'
   ignore_errors: True
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os and existing_of_flags == "0"
 
 # - name: "脚本方式拉取镜像"
 #   script: "pull-images.sh"
 #   tags:
 #     - kubeadm
-#   when: ansible_os_family == "Debian"
+#   when: is_linux_os
 
 - name: "拉取镜像"
   shell: "kubeadm config images pull --config {{KUBEADM_CONFIG_PATH}}"
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "删除重复的文件"
   file:
@@ -157,10 +166,10 @@
     - "/etc/kubernetes/manifests/etcd.yaml"
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
 - name: "Master修改server"
-  shell: 'sed -i "s#server: https://.*:6443#server: https://{{ansible_default_ipv4.address}}:6443#g" {{item}}'
+  shell: 'test -f {{item}} && sed -i "s#server: https://.*:6443#server: https://{{ansible_default_ipv4.address}}:6443#g" {{item}} || echo {{item}} not exists'
   ignore_errors: True
   with_items:
     - '/etc/kubernetes/kubelet.conf'
@@ -168,7 +177,7 @@
     - '/etc/kubernetes/scheduler.conf'
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
 - name: "检查CNI插件是否已经下载"
   shell: "test -f {{CNI_PLUGINS_PATH_ON_LINUX}} && echo 0 || echo 1"
@@ -176,7 +185,7 @@
   changed_when: False
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "安装CNI插件"
   block:
@@ -197,7 +206,7 @@
         remote_src: true
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "Master初始化"
   shell: "{{item}}"
@@ -208,13 +217,14 @@
   ignore_errors: True
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
 - name: "输出初始化信息"
-  debug: msg={{ kubeadm_init }}
+  debug:
+    msg: "{{ kubeadm_init }}"
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
 - name: "Master初始化后操作"
   shell: "{{item}}"
@@ -224,10 +234,10 @@
     - "chown $(id -u):$(id -g) $HOME/.kube/config"
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
 - name: "Master安装Pod网络"
   shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
   tags:
     - kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node

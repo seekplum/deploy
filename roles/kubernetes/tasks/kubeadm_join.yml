@@ -5,12 +5,14 @@
   changed_when: False
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
-- set_fact: "kubeadm_token={{get_kubeadm_token.stdout}}"
+- name: "设置 token 变量"
+  set_fact:
+    kubeadm_token: "{{get_kubeadm_token.stdout}}"
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
 - name: "生成kubeadm token"
   shell: kubeadm token create
@@ -18,19 +20,22 @@
   changed_when: False
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian" and is_master_node and kubeadm_token == ""
+  when: is_master_node and kubeadm_token == ""
 
-- set_fact: "kubeadm_token={{create_kubeadm_token.stdout}}"
+- name: "设置重新生成的 token 变量"
+  set_fact:
+    kubeadm_token: "{{create_kubeadm_token.stdout}}"
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian" and is_master_node and kubeadm_token == ""
+  when: is_master_node and kubeadm_token == ""
 
 - name: "输出token"
-  debug: var=kubeadm_token
+  debug:
+    var: kubeadm_token
   with_items: kubeadm_token
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
 - name: "生成kubeadm join命令"
   shell: "echo kubeadm join --token={{kubeadm_token}} {{hostvars[groups['masters'][0]].ansible_default_ipv4.address}}:6443 --discovery-token-unsafe-skip-ca-verification"
@@ -38,31 +43,34 @@
   changed_when: False
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
 - name: "输出join命令"
-  debug: var=kubeadm_join_token.stdout
+  debug:
+    var: kubeadm_join_token.stdout
   with_items: kubeadm_join_token.results
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
 - name: "设置加入节点命令"
-  set_fact: kubeadm_join_token_cmd={{ kubeadm_join_token.stdout }}
+  set_fact:
+    kubeadm_join_token_cmd: "{{ kubeadm_join_token.stdout }}"
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian" and is_master_node
+  when: is_master_node
 
 - name: "slave节点加入kubernetes"
   shell: '{{ hostvars[groups["masters"][0]]["kubeadm_join_token_cmd"] }}'
   register: slave_kubeadm_join_result
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian" and is_slaves_node and hostvars[groups["masters"][0]]["kubeadm_join_token_cmd"] != ""
+  when: is_slaves_node and hostvars[groups["masters"][0]]["kubeadm_join_token_cmd"] != ""
 
 - name: "输出slave join结果"
-  debug: var=slave_kubeadm_join_result.stdout
+  debug:
+    var: slave_kubeadm_join_result.stdout
   with_items: slave_kubeadm_join_result.results
   tags:
     - join_kubeadm
-  when: ansible_os_family == "Debian" and is_slaves_node
+  when: is_slaves_node
