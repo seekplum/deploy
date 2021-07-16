@@ -74,3 +74,20 @@
   tags:
     - join_kubeadm
   when: is_slaves_node
+
+- name: "查询节点、Pod状态"
+  shell: "{{item}}"
+  register: kubeadm_pods_info
+  with_items:
+    - kubectl get nodes,cs -o wide
+    - kubectl --namespace kube-system get pods -o wide
+  tags:
+    - join_kubeadm
+  when: is_master_node
+
+- name: "输出Pod信息"
+  debug:
+    msg: "{{ kubeadm_pods_info }}"
+  tags:
+    - join_kubeadm
+  when: is_master_node
