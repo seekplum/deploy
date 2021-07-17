@@ -1,7 +1,7 @@
 ---
 
 - name: change terminal
-  shell: "chsh -s /bin/bash {{ansible_ssh_user}}"
+  shell: "chsh -s /bin/bash {{ansible_user_id}}"
   become: yes
   become_method: sudo
   tags:
