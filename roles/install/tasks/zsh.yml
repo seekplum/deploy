@@ -29,7 +29,7 @@
     - zsh
   tags:
     - zsh
-  when: ansible_os_family == "RedHat" and installed_of_zsh.stdout == "1"
+  when: is_centos_os and installed_of_zsh.stdout == "1"
 
 - name: install zsh on Ubuntu
   apt:
@@ -40,7 +40,7 @@
     - zsh
   tags:
     - zsh
-  when: ansible_os_family == "Debian" and installed_of_zsh.stdout == "1"
+  when: is_ubuntu_os and installed_of_zsh.stdout == "1"
 
 - name: install zsh on macOS
   shell: 'if [ $(brew list | grep {{item}} | wc -l) == "0" ]; then brew install {{item}}; else echo {{item}} is installed; fi'
@@ -50,7 +50,7 @@
     - zsh-syntax-highlighting
   tags:
     - zsh
-  when: ansible_os_family == "Darwin" and installed_of_zsh.stdout == "1"
+  when: is_mac_os and installed_of_zsh.stdout == "1"
 
 - name: install oh-my-zsh
   block:
@@ -72,7 +72,7 @@
     - zsh
 
 - name: change terminal
-  shell: "chsh -s /bin/zsh {{ansible_ssh_user}}"
+  shell: "chsh -s /bin/zsh {{ansible_user_id}}"
   become: yes
   become_method: sudo
   tags:
@@ -93,7 +93,7 @@
   changed_when: True
   tags:
     - zsh
-  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+  when: is_linux_os
 
 # mac的sed用法有区别
 - name: configuare zsh on macOS
@@ -101,7 +101,7 @@
   changed_when: True
   tags:
     - zsh
-  when: ansible_os_family == "Darwin"
+  when: is_mac_os
 
 - name: update bash_profile configuare
   lineinfile:

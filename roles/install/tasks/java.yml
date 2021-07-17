@@ -6,7 +6,7 @@
     mode: 0755
   tags:
     - java
-  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: check existing java packages on Linux
   shell: "test -f {{JAVA_PACKAGE_PATH_ON_LINUX}} && echo 0 || echo 1"
@@ -14,7 +14,7 @@
   changed_when: False
   tags:
     - java
-  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: check java installed
   shell: "java --version >/dev/null 2>&1 && echo 0 || echo 1"
@@ -22,7 +22,7 @@
   changed_when: False
   tags:
     - java
-  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: install java
   block:
@@ -31,14 +31,14 @@
         url: "{{JAVA_DOWNLOAD_URL_ON_LINUX}}"
         dest: "{{JAVA_PACKAGE_PATH_ON_LINUX}}"
         force: false
-      when: (ansible_os_family == "RedHat" or ansible_os_family == "Debian") and existing_of_java_on_linux.stdout == "1"
-    
+      when: (is_linux_os) and existing_of_java_on_linux.stdout == "1"
+
     - name: unarchive java on Linux
       unarchive:
         src: "{{JAVA_PACKAGE_PATH_ON_LINUX}}"
         dest: "{{JAVA_HOME}}"
         remote_src: true
         extra_opts: ['--strip-components=1']
-      when: (ansible_os_family == "RedHat" or ansible_os_family == "Debian") and installed_of_java.stdout == "1"
+      when: (is_linux_os) and installed_of_java.stdout == "1"
   tags:
     - java

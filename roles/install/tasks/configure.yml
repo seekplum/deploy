@@ -68,7 +68,7 @@
     - "replace_config.sh"
   tags:
     - configure
-  when: ansible_os_family == "Darwin"
+  when: is_mac_os
 
 - name: virtualbox script link to path On macOS
   file:
@@ -82,7 +82,7 @@
     - "replace_config.sh"
   tags:
     - configure
-  when: ansible_os_family == "Darwin"
+  when: is_mac_os
 
 
 - name: copy apt source list on Ubuntu
@@ -93,4 +93,4 @@
     force: true
   tags:
     - configure
-  when: ansible_os_family == "Debian"
+  when: is_ubuntu_os

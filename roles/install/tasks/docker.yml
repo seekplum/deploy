@@ -28,13 +28,13 @@
     force: true
   tags:
     - docker
-  when: ansible_os_family == "RedHat" and installed_of_docker.stdout == "1"
+  when: is_centos_os and installed_of_docker.stdout == "1"
 
 - name: Add docker source on Redhat
   shell: "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
   tags:
     - docker
-  when: ansible_os_family == "RedHat" and installed_of_docker.stdout == "1"
+  when: is_centos_os and installed_of_docker.stdout == "1"
 
 - name: Install docker on Redhat
   yum:
@@ -45,7 +45,7 @@
     - docker-ce
   tags:
     - docker
-  when: ansible_os_family == "RedHat" and installed_of_docker.stdout == "1"
+  when: is_centos_os and installed_of_docker.stdout == "1"
 
 - name: Add gpg key on Ubuntu
   shell: "{{item}}"
@@ -58,7 +58,7 @@
   become_method: sudo
   tags:
     - docker
-  when: ansible_os_family == "Debian" and installed_of_docker.stdout == "1"
+  when: is_ubuntu_os and installed_of_docker.stdout == "1"
 
 - name: Install docker on Ubuntu
   apt:
@@ -71,7 +71,7 @@
     - containerd.io
   tags:
     - docker
-  when: ansible_os_family == "Debian" and installed_of_docker.stdout == "1"
+  when: is_ubuntu_os and installed_of_docker.stdout == "1"
 
 - name: Install docker on macOS
   shell: "brew cask install {{item}}"
@@ -82,19 +82,19 @@
     - docker-machine-completion
   tags:
     - docker
-  when: ansible_os_family == "Darwin" and installed_of_docker.stdout == "1"
+  when: is_mac_os and installed_of_docker.stdout == "1"
 
 - name: install docker-machine on macOS
   shell: "brew install docker-machine"
   tags:
     - docker
-  when: ansible_os_family == "Darwin" and installed_of_docker_machine.stdout == "1"
+  when: is_mac_os and installed_of_docker_machine.stdout == "1"
 
 - name: install docker-machine on macOS
   shell: "brew install docker-compose"
   tags:
     - docker
-  when: ansible_os_family == "Darwin" and installed_of_docker_compose.stdout == "1"
+  when: is_mac_os and installed_of_docker_compose.stdout == "1"
 
 - name: install docker-machine on Ubuntu
   shell: "{{item}}"
@@ -103,19 +103,18 @@
     - 'chmod +x /usr/local/bin/docker-compose'
   tags:
     - docker
-  when: ansible_os_family == "Debian" and installed_of_docker_compose.stdout == "1"
+  when: is_ubuntu_os and installed_of_docker_compose.stdout == "1"
 
 - name: start docker on ubuntu or Redhat
-  service: name={{item.name}} state={{item.state}} enabled={{item.enabled}}
+  service:
+    name: "docker"
+    state: "started"
+    enabled: "yes"
   register: log
   ignore_errors: True
-  with_items:
-    - name: 'docker'
-      enabled: 'yes'
-      state: 'started'
   tags:
     - docker
-  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: "macOS修改docker启动配置"
   copy:

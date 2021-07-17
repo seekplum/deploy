@@ -9,7 +9,7 @@
   ignore_errors: True
   tags:
     - remove_docker
-  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+  when: is_linux_os
 
 - name: uninstall docker on Redhat
   yum:
@@ -31,7 +31,7 @@
     - docker-engine-selinux
   tags:
     - remove_docker
-  when: ansible_os_family == "RedHat"
+  when: is_centos_os
 
 - name: uninstall docker on Ubuntu
   apt:
@@ -53,7 +53,7 @@
   ignore_errors: True
   tags:
     - remove_docker
-  when: ansible_os_family == "Debian"
+  when: is_ubuntu_os
 
 - name: uninstall docker docker-machine docker-compose on macOS
   shell: "brew cask uninstall {{item}}  --force || brew uninstall {{item}} --force"
@@ -67,7 +67,7 @@
   ignore_errors: True
   tags:
     - remove_docker
-  when: ansible_os_family == "Darwin"
+  when: is_mac_os
 
 - name: remove docker directory
   file:

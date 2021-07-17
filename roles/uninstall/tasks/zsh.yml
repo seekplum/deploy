@@ -35,7 +35,7 @@
     - zsh
   tags:
     - remove_zsh
-  when: ansible_os_family == "RedHat"
+  when: is_centos_os
 
 - name: uninstall zsh on Ubuntu
   apt:
@@ -45,7 +45,7 @@
     - zsh
   tags:
     - remove_zsh
-  when: ansible_os_family == "Debian"
+  when: is_ubuntu_os
 
 - name: uninstall zsh on macOS
   shell: "brew uninstall {{item}} --force"
@@ -56,7 +56,7 @@
     - zsh-syntax-highlighting
   tags:
     - remove_zsh
-  when: ansible_os_family == "Darwin"
+  when: is_mac_os
 
 - name: remove zsh directory
   file:

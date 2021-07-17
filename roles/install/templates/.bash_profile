@@ -8,7 +8,7 @@ export MYSQL_HOME="${HOME}/packages/mysql"
 export ORACLE_HOME="${HOME}/packages/oracle"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${ORACLE_HOME}"
 export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}:${ORACLE_HOME}:${MYSQL_HOME}/lib"
-{% if ansible_os_family == "Darwin" %}
+{% if is_mac_os %}
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home"
 {% else %}
 export JAVA_HOME="{{JAVA_HOME}}"
@@ -37,7 +37,7 @@ export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/sqlite/lib/pkgconfig"
 
 export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node # 配置 nvm 源
 
-{% if ansible_os_family == "Darwin" %}
+{% if is_mac_os %}
 export PS1="\h@\u: \W \$ " # 终端提示符
 {% else %}
 export PS1="\[\e[0;33m\]\u\[\e[0m\]@\[\e[0;37m\]\h\[\e[0m\]:\[\e[0;31m\] \w \[\e[0m\]\$ " # 终端提示符

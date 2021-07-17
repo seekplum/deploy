@@ -7,13 +7,13 @@
   changed_when: False
   tags:
     - initialize
-  when: ansible_os_family == "Darwin" and ansible_ssh_user != "root"
+  when: is_mac_os and ansible_user_id != "root"
 
 - name: install brew on macOS
   shell: 'ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
   tags:
     - initialize
-  when: ansible_os_family == "Darwin" and ansible_ssh_user != "root" and existing_of_brew.stdout == "1"
+  when: is_mac_os and ansible_user_id != "root" and existing_of_brew.stdout == "1"
 
 - name: install packages on Redhat
   yum:
@@ -51,7 +51,7 @@
     # - the_silver_searcher
   tags:
     - initialize
-  when: ansible_os_family == "RedHat"
+  when: is_centos_os
 
 - name: install packages on Ubuntu
   apt:
@@ -93,7 +93,7 @@
     - initialize
   become: yes
   become_method: sudo
-  when: ansible_os_family == "Debian"
+  when: is_ubuntu_os
 
 - name: install xcode-select on macOS
   shell: 'xcode-select -v >/dev/null 2>&1 ||xcode-select --install'
@@ -101,7 +101,7 @@
   ignore_errors: True
   tags:
     - initialize
-  when: ansible_os_family == "Darwin"
+  when: is_mac_os
 
 - name: install packages on macOS
   shell: 'if [ $(brew list | grep {{item}} | wc -l) == "0" ]; then brew install {{item}}; else echo {{item}} is installed; fi'
@@ -116,7 +116,7 @@
   ignore_errors: True
   tags:
     - initialize
-  when: ansible_os_family == "Darwin" and ansible_ssh_user != "root"
+  when: is_mac_os and ansible_user_id != "root"
 
 - name: check sshpass installed on macOS
   shell: "sshpass -V >/dev/null 2>&1 && echo 0 || echo 1"
@@ -124,7 +124,7 @@
   changed_when: False
   tags:
     - initialize
-  when: ansible_os_family == "Darwin"
+  when: is_mac_os
 
 - name: install sshpass on macOS
   shell: "brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb"
@@ -132,7 +132,7 @@
   ignore_errors: True
   tags:
     - initialize
-  when: ansible_os_family == "Darwin" and ansible_ssh_user != "root" and existing_of_sshpass_on_mac.stdout == "1"
+  when: is_mac_os and ansible_user_id != "root" and existing_of_sshpass_on_mac.stdout == "1"
 
 - name: check pip installed
   shell: "pip -V >/dev/null 2>&1 && echo 0 || echo 1"
