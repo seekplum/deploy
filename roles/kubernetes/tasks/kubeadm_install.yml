@@ -47,9 +47,7 @@
   when: is_linux_os
 
 - name: "临时关闭交换分区"
-  shell: "{{item}}"
-  with_items:
-    - swapoff -a
+  shell: swapoff -a
   tags:
     - kubeadm
   when: is_linux_os
@@ -153,22 +151,6 @@
     - kubeadm
   when: is_linux_os
 
-- name: "生成配置文件"
-  shell: "kubeadm config print init-defaults > {{KUBEADM_CONFIG_PATH}}"
-  tags:
-    - kubeadm
-  when: is_linux_os
-
-- name: "修改配置文件"
-  shell: "{{item}}"
-  with_items:
-    - 'sed -i "s#^imageRepository.*#imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers#g" {{KUBEADM_CONFIG_PATH}}'
-    - 'sed -i "s#^kubernetesVersion.*#kubernetesVersion: {{ kubeadm_version.stdout }}#g" {{KUBEADM_CONFIG_PATH}}'
-    - 'sed -i "s#advertiseAddress.*#advertiseAddress: {{ ansible_default_ipv4.address }}#g" {{KUBEADM_CONFIG_PATH}}'
-  tags:
-    - kubeadm
-  when: is_linux_os
-
 - name: "重启Docker"
   shell: systemctl daemon-reload && systemctl restart docker
   tags:
@@ -261,8 +243,8 @@
   shell: "{{item}}"
   register: kubeadm_init
   with_items:
-    - "netstat -alnp | grep -E ':6443 |:10251 |:10252 |:10250 ' | awk '{print $7}' | cut -d'/' -f1 | grep -v '-' | xargs kill -9"
-    - "kubeadm init --config {{KUBEADM_CONFIG_PATH}}"
+    - "netstat -alnp | grep -E ':6443 |:10251 |:10252 |:10250 ' | awk '{print $7}' | cut -d'/' -f1 | grep -v '-' | xargs kill -9 >/dev/null 2&> 1"
+    - "kubeadm init"
   ignore_errors: True
   tags:
     - kubeadm
