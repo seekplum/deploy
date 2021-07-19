@@ -117,4 +117,27 @@
     - docker
   when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
 
-# TODO: Mac 启动服务
+- name: "macOS修改docker启动配置"
+  copy:
+    src: mac-daemon.json
+    dest: "{{HOME_ROOT}}/.docker/daemon.json"
+    mode: 0644
+    force: true
+    backup: true # 进行备份
+  tags:
+    - kubeadm
+  when: is_mac_os
+
+- name: "macOS重启Docker"
+  shell: osascript -e 'quit app "Docker"' && open -a Docker
+  tags:
+    - kubeadm
+  when: is_mac_os
+
+# - name: "macOS关闭防火墙"
+#   shell: launchctl unload /System/Library/LaunchDaemons/com.apple.alf.agent.plist
+#   become: yes
+#   become_method: sudo
+#   tags:
+#     - kubeadm
+#   when: is_mac_os
