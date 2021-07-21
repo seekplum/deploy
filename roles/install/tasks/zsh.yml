@@ -7,14 +7,14 @@
     - zsh
 
 - name: check oh-my-zsh installed
-  shell: "test -d {{HOME_ROOT}}/.oh-my-zsh/ && echo 0 || echo 1"
+  shell: "test -d {{ HOME_ROOT }}/.oh-my-zsh/ && echo 0 || echo 1"
   register: installed_of_oh_my_zsh
   changed_when: False
   tags:
     - zsh
 
 - name: check zsh-autosuggestions installed
-  shell: "test -d {{HOME_ROOT}}/.oh-my-zsh/custom/plugins/zsh-autosuggestions && echo 0 || echo 1"
+  shell: "test -d {{ HOME_ROOT }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions && echo 0 || echo 1"
   register: installed_of_oh_my_zsh_autosuggestions
   changed_when: False
   tags:
@@ -22,7 +22,7 @@
 
 - name: install zsh on Redhat
   yum:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: present
     update_cache: true
   with_items:
@@ -33,7 +33,7 @@
 
 - name: install zsh on Ubuntu
   apt:
-    pkg: "{{item}}"
+    pkg: "{{ item }}"
     state: present
     update_cache: true
   with_items:
@@ -43,7 +43,7 @@
   when: is_ubuntu_os and installed_of_zsh.stdout == "1"
 
 - name: install zsh on macOS
-  shell: 'if [ $(brew list | grep {{item}} | wc -l) == "0" ]; then brew install {{item}}; else echo {{item}} is installed; fi'
+  shell: 'if [ $(brew list | grep {{ item }} | wc -l) == "0" ]; then brew install {{ item }}; else echo {{ item }} is installed; fi'
   with_items:
     - zsh
     - zsh-completions
@@ -65,14 +65,14 @@
     - name: download zsh autosuggestions
       git:
         repo: git://github.com/zsh-users/zsh-autosuggestions
-        dest: "{{HOME_ROOT}}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+        dest: "{{ HOME_ROOT }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
         accept_hostkey: true
       when: installed_of_oh_my_zsh_autosuggestions.stdout == "1"
   tags:
     - zsh
 
 - name: change terminal
-  shell: "chsh -s /bin/zsh {{ansible_user_id}}"
+  shell: "chsh -s /bin/zsh {{ ansible_user_id }}"
   become: yes
   become_method: sudo
   tags:
@@ -81,7 +81,7 @@
 - name: copy zshrc template into home
   template:
     src: .zshrc
-    dest: "{{HOME_ROOT}}"
+    dest: "{{ HOME_ROOT }}"
     mode: 0644
     force: true
     backup: true # 进行备份
@@ -89,7 +89,7 @@
     - zsh
 
 - name: configuare zsh on Linux
-  shell: "sed -i '3,6d' {{HOME_ROOT}}/.bash_profile"
+  shell: "sed -i '3,6d' {{ HOME_ROOT }}/.bash_profile"
   changed_when: True
   tags:
     - zsh
@@ -97,7 +97,7 @@
 
 # mac的sed用法有区别
 - name: configuare zsh on macOS
-  shell: "sed -i \"\" '3,6d' {{HOME_ROOT}}/.bash_profile"
+  shell: "sed -i \"\" '3,6d' {{ HOME_ROOT }}/.bash_profile"
   changed_when: True
   tags:
     - zsh
@@ -105,9 +105,9 @@
 
 - name: update bash_profile configuare
   lineinfile:
-    dest: "{{HOME_ROOT}}/.bash_profile"
+    dest: "{{ HOME_ROOT }}/.bash_profile"
     state: absent
-    regexp: "{{item}}"
+    regexp: "{{ item }}"
   with_items:
     - 'export PS1="'
   changed_when: True

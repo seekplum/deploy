@@ -31,7 +31,7 @@
   block:
     - name: create nvm dir
       file:
-        dest: "{{HOME_ROOT}}/.nvm"
+        dest: "{{ HOME_ROOT }}/.nvm"
         state: directory
         mode: 0755
       when: installed_of_nvm.stdout == "1"
@@ -41,11 +41,11 @@
       when: installed_of_npm.stdout == "1"
 
     - name: install nodejs
-      shell: ". {{HOME_ROOT}}/.bash_profile && nvm install {{NODE_VERSION}}"
+      shell: ". {{ HOME_ROOT }}/.bash_profile && nvm install {{ NODE_VERSION }}"
       when: installed_of_node.stdout == "1"
 
     - name: install cnpm
-      shell: ". {{HOME_ROOT}}/.bash_profile && npm install -g cnpm --registry=https://registry.npm.taobao.org"
+      shell: ". {{ HOME_ROOT }}/.bash_profile && npm install -g cnpm --registry=https://registry.npm.taobao.org"
       when: installed_of_cnpm.stdout == "1"
   tags:
     - nodejs

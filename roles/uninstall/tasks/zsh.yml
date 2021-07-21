@@ -1,7 +1,7 @@
 ---
 
 - name: change terminal
-  shell: "chsh -s /bin/bash {{ansible_user_id}}"
+  shell: "chsh -s /bin/bash {{ ansible_user_id }}"
   become: yes
   become_method: sudo
   tags:
@@ -17,7 +17,7 @@
 - name: change bashrc
   shell:
     cmd: |
-      cat >>{{HOME_ROOT}}/.bash_profile<<EOF
+      cat >>{{ HOME_ROOT }}/.bash_profile<<EOF
       if [ -f /etc/bashrc ]; then
         . /etc/bashrc
       fi
@@ -28,7 +28,7 @@
 
 - name: uninstall zsh on Redhat
   yum:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: absent
     update_cache: true
   with_items:
@@ -39,7 +39,7 @@
 
 - name: uninstall zsh on Ubuntu
   apt:
-    pkg: "{{item}}"
+    pkg: "{{ item }}"
     state: absent
   with_items:
     - zsh
@@ -48,7 +48,7 @@
   when: is_ubuntu_os
 
 - name: uninstall zsh on macOS
-  shell: "brew uninstall {{item}} --force"
+  shell: "brew uninstall {{ item }} --force"
   ignore_errors: True
   with_items:
     - zsh
@@ -60,14 +60,14 @@
 
 - name: remove zsh directory
   file:
-    path: "{{item}}"
+    path: "{{ item }}"
     state: absent
     force: true
   with_items:
-    - "{{HOME_ROOT}}/.zshrc"
-    - "{{HOME_ROOT}}/.zshrc_history"
-    - "{{HOME_ROOT}}/.zshrc.pre-oh-my-zsh"
-    - "{{HOME_ROOT}}/.oh-my-zsh"
+    - "{{ HOME_ROOT }}/.zshrc"
+    - "{{ HOME_ROOT }}/.zshrc_history"
+    - "{{ HOME_ROOT }}/.zshrc.pre-oh-my-zsh"
+    - "{{ HOME_ROOT }}/.oh-my-zsh"
   become: yes
   become_method: sudo
   tags:

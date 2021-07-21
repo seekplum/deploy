@@ -8,32 +8,24 @@
 
 - name: "Ubuntu卸载kubeadm"
   apt:
-    pkg: "{{item}}"
+    pkg: ['kubelet', 'kubectl', 'kubeadm']
     state: absent
-  with_items:
-    - kubelet
-    - kubectl
-    - kubeadm
   tags:
     - remove_kubeadm
   when: is_ubuntu_os
 
 - name: "RedHat卸载kubeadm"
   yum:
-    name: "{{item}}"
+    name: ['kubelet', 'kubectl', 'kubeadm']
     state: absent
     autoremove: "yes"
-  with_items:
-    - kubelet
-    - kubectl
-    - kubeadm
   tags:
     - remove_kubeadm
   when: is_centos_os
 
 - name: "删除文件"
   file:
-    path: "{{item}}"
+    path: "{{ item }}"
     state: absent
     force: true
   with_items:
@@ -73,8 +65,8 @@
     regexp: "(^{{ hostvars[item].ansible_default_ipv4.address }})|({{ hostvars[item].ansible_hostname }}$)"
     state: absent
   with_flattened:
-    - '{{groups["masters"]}}'
-    - '{{groups["slaves"]}}'
+    - '{{ groups["masters"] }}'
+    - '{{ groups["slaves"] }}'
   become: yes
   become_method: sudo
   tags:

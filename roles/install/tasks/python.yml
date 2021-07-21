@@ -1,21 +1,21 @@
 ---
 - name: create python directory
   file:
-    path: "{{VIRTUEL_ROOT}}/{{item.directory}}"
+    path: "{{ VIRTUEL_ROOT }}/{{ item.directory }}"
     state: directory
-  with_items: "{{VIRTUAL_ENVS}}"
+  with_items: "{{ VIRTUAL_ENVS }}"
   tags:
     - python
 
 - name: get python source code
   include_tasks: .download-python.yml
-  with_items: "{{VIRTUAL_ENVS}}"
+  with_items: "{{ VIRTUAL_ENVS }}"
   tags:
     - python
 
 
 - name: check existing get-pip.py
-  shell: "test -f {{PY_PIP_PATH}} && echo 0 || echo 1"
+  shell: "test -f {{ PY_PIP_PATH }} && echo 0 || echo 1"
   register: existing_of_py_pip
   changed_when: False
   tags:
@@ -24,7 +24,7 @@
 - name: download get-pip.py
   get_url:
     url: https://bootstrap.pypa.io/get-pip.py
-    dest: "{{PY_PIP_PATH}}"
+    dest: "{{ PY_PIP_PATH }}"
     force: false
   tags:
     - python
@@ -32,14 +32,14 @@
 
 - name: create temp python directory
   file:
-    path: "{{TEMP_ROOT}}/Python-{{item.version}}"
+    path: "{{ TEMP_ROOT }}/Python-{{ item.version }}"
     state: directory
-  with_items: "{{VIRTUAL_ENVS}}"
+  with_items: "{{ VIRTUAL_ENVS }}"
   tags:
     - python
 
 - name: install python
   include_tasks: .compile-python.yml
-  with_items: "{{VIRTUAL_ENVS}}"
+  with_items: "{{ VIRTUAL_ENVS }}"
   tags:
     - python

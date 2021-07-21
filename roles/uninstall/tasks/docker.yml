@@ -1,7 +1,7 @@
 ---
 
 - name: stop docker
-  service: name={{item.name}} state={{item.state}} enabled={{item.enabled}}
+  service: name={{ item.name }} state={{ item.state }} enabled={{ item.enabled }}
   with_items:
     - name: 'docker'
       enabled: 'no'
@@ -13,7 +13,7 @@
 
 - name: uninstall docker on Redhat
   yum:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: absent
     update_cache: true
   with_items:
@@ -35,7 +35,7 @@
 
 - name: uninstall docker on Ubuntu
   apt:
-    pkg: "{{item}}"
+    pkg: "{{ item }}"
     state: absent
     update_cache: true
   with_items:
@@ -56,7 +56,7 @@
   when: is_ubuntu_os
 
 - name: uninstall docker docker-machine docker-compose on macOS
-  shell: "brew cask uninstall {{item}}  --force || brew uninstall {{item}} --force"
+  shell: "brew cask uninstall {{ item }}  --force || brew uninstall {{ item }} --force"
   with_items:
     - "docker"
     - "docker-machine"
@@ -71,16 +71,16 @@
 
 - name: remove docker directory
   file:
-    path: "{{item}}"
+    path: "{{ item }}"
     state: absent
     force: true
   with_items:
     - "/var/lib/docker"
     - "/etc/apparmor.d/docker"
     - "/var/run/docker.sock"
-    - "{{HOME_ROOT}}/Library/Caches/com.docker.docker"
-    - "{{HOME_ROOT}}/Library/Containers/com.docker.docker"
-    - "{{HOME_ROOT}}/Library/Containers/com.docker.helper"
+    - "{{ HOME_ROOT }}/Library/Caches/com.docker.docker"
+    - "{{ HOME_ROOT }}/Library/Containers/com.docker.docker"
+    - "{{ HOME_ROOT }}/Library/Containers/com.docker.helper"
   become: yes
   become_method: sudo
   tags:

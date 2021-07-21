@@ -1,10 +1,10 @@
 ---
 # vars file for common
-HOME_ROOT: "{{ansible_user_dir}}" # 登陆用户的 home 目录
+HOME_ROOT: "{{ ansible_user_dir }}" # 登陆用户的 home 目录
 SOFT_INSTALL_ROOT: "/usr/local"
-GOROOT: "{{SOFT_INSTALL_ROOT}}/go"
-JAVA_HOME: "{{SOFT_INSTALL_ROOT}}/java"
-TEMP_ROOT: "{{HOME_ROOT}}"
+GOROOT: "{{ SOFT_INSTALL_ROOT }}/go"
+JAVA_HOME: "{{ SOFT_INSTALL_ROOT }}/java"
+TEMP_ROOT: "{{ HOME_ROOT }}"
 PIP_INDEX_URL: "https://mirrors.aliyun.com/pypi/simple"
 PIP_TRUSTED_HOST: "mirrors.aliyun.com"
 PIP_EXTRA_INDEX_URL: "https://pypi.org/simple"

@@ -16,14 +16,14 @@
 
 - name: "检查当前节点类型"
   set_fact:
-    is_common_node: '{{"common" in group_names}}'
-    is_master_node: '{{"masters" in group_names}}'
-    is_slaves_node: '{{"slaves" in group_names}}'
+    is_common_node: '{{ "common" in group_names }}'
+    is_master_node: '{{ "masters" in group_names }}'
+    is_slaves_node: '{{ "slaves" in group_names }}'
   tags:
     - common
 
 - name: "输出节点类型"
   debug:
-    msg: "[{{ ansible_hostname }}] Group Names: {{group_names}}, Is Common Node {{is_common_node}}, Is Master Node {{ is_master_node }}, Is Slaves Node {{ is_slaves_node }}."
+    msg: "[{{ ansible_hostname }}] Group Names: {{ group_names }}, Is Common Node {{ is_common_node }}, Is Master Node {{ is_master_node }}, Is Slaves Node {{ is_slaves_node }}."
   tags:
     - common

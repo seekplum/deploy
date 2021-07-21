@@ -9,10 +9,10 @@
 
 - name: "设置 token 变量"
   set_fact:
-    kubeadm_token: "{{get_kubeadm_token.stdout}}"
+    kubeadm_token: "{{ get_kubeadm_token.stdout }}"
   tags:
     - join_kubeadm
-  when: is_master_node
+  when: is_master_node and "stdout" in get_kubeadm_token
 
 - name: "生成kubeadm token"
   shell: kubeadm token create
@@ -20,14 +20,14 @@
   changed_when: False
   tags:
     - join_kubeadm
-  when: is_master_node and kubeadm_token == ""
+  when: is_master_node and kubeadm_token is defined and kubeadm_token == ""
 
 - name: "设置重新生成的 token 变量"
   set_fact:
-    kubeadm_token: "{{create_kubeadm_token.stdout}}"
+    kubeadm_token: "{{ create_kubeadm_token.stdout }}"
   tags:
     - join_kubeadm
-  when: is_master_node and kubeadm_token == ""
+  when: is_master_node and kubeadm_token is defined and kubeadm_token == ""
 
 - name: "输出token"
   debug:
@@ -35,15 +35,15 @@
   with_items: kubeadm_token
   tags:
     - join_kubeadm
-  when: is_master_node
+  when: is_master_node and kubeadm_token is defined
 
 - name: "生成kubeadm join命令"
-  shell: "echo kubeadm join --token={{kubeadm_token}} {{hostvars[groups['masters'][0]].ansible_default_ipv4.address}}:6443 --discovery-token-unsafe-skip-ca-verification"
+  shell: "echo kubeadm join --token={{ kubeadm_token }} {{ hostvars[groups['masters'][0]].ansible_default_ipv4.address }}:6443 --discovery-token-unsafe-skip-ca-verification"
   register: kubeadm_join_token
   changed_when: False
   tags:
     - join_kubeadm
-  when: is_master_node
+  when: is_master_node and kubeadm_token is defined
 
 - name: "输出join命令"
   debug:
@@ -51,21 +51,21 @@
   with_items: kubeadm_join_token.results
   tags:
     - join_kubeadm
-  when: is_master_node
+  when: is_master_node and kubeadm_join_token is defined and "results" in kubeadm_join_token and "stdout" in kubeadm_join_token
 
 - name: "设置加入节点命令"
   set_fact:
     kubeadm_join_token_cmd: "{{ kubeadm_join_token.stdout }}"
   tags:
     - join_kubeadm
-  when: is_master_node
+  when: is_master_node and "stdout" in kubeadm_join_token
 
 - name: "slave节点加入kubernetes"
   shell: '{{ hostvars[groups["masters"][0]]["kubeadm_join_token_cmd"] }}'
   register: slave_kubeadm_join_result
   tags:
     - join_kubeadm
-  when: is_slaves_node and hostvars[groups["masters"][0]]["kubeadm_join_token_cmd"] != ""
+  when: is_slaves_node and "kubeadm_join_token_cmd" in hostvars[groups["masters"][0]] and hostvars[groups["masters"][0]]["kubeadm_join_token_cmd"] != ""
 
 - name: "输出slave join结果"
   debug:
@@ -76,7 +76,7 @@
   when: is_slaves_node
 
 - name: "查询节点、Pod状态"
-  shell: "{{item}}"
+  shell: "{{ item }}"
   register: kubeadm_pods_info
   with_items:
     - kubectl get nodes,cs -o wide

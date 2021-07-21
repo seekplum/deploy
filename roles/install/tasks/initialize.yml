@@ -17,7 +17,7 @@
 
 - name: install packages on Redhat
   yum:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: present
     update_cache: true
   with_items:
@@ -55,7 +55,7 @@
 
 - name: install packages on Ubuntu
   apt:
-    pkg: "{{item}}"
+    pkg: "{{ item }}"
     state: present
     update_cache: true
   with_items:
@@ -104,7 +104,7 @@
   when: is_mac_os
 
 - name: install packages on macOS
-  shell: 'if [ $(brew list | grep {{item}} | wc -l) == "0" ]; then brew install {{item}}; else echo {{item}} is installed; fi'
+  shell: 'if [ $(brew list | grep {{ item }} | wc -l) == "0" ]; then brew install {{ item }}; else echo {{ item }} is installed; fi'
   with_items:
     - wget
     - tree
@@ -157,7 +157,7 @@
     - initialize
 
 - name: check pyenv installed
-  shell: "test -d {{HOME_ROOT}}/.pyenv && echo 0 || echo 1"
+  shell: "test -d {{ HOME_ROOT }}/.pyenv && echo 0 || echo 1"
   register: installed_of_pyenv
   changed_when: False
   tags:
@@ -166,7 +166,7 @@
 - name: download pyenv
   git:
     repo: git://github.com/pyenv/pyenv
-    dest: "{{HOME_ROOT}}/.pyenv"
+    dest: "{{ HOME_ROOT }}/.pyenv"
     accept_hostkey: true
   when: installed_of_pyenv.stdout == "1"
   tags:

@@ -10,8 +10,8 @@
   become: yes
   become_method: sudo
   with_flattened:
-    - '{{groups["masters"]}}'
-    - '{{groups["slaves"]}}'
+    - '{{ groups["masters"] }}'
+    - '{{ groups["slaves"] }}'
   tags:
     - kubeadm
   when: is_linux_os
@@ -66,7 +66,7 @@
     replace: '# \1'
   tags:
     - kubeadm
-  when: is_linux_os and not swap_name.stdout.startswith("#")
+  when: is_linux_os and "stdout" in swap_name and not swap_name.stdout.startswith("#")
 
 - name: "Ubuntu添加阿里源"
   shell: "curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -"
@@ -120,26 +120,18 @@
 
 - name: "RedHat安装kubeadm"
   yum:
-    name: "{{item}}"
+    name: ['kubelet', 'kubectl', 'kubeadm']
     state: present
     update_cache: true
-  with_items:
-    - kubelet
-    - kubectl
-    - kubeadm
   tags:
     - kubeadm
   when: is_centos_os
 
 - name: "Ubuntu安装kubeadm"
   apt:
-    pkg: "{{item}}"
+    pkg: ['kubelet', 'kubectl', 'kubeadm']
     state: present
     update_cache: true
-  with_items:
-    - kubelet
-    - kubectl
-    - kubeadm
   tags:
     - kubeadm
   when: is_ubuntu_os
@@ -191,7 +183,7 @@
   ignore_errors: True
   tags:
     - kubeadm
-  when: is_linux_os and existing_of_flags.stdout == "0"
+  when: is_linux_os and "stdout" in existing_of_flags and existing_of_flags.stdout == "0"
 
 - name: "脚本方式拉取镜像"
   script: "pull-images.sh"
@@ -202,7 +194,7 @@
 
 - name: "删除重复的文件"
   file:
-    path: "{{item}}"
+    path: "{{ item }}"
     state: absent
     force: true
   with_items:
@@ -216,9 +208,9 @@
 
 - name: "Master修改server"
   replace:
-    path: "{{item}}"
+    path: "{{ item }}"
     regexp: '^(server: https://.*:6443)'
-    replace: 'server: https://{{ansible_default_ipv4.address}}:6443'
+    replace: 'server: https://{{ ansible_default_ipv4.address }}:6443'
   ignore_errors: True
   with_items:
     - '/etc/kubernetes/kubelet.conf'
@@ -229,7 +221,7 @@
   when: is_master_node
 
 - name: "检查CNI插件是否已经下载"
-  shell: "test -f {{CNI_PLUGINS_PATH_ON_LINUX}} && echo 0 || echo 1"
+  shell: "test -f {{ CNI_PLUGINS_PATH_ON_LINUX }} && echo 0 || echo 1"
   register: existing_of_cni_plugins
   changed_when: False
   tags:
@@ -239,26 +231,26 @@
 - name: "安装CNI插件"
   block:
     - name: "创建目录"
-      shell: "mkdir -p {{CNI_PLUGINS_DIRECTOR_ON_LINUX}}"
+      shell: "mkdir -p {{ CNI_PLUGINS_DIRECTOR_ON_LINUX }}"
 
     - name: "下载CNI插件"
       get_url:
-        url: "{{CNI_PLUGINS_URL_ON_LINUX}}"
-        dest: "{{CNI_PLUGINS_PATH_ON_LINUX}}"
+        url: "{{ CNI_PLUGINS_URL_ON_LINUX }}"
+        dest: "{{ CNI_PLUGINS_PATH_ON_LINUX }}"
         force: false
-      when: existing_of_cni_plugins.stdout == "1"
+      when: '"stdout" in existing_of_cni_plugins and existing_of_cni_plugins.stdout == "1"'
 
     - name: "解压CNI插件"
       unarchive:
-        src: "{{CNI_PLUGINS_PATH_ON_LINUX}}"
-        dest: "{{CNI_PLUGINS_DIRECTOR_ON_LINUX}}"
+        src: "{{ CNI_PLUGINS_PATH_ON_LINUX }}"
+        dest: "{{ CNI_PLUGINS_DIRECTOR_ON_LINUX }}"
         remote_src: true
   tags:
     - kubeadm
   when: is_linux_os
 
 - name: "Master初始化"
-  shell: "{{item}}"
+  shell: "{{ item }}"
   register: kubeadm_init
   with_items:
     - "netstat -alnp | grep -E ':6443 |:10251 |:10252 |:10250 ' | awk '{print $7}' | cut -d'/' -f1 | grep -v '-' | xargs kill -9 >/dev/null 2&> 1"
@@ -276,7 +268,7 @@
   when: is_master_node
 
 - name: "Master初始化后操作"
-  shell: "{{item}}"
+  shell: "{{ item }}"
   with_items:
     - "mkdir -p $HOME/.kube"
     - "scp /etc/kubernetes/admin.conf $HOME/.kube/config"
@@ -300,28 +292,28 @@
 
 - name: "设置更新后内容"
   set_fact:
-    coredns_yml_output: "{{coredns_configured.stdout + 'apiGroups:\n  - discovery.k8s.io\n  resources:\n  - endpointslices\n  verbs:\n  - list\n  - watch'}}"
+    coredns_yml_output: "{{ coredns_configured.stdout + 'apiGroups:\n  - discovery.k8s.io\n  resources:\n  - endpointslices\n  verbs:\n  - list\n  - watch' }}"
   tags:
     - kubeadm
-  when: is_master_node
+  when: is_master_node and "stdout" in coredns_configured
 
 - name: "输出coredns配置"
   debug:
     msg: "{{ coredns_yml_output }}"
   tags:
     - kubeadm
-  when: is_master_node
+  when: is_master_node and coredns_yml_output is defined
 
 - name: "修复coredns角色异常"
   # https://github.com/coredns/helm/issues/9
-  shell: "echo {{coredns_yml_output}} |  kubectl replace -f -"
+  shell: "echo {{ coredns_yml_output }} |  kubectl replace -f -"
   tags:
     - kubeadm
-  when: is_master_node
+  when: is_master_node and coredns_yml_output is defined
 
 - name: "修复组件健康状态异常"
   replace:
-    path: "{{item}}"
+    path: "{{ item }}"
     regexp: '(- --port=0)'
     replace: '# \1'
   with_items:

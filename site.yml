@@ -21,7 +21,7 @@
     - install
     - deploy
   environment:
-    PIP_INDEX_URL: "{{PIP_INDEX_URL}}"
+    PIP_INDEX_URL: "{{ PIP_INDEX_URL }}"
     PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
     PASSPHRASE: test
 
