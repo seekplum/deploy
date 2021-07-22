@@ -1,27 +1,26 @@
 ---
 
-- name: "清除hosts配置"
-  shell: 'sed -i "/^{{ hostvars[item].ansible_default_ipv4.address }}.*$/d" /etc/hosts; sed -i "/^.*{{ hostvars[item].ansible_hostname }}$/d" /etc/hosts'
-  with_items:
-    - '{{groups["masters"][0]}}'
-    - '{{groups["slaves"][0]}}'
-    - '{{groups["slaves"][1]}}'
-  tags:
-    - kubeadm
-  when: is_linux_os
-
 - name: "配置hosts"
-  shell: 'echo {{ hostvars[item].ansible_default_ipv4.address }} {{ hostvars[item].ansible_hostname }} >> /etc/hosts'
-  with_items:
-    - '{{groups["masters"][0]}}'
-    - '{{groups["slaves"][0]}}'
-    - '{{groups["slaves"][1]}}'
+  blockinfile:
+    path: /etc/hosts
+    state: present
+    marker: "# k8s node"
+    block: |
+      {{ hostvars[item].ansible_default_ipv4.address }} {{ hostvars[item].ansible_hostname }}
+  become: yes
+  become_method: sudo
+  with_flattened:
+    - '{{groups["masters"]}}'
+    - '{{groups["slaves"]}}'
   tags:
     - kubeadm
   when: is_linux_os
 
 - name: "Ubuntu关闭防火墙"
-  shell: 'ufw disable'
+  service:
+    name: "ufw"
+    state: "stopped"
+    enabled: "no"
   tags:
     - kubeadm
   when: is_ubuntu_os
@@ -35,7 +34,7 @@
     - kubeadm
   when: is_centos_os
 
-- name: "修改docker启动配置"
+- name: "Linux修改docker启动配置"
   copy:
     src: daemon.json
     dest: /etc/docker/daemon.json
@@ -52,7 +51,7 @@
     - kubeadm
   when: is_linux_os
 
-- name: "获取交换分区名字"
+- name: "Linux获取交换分区名字"
   shell: cat /etc/fstab | grep " swap " | awk '{print $1}'
   register: swap_name
   changed_when: False
@@ -60,12 +59,14 @@
     - kubeadm
   when: is_linux_os
 
-- name: "永久关闭交换分区"
-  shell: sed -i "s#^{{ swap_name.stdout }}#\#&#g" /etc/fstab
+- name: "Linux永久关闭交换分区"
+  replace:
+    path: /etc/fstab
+    regexp: '^({{ swap_name.stdout }})'
+    replace: '# \1'
   tags:
     - kubeadm
   when: is_linux_os and not swap_name.stdout.startswith("#")
-
 
 - name: "Ubuntu添加阿里源"
   shell: "curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -"
@@ -99,7 +100,7 @@
     - kubeadm
   when: is_centos_os
 
-- name: "配置k8s内核参数"
+- name: "Linux配置k8s内核参数"
   shell:
     cmd: |
       cat >/etc/sysctl.d/k8s.conf<<EOF
@@ -111,7 +112,7 @@
     - kubeadm
   when: is_linux_os
 
-- name: "生效内核参数"
+- name: "Linux生效内核参数"
   shell: sysctl --system
   tags:
     - kubeadm
@@ -151,13 +152,13 @@
     - kubeadm
   when: is_linux_os
 
-- name: "重载配置"
+- name: "Linux重载配置"
   shell: systemctl daemon-reload
   tags:
     - kubeadm
   when: is_linux_os
 
-- name: "重启Docker"
+- name: "Linux重启Docker"
   service:
     name: "docker"
     state: "restarted"
@@ -165,7 +166,7 @@
     - kubeadm
   when: is_linux_os
 
-- name: "重启kubelet"
+- name: "Linux重启kubelet"
   service:
     name: "kubelet"
     state: "restarted"
@@ -174,7 +175,7 @@
     - kubeadm
   when: is_linux_os
 
-- name: "检查kubeadm-flags.env文件是否存在"
+- name: "Linux检查kubeadm-flags.env文件是否存在"
   shell: "test -f /var/lib/kubelet/kubeadm-flags.env && echo 0 || echo 1"
   register: existing_of_flags
   changed_when: False
@@ -182,12 +183,15 @@
     - kubeadm
   when: is_linux_os
 
-- name: "修改kubelet cgroup类型"
-  shell: 'sed -i "s/--cgroup-driver=[a-zA-Z]*/--cgroup-driver=systemd/g" /var/lib/kubelet/kubeadm-flags.env'
+- name: "Linux修改kubelet cgroup类型"
+  replace:
+    path: /var/lib/kubelet/kubeadm-flags.env
+    regexp: '^(--cgroup-driver=[a-zA-Z]*)'
+    replace: '--cgroup-driver=systemd'
   ignore_errors: True
   tags:
     - kubeadm
-  when: is_linux_os and existing_of_flags == "0"
+  when: is_linux_os and existing_of_flags.stdout == "0"
 
 - name: "脚本方式拉取镜像"
   script: "pull-images.sh"
@@ -211,7 +215,10 @@
   when: is_master_node
 
 - name: "Master修改server"
-  shell: 'test -f {{item}} && sed -i "s#server: https://.*:6443#server: https://{{ansible_default_ipv4.address}}:6443#g" {{item}} || echo {{item}} not exists'
+  replace:
+    path: "{{item}}"
+    regexp: '^(server: https://.*:6443)'
+    replace: 'server: https://{{ansible_default_ipv4.address}}:6443'
   ignore_errors: True
   with_items:
     - '/etc/kubernetes/kubelet.conf'
@@ -284,15 +291,42 @@
     - kubeadm
   when: is_master_node
 
+- name: "查询coredns角色配置"
+  shell: "kubectl get clusterrole system:coredns -o yaml"
+  register: coredns_configured
+  tags:
+    - kubeadm
+  when: is_master_node
+
+- name: "设置更新后内容"
+  set_fact:
+    coredns_yml_output: "{{coredns_configured.stdout + 'apiGroups:\n  - discovery.k8s.io\n  resources:\n  - endpointslices\n  verbs:\n  - list\n  - watch'}}"
+  tags:
+    - kubeadm
+  when: is_master_node
+
+- name: "输出coredns配置"
+  debug:
+    msg: "{{ coredns_yml_output }}"
+  tags:
+    - kubeadm
+  when: is_master_node
+
 - name: "修复coredns角色异常"
   # https://github.com/coredns/helm/issues/9
-  shell: kubectl get clusterrole system:coredns -o yaml | sed '$a- apiGroups:\n  - discovery.k8s.io\n  resources:\n  - endpointslices\n  verbs:\n  - list\n  - watch' |  kubectl replace -f -
+  shell: "echo {{coredns_yml_output}} |  kubectl replace -f -"
   tags:
     - kubeadm
   when: is_master_node
 
 - name: "修复组件健康状态异常"
-  shell: sed -i "s/- --port=0/# &/g" /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml
+  replace:
+    path: "{{item}}"
+    regexp: '(- --port=0)'
+    replace: '# \1'
+  with_items:
+    - /etc/kubernetes/manifests/kube-scheduler.yaml
+    - /etc/kubernetes/manifests/kube-controller-manager.yaml
   tags:
     - kubeadm
   when: is_master_node

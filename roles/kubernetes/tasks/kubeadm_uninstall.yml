@@ -66,3 +66,17 @@
   tags:
     - remove_kubeadm
   when: is_linux_os
+
+- name: "清除hosts配置"
+  lineinfile:
+    path: /etc/hosts
+    regexp: "(^{{ hostvars[item].ansible_default_ipv4.address }})|({{ hostvars[item].ansible_hostname }}$)"
+    state: absent
+  with_flattened:
+    - '{{groups["masters"]}}'
+    - '{{groups["slaves"]}}'
+  become: yes
+  become_method: sudo
+  tags:
+    - remove_kubeadm
+  when: is_linux_os
