@@ -96,14 +96,14 @@
     - docker
   when: is_mac_os and installed_of_docker_compose.stdout == "1"
 
-- name: install docker-machine on Ubuntu
+- name: install docker-compose on Linux
   shell: "{{ item }}"
   with_items:
     - 'curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose'
     - 'chmod +x /usr/local/bin/docker-compose'
   tags:
     - docker
-  when: is_ubuntu_os and installed_of_docker_compose.stdout == "1"
+  when: is_linux_os and installed_of_docker_compose.stdout == "1"
 
 - name: start docker on ubuntu or Redhat
   service:

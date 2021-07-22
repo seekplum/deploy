@@ -94,3 +94,14 @@
   tags:
     - configure
   when: is_ubuntu_os
+
+- name: copy repo on Redhat
+  copy:
+    src: "CentOS-Base.repo"
+    dest: "/etc/yum.repos.d/"
+    mode: 0644
+    force: true
+    backup: true
+  tags:
+    - configure
+  when: is_centos_os
