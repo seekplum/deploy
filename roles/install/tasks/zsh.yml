@@ -22,11 +22,10 @@
 
 - name: install zsh on Redhat
   yum:
-    name: "{{ item }}"
+    name: "zsh"
     state: present
     update_cache: true
-  with_items:
-    - zsh
+  # shell: yum install -y zsh
   tags:
     - zsh
   when: is_centos_os and installed_of_zsh.stdout == "1"
