@@ -3,7 +3,7 @@
 vms_txt='/tmp/.vms_temp.txt'
 runningvms_txt='/tmp/.runningvms_temp.txt'
 
-VBoxManage list vms | grep "ubuntu" | awk '{print $1}' | sed 's/.$//' | sed 's/^.//' > ${vms_txt}
+VBoxManage list vms | grep -E "ubuntu|centos" | awk '{print $1}' | sed 's/.$//' | sed 's/^.//' > ${vms_txt}
 VBoxManage list runningvms | awk '{print $1}' | awk '{gsub(/^"|"$/, "");print}' > ${runningvms_txt}
 
 if [ $# -eq 0 ]; then
