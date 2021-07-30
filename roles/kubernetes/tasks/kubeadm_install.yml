@@ -1,5 +1,16 @@
 ---
 
+- name: "清除注释"
+  lineinfile:
+    path: /etc/hosts
+    regexp: "# k8s node"
+    state: absent
+  become: yes
+  become_method: sudo
+  tags:
+    - kubeadm
+  when: is_linux_os
+
 - name: "配置hosts"
   blockinfile:
     path: /etc/hosts
