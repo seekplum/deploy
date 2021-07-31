@@ -147,14 +147,6 @@
     - kubeadm
   when: is_ubuntu_os
 
-- name: "获取kubeadm版本"
-  shell: kubeadm version | grep -E -o 'GitVersion:"(v[0-9\.]+)"' | grep -E -o '(v[0-9\.]+)'
-  register: kubeadm_version
-  changed_when: False
-  tags:
-    - kubeadm
-  when: is_linux_os
-
 - name: "Linux重载配置"
   shell: systemctl daemon-reload
   tags:
