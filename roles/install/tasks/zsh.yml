@@ -39,6 +39,8 @@
     - zsh
   tags:
     - zsh
+  become: yes
+  become_method: sudo
   when: is_ubuntu_os and installed_of_zsh.stdout == "1"
 
 - name: install zsh on macOS
