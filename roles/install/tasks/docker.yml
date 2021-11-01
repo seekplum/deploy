@@ -50,7 +50,7 @@
 - name: Add gpg key on Ubuntu
   shell: "{{ item }}"
   with_items:
-    - apt-get remove docker docker-engine docker.io containerd runc
+    - apt-get remove docker docker.io containerd runc
     - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
     - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
     - apt-get update
@@ -99,7 +99,7 @@
 - name: install docker-compose on Linux
   shell: "{{ item }}"
   with_items:
-    - 'curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose'
+    - 'curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose'
     - 'chmod +x /usr/local/bin/docker-compose'
   tags:
     - docker
@@ -124,13 +124,13 @@
     force: true
     backup: true # 进行备份
   tags:
-    - kubeadm
+    - docker
   when: is_mac_os
 
 - name: "macOS重启Docker"
   shell: osascript -e 'quit app "Docker"' && open -a Docker
   tags:
-    - kubeadm
+    - docker
   when: is_mac_os
 
 # - name: "macOS关闭防火墙"
@@ -138,5 +138,5 @@
 #   become: yes
 #   become_method: sudo
 #   tags:
-#     - kubeadm
+#     - docker
 #   when: is_mac_os
