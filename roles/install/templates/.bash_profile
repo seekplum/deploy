@@ -46,8 +46,8 @@ export LS_OPTIONS='--color=auto' # 如果没有指定，则自动选择颜色
 export CLICOLOR='Yes' # 是否输出颜色
 export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
 # 自定义使用Python版本
-export PYENV_ROOT="${HOME}/.pyenv"
-export PYTHON_VERSION=3.7.5
+export PYENV_ROOT="{{PYENV_ROOT}}"
+export PYTHON_VERSION={{PYTHON_VERSION}}
 export PYTHON_VIRTUEL_ROOT={{VIRTUEL_ROOT}}/${PYTHON_VERSION}
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 export PATH="${PATH}:/usr/local/opt/ncurses/bin"
@@ -91,14 +91,13 @@ alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe2012"
 alias cdd="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe-docs"
 
 # pyenv 配置
-export PYENV_ROOT="${HOME}/.pyenv"
 export PATH="${PYENV_ROOT}/bin:${PATH}"
 
 # virtualenvwrappe 配置
 export WORKON_HOME=${HOME}/.virtualenvs
-export VIRTUALENVWRAPPER_SCRIPT=${HOME}/.pyenv/versions/3.7.5/bin/virtualenvwrapper.sh
-export VIRTUALENVWRAPPER_PYTHON=${HOME}/.pyenv/versions/3.7.5/bin/python
-export VIRTUALENVWRAPPER_VIRTUALENV=${HOME}/.pyenv/versions/3.7.5/bin/virtualenv
+export VIRTUALENVWRAPPER_SCRIPT={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenvwrapper.sh
+export VIRTUALENVWRAPPER_PYTHON={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/python
+export VIRTUALENVWRAPPER_VIRTUALENV={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenv
 # export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
 source ${VIRTUALENVWRAPPER_SCRIPT}
 
