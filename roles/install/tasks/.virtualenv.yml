@@ -1,28 +1,16 @@
 ---
-- name: check existing of env
-  shell: "test -f {{ VIRTUEL_ROOT }}/{{ item.directory }}/bin/activate && echo 0 || echo 1"
-  register: result_of_check_env
-  changed_when: false
-
 - name: check existing of pyconcrete of env
-  shell: "test -f {{ VIRTUEL_ROOT }}/{{ item.directory }}/bin/pyconcrete-admin.py && echo 0 || echo 1"
+  shell: "test -f {{ VIRTUEL_ROOT }}/{{ item.version }}/bin/pyconcrete-admin.py && echo 0 || echo 1"
   register: result_of_check_pyconcrete
   changed_when: false
 
-- name: install virtuelenv
-  shell: "virtualenv --version || pip install virtualenv"
-
 - name: make virtualenv
-  shell:
-    "virtualenv --no-site-packages --distribute --always-copy --python={{ VIRTUEL_ROOT }}/{{ item.directory }}/{{ item.name }}/bin/{{ item.python }} \
-    {{ VIRTUEL_ROOT }}/{{ item.directory }}"
-  register: result_of_make_env
-  when: result_of_check_env.stdout == "1"
+  shell: "{{ PYENV_ROOT }}/versions/{{ item.version }}/bin/virtualenv --python={{ PYENV_ROOT }}/versions/{{ item.version }}/bin/python {{ VIRTUEL_ROOT }}/{{ item.version }}"
 
 - name: install pyconcrete into virtualenv
   shell:
-    ". {{ VIRTUEL_ROOT }}/{{ item.directory }}/bin/activate && \
-    {{ item.python }} setup.py install --passphrase=$PASSPHRASE"
+    ". {{ VIRTUEL_ROOT }}/{{ item.version }}/bin/activate && \
+    python setup.py install --passphrase=$PASSPHRASE"
   args:
     chdir: "{{ TEMP_ROOT }}/pyconcrete-0.10.2"
   register: result_of_install_pyconcrete
