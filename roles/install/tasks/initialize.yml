@@ -59,11 +59,20 @@
 #     - initialize
 #   when: is_centos_os
 
+- name: autoremove and update on Ubuntu
+  shell: "sudo apt autoremove && sudo apt-get upgrade && sudo apt-get update"
+  tags:
+    - initialize
+  when: is_ubuntu_os
+
 - name: install packages on Ubuntu
   apt:
     pkg: "{{ item }}"
     state: present
     update_cache: true
+  # https://stackoverflow.com/questions/51622712/ansible-requires-python-apt-but-its-already-installed
+  # ansible -i hosts common -m "apt name=python-apt state=latest" --become-user root
+  # shell: "sudo apt-get install -y {{ item }}"
   with_items:
     - curl
     - jq
@@ -88,13 +97,15 @@
     - libsqlite3-dev
     - llvm
     - libncurses5-dev
-    - python-pip
     - software-properties-common
     - haveged
     - silversearcher-ag
     - apt-transport-https
-    - ca-certificates
+    # - ca-certificates
     - gnupg-agent
+    - gnupg2
+    - python-apt
+    - libffi-dev
   tags:
     - initialize
   become: yes
@@ -163,7 +174,7 @@
     - initialize
 
 - name: check pyenv installed
-  shell: "test -d {{ HOME_ROOT }}/.pyenv && echo 0 || echo 1"
+  shell: "test -d {{ PYENV_ROOT }} && echo 0 || echo 1"
   register: installed_of_pyenv
   changed_when: False
   tags:
@@ -172,7 +183,7 @@
 - name: download pyenv
   git:
     repo: git://github.com/pyenv/pyenv
-    dest: "{{ HOME_ROOT }}/.pyenv"
+    dest: "{{ PYENV_ROOT }}"
     accept_hostkey: true
   when: installed_of_pyenv.stdout == "1"
   tags:
