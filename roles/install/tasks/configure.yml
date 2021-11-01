@@ -91,6 +91,8 @@
     dest: "/etc/apt/"
     mode: 0644
     force: true
+  become: yes
+  become_method: sudo
   tags:
     - configure
   when: is_ubuntu_os
@@ -102,6 +104,8 @@
     mode: 0644
     force: true
     backup: true
+  become: yes
+  become_method: sudo
   tags:
     - configure
   when: is_centos_os
