@@ -11,7 +11,7 @@
     pkg: ['kubelet', 'kubectl', 'kubeadm']
     state: absent
   tags:
-    - remove_kubeadm
+    - remove_kubeadm_force
   when: is_ubuntu_os
 
 - name: "RedHat卸载kubeadm"
@@ -20,7 +20,7 @@
     state: absent
     autoremove: "yes"
   tags:
-    - remove_kubeadm
+    - remove_kubeadm_force
   when: is_centos_os
 
 - name: "删除文件"
@@ -56,7 +56,7 @@
     - "/etc/systemd/system/kubelet.service"
     - "/var/lib/etcd"
   tags:
-    - remove_kubeadm
+    - remove_kubeadm_force
   when: is_linux_os
 
 - name: "清除hosts配置"

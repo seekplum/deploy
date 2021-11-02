@@ -69,7 +69,7 @@ ansible-playbook -i hosts site.yml -t install --skip-tags "configure,initialize,
 * kubeadm安装kubernets
 
 ```bash
-ansible-playbook -i hosts site.yml -t kubernetes --skip-tags "remove_kubeadm,kubeadm,join_kubeadm"
+ansible-playbook -i hosts site.yml -t kubernetes --skip-tags "remove_kubeadm,remove_kubeadm_force,kubeadm,join_kubeadm"
 ```
 
 * -i: 指定运行的主机, 如 `-i hosts`
