@@ -78,6 +78,7 @@
     - "/var/lib/docker"
     - "/etc/apparmor.d/docker"
     - "/var/run/docker.sock"
+    - "/usr/local/bin/docker-compose"
     - "{{ HOME_ROOT }}/Library/Caches/com.docker.docker"
     - "{{ HOME_ROOT }}/Library/Containers/com.docker.docker"
     - "{{ HOME_ROOT }}/Library/Containers/com.docker.helper"
