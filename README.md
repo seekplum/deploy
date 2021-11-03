@@ -57,7 +57,7 @@ ssh-copy-id -i ~/.ssh/mykey.pub root@x.x.x.x
 * 执行卸载操作
 
 ```bash
-ansible-playbook -i hosts site.yml -t uninstall --skip-tags "remove_zsh,remove_docker,remove_nodejs,remove_golang"
+ansible-playbook -i hosts site.yml -t uninstall --skip-tags "remove_zsh,remove_docker,remove_nodejs,remove_golang,remove_java"
 ```
 
 * 执行安装操作
