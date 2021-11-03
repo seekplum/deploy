@@ -20,6 +20,14 @@ function main() {
         aliyun_name=${aliyun_registry}/${name}
 
         result=`pull_image ${aliyun_name}`
+        # 去除name中的 v 前缀
+        if [[ "$result" == "1" && "${name}" != "${name/:v/:}" ]]; then
+            print_error "pull2 ${name} failed, retrying ${name/:v/:}"
+            name="${name/:v/:}"
+            aliyun_name=${aliyun_registry}/${name}
+
+            result=`pull_image ${aliyun_name}`
+        fi
         # 拉取失败，尝试修改名称
         if [[ "$result" == "1" && "${name}" != "${name##*/}" ]]; then
             print_error "pull2 ${name} failed, retrying ${name##*/}"
