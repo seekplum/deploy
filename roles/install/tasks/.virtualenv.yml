@@ -12,6 +12,6 @@
     ". {{ VIRTUEL_ROOT }}/{{ item.version }}/bin/activate && \
     python setup.py install --passphrase=$PASSPHRASE"
   args:
-    chdir: "{{ TEMP_ROOT }}/pyconcrete-0.10.2"
+    chdir: "{{ HOME_ROOT }}/pyconcrete-0.10.2"
   register: result_of_install_pyconcrete
   when: result_of_unarchive_pyconcrete.changed or result_of_check_pyconcrete.stdout == "1"

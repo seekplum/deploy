@@ -16,13 +16,13 @@
   when: existing_of_pyconcreate is defined and existing_of_pyconcreate.stdout == "1"
 
 - name: check pyconcrete unarchive
-  shell: "test -d {{ TEMP_ROOT }}/pyconcrete-0.10.2 && echo 0 || echo 1"
+  shell: "test -d {{ HOME_ROOT }}/pyconcrete-0.10.2 && echo 0 || echo 1"
   register: unarchive_of_pyconcrete
   tags:
     - zsh
 
 - name: unarchive pyconcrete
-  shell: "tar -zxvf {{ PYCONCREATE_PATH }} -C {{ TEMP_ROOT }}"
+  shell: "tar -zxvf {{ PYCONCREATE_PATH }} -C {{ HOME_ROOT }}"
   register: result_of_unarchive_pyconcrete
   tags:
     - virtualenv
