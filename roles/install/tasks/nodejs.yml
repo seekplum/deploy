@@ -37,7 +37,7 @@
       when: installed_of_nvm.stdout == "1"
 
     - name: install npm
-      shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+      shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/v{{ NVM_VERSION }}/install.sh | bash
       when: installed_of_npm.stdout == "1"
 
     - name: install nodejs
