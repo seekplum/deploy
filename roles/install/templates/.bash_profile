@@ -1,19 +1,19 @@
 # .bash_profile
 
-if [[ -f /etc/bashrc ]]; then
-    . /etc/bashrc
-fi
+# if [[ -f /etc/bashrc ]]; then
+#     . /etc/bashrc
+# fi
 
 export MYSQL_HOME="${HOME}/packages/mysql"
 export ORACLE_HOME="${HOME}/packages/oracle"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${ORACLE_HOME}"
 export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}:${ORACLE_HOME}:${MYSQL_HOME}/lib"
 {% if is_mac_os %}
-export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home"
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk-12.0.1.jdk/Contents/Home"
 {% else %}
 export JAVA_HOME="{{JAVA_HOME}}"
 {% endif %}
-export CLASS_PATH="${JAVA_HOME}/lib"
+export CLASSPATH="${JAVA_HOME}/lib"
 
 export M2_HOME="${HOME}/packages/apache-maven-3.5.4"
 
@@ -47,8 +47,8 @@ export CLICOLOR='Yes' # 是否输出颜色
 export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
 # 自定义使用Python版本
 export PYENV_ROOT="{{PYENV_ROOT}}"
-export PYTHON_VERSION={{PYTHON_VERSION}}
-export PYTHON_VIRTUEL_ROOT={{VIRTUEL_ROOT}}/${PYTHON_VERSION}
+export PYTHON_VERSION="{{PYTHON_VERSION}}"
+export PYTHON_VIRTUEL_ROOT="{{VIRTUEL_ROOT}}/${PYTHON_VERSION}"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 export PATH="${PATH}:/usr/local/opt/ncurses/bin"
 export PATH="${PATH}:{{HOME_ROOT}}/.nvm/:{{HOME_ROOT}}/.nvm/versions/node/{{NODE_VERSION}}/bin"
@@ -60,12 +60,13 @@ export PATH="${PATH}:${PYTHON_VIRTUEL_ROOT}/bin"
 export PATH="${PATH}:${MYSQL_HOME}/bin:${JAVA_HOME}/bin"
 export PATH="${PATH}:${M2_HOME}/bin"
 export PATH="${PATH}:${HOME}/istio-0.8.0/bin"
-export PATH="${PATH}:${HOME}/packages/redis/src/"
-export PATH="${PATH}:${HOME}/packages/mongodb/bin/"
-export PATH="${PATH}:/usr/local/Cellar/rabbitmq/3.7.14/sbin/"
+export PATH="${PATH}:${HOME}/packages/redis/src"
+export PATH="${PATH}:${HOME}/packages/mongodb/bin"
+export PATH="${PATH}:/usr/local/Cellar/rabbitmq/3.7.14/sbin"
 export PATH="${PATH}:${HOME}/packages/apache-maven-3.5.4/bin"
-export PATH="${PYENV_ROOT}/bin:${PATH}"
-export PATH="${HOME}/.poetry/bin:${PATH}"
+export PATH="${PATH}:${PYENV_ROOT}/bin"
+export PATH="${PATH}:${HOME}/.poetry/bin"
+export PATH="${PATH}:${PYENV_ROOT}/bin"
 
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
 alias senv="senv3"
@@ -89,9 +90,6 @@ alias cds="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum"
 alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
 alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe2012"
 alias cdd="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe-docs"
-
-# pyenv 配置
-export PATH="${PYENV_ROOT}/bin:${PATH}"
 
 # virtualenvwrappe 配置
 export WORKON_HOME=${HOME}/.virtualenvs
