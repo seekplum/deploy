@@ -124,7 +124,11 @@ fi
 
 # 可以查看当前Shell配置 cat ~/.oh-my-zsh/themes/${ZSH_THEME}.zsh-theme
 # export PS1='%n %{$fg[cyan]%}%c%{$reset_color%}$(__docker_machine_ps1) $(git_prompt_info)%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )%{$reset_color%}'
+{% if is_mac_os %}
 export PS1='%n %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )%{$reset_color%}'
+{% else %}
+export PS1='[%M] %n %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )%{$reset_color%}'
+{% endif %}
 
 # zsh支持 :* 等匹配
 unsetopt nomatch
