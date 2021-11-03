@@ -72,3 +72,27 @@
   tags:
     - remove_kubeadm
   when: is_linux_os
+
+- name: "恢复127.0.0.1配置"
+  blockinfile:
+    path: /etc/hosts
+    state: present
+    marker: ""
+    block: |
+      127.0.0.1    {{ ansible_hostname }}
+  become: yes
+  become_method: sudo
+  tags:
+    - remove_kubeadm
+  when: is_linux_os
+
+- name: "清除注释"
+  lineinfile:
+    path: /etc/hosts
+    regexp: "# k8s node"
+    state: absent
+  become: yes
+  become_method: sudo
+  tags:
+    - remove_kubeadm
+  when: is_linux_os
