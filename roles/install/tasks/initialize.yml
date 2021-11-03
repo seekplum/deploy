@@ -21,7 +21,7 @@
     state: present
     update_cache: true
   with_items:
-    - python2-pip
+    # - python2-pip
     - python3-pip
     - zip
     - unzip
@@ -49,6 +49,7 @@
     - lvm2
     # - haveged
     # - the_silver_searcher
+    - patch
   tags:
     - initialize
   when: is_centos_os
