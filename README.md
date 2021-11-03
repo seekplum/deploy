@@ -57,19 +57,19 @@ ssh-copy-id -i ~/.ssh/mykey.pub root@x.x.x.x
 * 执行卸载操作
 
 ```bash
-ansible-playbook -i hosts site.yml -t uninstall --skip-tags "remove_zsh,remove_docker,remove_nodejs,remove_golang,remove_java"
+ansible-playbook site.yml -i hosts -t uninstall --skip-tags "remove_zsh,remove_docker,remove_nodejs,remove_golang,remove_java"
 ```
 
 * 执行安装操作
 
 ```bash
-ansible-playbook -i hosts site.yml -t install --skip-tags "configure,initialize,zsh,python,virtualenv,docker,golang,java,nodejs,ansible"
+ansible-playbook site.yml -i hosts -t install --skip-tags "configure,initialize,zsh,python,virtualenv,docker,golang,java,nodejs,ansible"
 ```
 
 * kubeadm安装kubernets
 
 ```bash
-ansible-playbook -i hosts site.yml -t kubernetes --skip-tags "remove_kubeadm,remove_kubeadm_force,kubeadm,join_kubeadm"
+ansible-playbook site.yml -i hosts -t kubernetes --skip-tags "remove_kubeadm,remove_kubeadm_force,kubeadm,join_kubeadm"
 ```
 
 * -i: 指定运行的主机, 如 `-i hosts`
