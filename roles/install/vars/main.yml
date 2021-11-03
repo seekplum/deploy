@@ -11,7 +11,6 @@ GO_DOWNLOAD_URL_ON_MAC: "https://golang.org/dl/go{{ GO_VERSION }}.darwin-amd64.t
 GO_DOWNLOAD_URL_ON_LINUX: "https://golang.org/dl/go{{ GO_VERSION }}.linux-amd64.tar.gz"
 JAVA_DOWNLOAD_URL_ON_LINUX: "https://download.oracle.com/otn/java/jdk/8u211-b12/478a62b7d4e34b78b671c754eaaf38ab/jdk-8u211-linux-x64.tar.gz?AuthParam=1560823503_83e70af581ff14c622b3768d9a7b90d4"
 PYCONCREATE_PATH: "{{ TEMP_ROOT }}/pyconcrete-0.10.2.tar.gz"
-PY_PIP_PATH: "{{ TEMP_ROOT }}/get-pip.py"
 PACKAGES_ROOT: "{{ HOME_ROOT }}/packages"
 NODE_VERSION: "v12.22.0"
 PYENV_ROOT: "{{ HOME_ROOT }}/.pyenv"
