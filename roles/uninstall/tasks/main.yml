@@ -13,6 +13,8 @@
     - .npm
     - .node-gyp
     - .npminstall_tarball
+  become: yes
+  become_method: sudo
   tags:
     - remove_nodejs
 
@@ -24,3 +26,21 @@
   become_method: sudo
   tags:
     - remove_golang
+
+- name: remove java on RedHat
+  shell: "rpm -qa | grep java | xargs rpm -e --noscripts"
+  ignore_errors: True
+  become: yes
+  become_method: sudo
+  tags:
+    - remove_java
+  when: is_centos_os
+
+- name: uninstall java
+  file:
+    path: "{{ JAVA_HOME }}"
+    state: absent
+  become: yes
+  become_method: sudo
+  tags:
+    - remove_java
