@@ -89,21 +89,6 @@
   tags:
     - zsh
 
-- name: configuare zsh on Linux
-  shell: "sed -i '3,6d' {{ HOME_ROOT }}/.bash_profile"
-  changed_when: True
-  tags:
-    - zsh
-  when: is_linux_os
-
-# mac的sed用法有区别
-- name: configuare zsh on macOS
-  shell: "sed -i \"\" '3,6d' {{ HOME_ROOT }}/.bash_profile"
-  changed_when: True
-  tags:
-    - zsh
-  when: is_mac_os
-
 - name: update bash_profile configuare
   lineinfile:
     dest: "{{ HOME_ROOT }}/.bash_profile"
