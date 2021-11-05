@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+function start() {
+    mount -o remount,rw /
+    echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local start" >> ~/mystart.log
+    systemctl daemon-reload && systemctl restart systemd-resolved
+}
+
+function print_help() {
+    echo "Usage: bash $0 {start}"
+    echo "e.g: $0 start"
+}
+
+
+case "$1" in
+  start)
+        start
+        ;;
+  "")
+  # -h|--help)
+        print_help  # 参数为空时执行
+        ;;
+  *)  # 匹配都失败执行
+        print_help
+esac
+
+exit 0

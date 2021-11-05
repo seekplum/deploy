@@ -110,3 +110,28 @@
   tags:
     - configure
   when: is_centos_os
+
+- name: automatic startup execution on Ubuntu
+  block:
+    - name: copy my-rc-local.service
+      copy:
+        src: "rc-local.service"
+        dest: "/etc/systemd/system/my-rc-local.service"
+        mode: 755
+        force: true
+    - name: copy /etc/my-rc.local
+      copy:
+        src: "rc.local"
+        dest: "/etc/my-rc.local"
+        mode: 755
+        force: true
+    - name: start my-rc-local service
+      service:
+        name: "my-rc-local"
+        state: "started"
+        enabled: "yes"
+  become: yes
+  become_method: sudo
+  tags:
+    - configure
+  when: is_ubuntu_os
