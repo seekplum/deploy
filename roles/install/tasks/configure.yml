@@ -33,7 +33,7 @@
   tags:
     - configure
 
-- name: copy vim configure into home
+- name: copy configure into home
   copy:
     src: "{{ role_path }}/files/{{ item }}"
     dest: "{{ HOME_ROOT }}"
@@ -41,6 +41,7 @@
     force: false # 避免原主机文件被覆盖
   with_items:
     - .vimrc
+    - .gitconfig
   tags:
     - configure
 
