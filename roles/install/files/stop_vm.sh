@@ -6,5 +6,6 @@ else
    stophosts=$*
 fi
 
-for host in ${stophosts}; do VBoxManage controlvm ${host} poweroff; done
+# poweroff 类似直接拔电源
+for host in ${stophosts}; do VBoxManage controlvm ${host} acpipowerbutton; done
 
