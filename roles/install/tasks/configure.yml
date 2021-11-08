@@ -135,3 +135,22 @@
   tags:
     - configure
   when: is_ubuntu_os
+
+- name: 配置DNS
+  block:
+    - name: "修改DNS"
+      replace:
+        path: '/etc/systemd/resolved.conf'
+        regexp: '^#?DNS=.*'
+        replace: 'DNS=8.8.8.8 114.114.114.114'
+    - name: "重启服务"
+      systemd:
+        name: "systemd-resolved"
+        state: "restarted"
+        enabled: "yes"
+        daemon_reload: yes
+  become: yes
+  become_method: sudo
+  tags:
+    - configure
+  when: is_ubuntu_os
