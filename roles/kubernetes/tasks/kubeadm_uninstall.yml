@@ -62,24 +62,11 @@
 - name: "清除hosts配置"
   lineinfile:
     path: /etc/hosts
-    regexp: "(^{{ hostvars[item].ansible_default_ipv4.address }})|({{ hostvars[item].ansible_hostname }}$)"
+    regexp: "(^{{ hostvars[item].ansible_default_ipv4.address }}\\s\\S+)|(\\S+\\s{{ hostvars[item].ansible_hostname }}$)"
     state: absent
   with_flattened:
     - '{{ groups["masters"] }}'
     - '{{ groups["slaves"] }}'
-  become: yes
-  become_method: sudo
-  tags:
-    - remove_kubeadm
-  when: is_linux_os
-
-- name: "恢复127.0.0.1配置"
-  blockinfile:
-    path: /etc/hosts
-    state: present
-    marker: ""
-    block: |
-      127.0.0.1    {{ ansible_hostname }}
   become: yes
   become_method: sudo
   tags:

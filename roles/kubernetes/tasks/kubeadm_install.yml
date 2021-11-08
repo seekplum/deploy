@@ -147,16 +147,11 @@
     - kubeadm
   when: is_ubuntu_os
 
-- name: "Linux重载配置"
-  shell: systemctl daemon-reload
-  tags:
-    - kubeadm
-  when: is_linux_os
-
 - name: "Linux重启Docker"
-  service:
+  systemd:
     name: "docker"
     state: "restarted"
+    daemon_reload: yes
   tags:
     - kubeadm
   when: is_linux_os
@@ -166,6 +161,7 @@
     name: "kubelet"
     state: "restarted"
     enabled: "yes"
+    daemon_reload: yes
   tags:
     - kubeadm
   when: is_linux_os
