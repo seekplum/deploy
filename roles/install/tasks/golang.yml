@@ -41,7 +41,7 @@
         url: "{{ GO_DOWNLOAD_URL_ON_LINUX }}"
         dest: "{{ GO_PACKAGE_PATH_ON_LINUX }}"
         force: false
-      when: (is_linux_os) and existing_of_go_on_linux.stdout == "1"
+      when: is_linux_os and existing_of_go_on_linux.stdout == "1"
 
     - name: download golang packages on macOS
       get_url:
@@ -55,7 +55,9 @@
         src: "{{ GO_PACKAGE_PATH_ON_LINUX }}"
         dest: "{{ SOFT_INSTALL_ROOT }}"
         remote_src: true
-      when: (is_linux_os) and installed_of_go.stdout == "1"
+      become: yes
+      become_method: sudo
+      when: is_linux_os and installed_of_go.stdout == "1"
 
     - name: unarchive golang on macOS
       shell: "tar -zxvf {{ GO_PACKAGE_PATH_ON_MAC }} -C {{ SOFT_INSTALL_ROOT }}"
