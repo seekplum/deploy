@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-from scratte.factory import create_app
-from scratte.settings import config
+from app.factory import create_app
+from app.settings import config
 
 app = create_app(config)
 

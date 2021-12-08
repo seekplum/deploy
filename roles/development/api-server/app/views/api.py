@@ -7,8 +7,8 @@ import git
 from flask import request
 from flask import Blueprint
 
-from scratte.helpers.jsonhelper import successful_ret
-from scratte.settings import config
+from app.helpers.jsonhelper import successful_ret
+from app.settings import config
 
 logger = logging.getLogger(__name__)
 

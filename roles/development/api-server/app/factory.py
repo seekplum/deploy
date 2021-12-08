@@ -14,10 +14,10 @@ from flask import Flask, Blueprint
 from flask import g, request
 from simplejson.errors import JSONDecodeError
 
-from scratte.settings import config
-from scratte.helpers.jsonhelper import failure_ret
+from app.settings import config
+from app.helpers.jsonhelper import failure_ret
 
-APP_NAME = 'scratte'
+APP_NAME = 'app'
 PACKAGE_NAME = APP_NAME
 PACKAGE_PATH = APP_NAME
 
