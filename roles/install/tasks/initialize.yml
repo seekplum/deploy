@@ -32,6 +32,7 @@
     - zlib
     - zlib-devel
     - libffi-devel
+    - sqlite-devel
     - rsync
     - git
     - bzip2
