@@ -1,4 +1,16 @@
 ---
+
+- name: 获取ansible系统变量
+  ansible.builtin.setup:
+    filter:
+      - ansible_os_family
+      - ansible_hostname
+      - ansible_user_id
+      - ansible_user_dir
+      - ansible_default_ipv4
+  tags:
+    - common
+
 - name: "检查当前节点操作系统"
   set_fact:
     is_linux_os: '{{ ansible_os_family == "RedHat" or ansible_os_family == "Debian" }}'

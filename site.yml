@@ -3,6 +3,7 @@
 
 - name: uninstall
   hosts: common
+  gather_facts: False
   roles:
     - common
     - uninstall
@@ -14,6 +15,7 @@
 
 - name: install
   hosts: common
+  gather_facts: False
   roles:
     - common
     - install
@@ -27,6 +29,7 @@
 
 - name: kubernetes
   hosts: masters,slaves
+  gather_facts: False
   roles:
     - common
     - kubernetes
