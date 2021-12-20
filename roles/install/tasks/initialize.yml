@@ -60,6 +60,7 @@
 #     - initialize
 #   when: is_centos_os
 
+# sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys <Key>
 - name: install packages on Ubuntu
   apt:
     pkg: "{{ item }}"
@@ -192,22 +193,6 @@
   shell: "trash --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_trash
   changed_when: False
-  tags:
-    - initialize
-
-- name: check pyenv installed
-  shell: "test -d {{ PYENV_ROOT }} && echo 0 || echo 1"
-  register: installed_of_pyenv
-  changed_when: False
-  tags:
-    - initialize
-
-- name: download pyenv
-  git:
-    repo: git://github.com/pyenv/pyenv
-    dest: "{{ PYENV_ROOT }}"
-    accept_hostkey: true
-  when: installed_of_pyenv.stdout == "1"
   tags:
     - initialize
 
