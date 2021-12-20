@@ -98,13 +98,36 @@
     - configure
   when: is_ubuntu_os
 
+- name: copy git ppa list on Ubuntu
+  copy:
+    src: "git-core-ubuntu-ppa-focal.list"
+    dest: "/etc/apt/sources.list.d/"
+    mode: 0644
+    force: true
+  become: yes
+  become_method: sudo
+  tags:
+    - configure
+  when: is_ubuntu_os
+
 - name: copy repo on Redhat
   copy:
-    src: "CentOS-Base.repo"
+    src: "{{ item }}"
     dest: "/etc/yum.repos.d/"
     mode: 0644
     force: true
     backup: true
+  with_items:
+    - "CentOS-Base.repo"
+    - "wandisco-git.repo"
+  become: yes
+  become_method: sudo
+  tags:
+    - configure
+  when: is_centos_os
+
+- name: import gpg key on Redhat
+  shell: "rpm --import http://opensource.wandisco.com/RPM-GPG-KEY-WANdisco"
   become: yes
   become_method: sudo
   tags:
