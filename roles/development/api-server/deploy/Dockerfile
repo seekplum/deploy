@@ -1,14 +1,15 @@
 FROM python:3.7-slim
 
-MAINTAINER seekplum <1131909224m@sina.cn>
+LABEL maintainer="seekplum <1131909224m@sina.cn>"
 
 ADD requirements/requirements.txt /tmp/requirements.txt
-RUN set -xe \
-    && apt-get update \
-    && apt-get install -y git \
-    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo "Asia/Shanghai" > /etc/timezone \
-    && pip install -r /tmp/requirements.txt -i https://mirrors.aliyun.com/pypi/simple \
-    && rm -f /tmp/requirements.txt
+RUN set -xe && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo "Asia/Shanghai" > /etc/timezone && \
+    sed -i -E -e 's/(deb|security).debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y git && \
+    pip install -r /tmp/requirements.txt -i https://mirrors.aliyun.com/pypi/simple && \
+    rm -f /tmp/requirements.txt
 # 1024 * 1024 * 1024 * 50
 RUN git config --global http.postBuffer 53687091200
 RUN git config --global --add core.compression -1
