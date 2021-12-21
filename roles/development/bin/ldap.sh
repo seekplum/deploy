@@ -8,6 +8,13 @@ LDAP_SERVER_PORT="389"
 LDAP_ADMIN_USER="cn=admin,dc=seekplum,dc=io"
 LDAP_ADMIN_PASS="seekplum"
 
+
+function print_error () {
+    echo -e "\033[31m$1\033[0m"
+}
+
+[[ -z ${LDAP_SERVER_IP} ]] && print_error "Miss LDAP_SERVER_IP" && exit 1
+
 create_user () {
     if [ x"$#" != x"3" ];then
         echo "Usage: bash $0 create <username> <password> <realname>"
@@ -21,8 +28,8 @@ create_user () {
     REALNAME="$3"
     REALNAME_BASE64=$(echo -n $REALNAME | base64)
 
-    # add count & group 
-    cat <<EOF | ldapmodify -c -h $LDAP_SERVER_IP -p $LDAP_SERVER_PORT -w $LDAP_ADMIN_PASS -D $LDAP_ADMIN_USER 
+    # add count & group
+    cat <<EOF | ldapmodify -c -h $LDAP_SERVER_IP -p $LDAP_SERVER_PORT -w $LDAP_ADMIN_PASS -D $LDAP_ADMIN_USER
 dn: cn=$USERNAME,ou=users,dc=seekplum,dc=io
 changetype: add
 objectClass: top
@@ -53,7 +60,7 @@ modify_password () {
     ENCRYPT_PASSWORD=$(slappasswd -h {ssha} -s "$PASSWORD")
 
     # modify
-    cat <<EOF | ldapmodify -c -h $LDAP_SERVER_IP -p $LDAP_SERVER_PORT -w $LDAP_ADMIN_PASS -D $LDAP_ADMIN_USER 
+    cat <<EOF | ldapmodify -c -h $LDAP_SERVER_IP -p $LDAP_SERVER_PORT -w $LDAP_ADMIN_PASS -D $LDAP_ADMIN_USER
 dn: cn=$USERNAME,ou=users,dc=seekplum,dc=io
 changetype: modify
 replace: userPassword
@@ -70,7 +77,7 @@ delete_user () {
     # param
     USERNAME="$1"
 
-    # delete user 
+    # delete user
     ldapdelete -c -h $LDAP_SERVER_IP -p $LDAP_SERVER_PORT -w $LDAP_ADMIN_PASS -D $LDAP_ADMIN_USER "cn=$USERNAME,ou=users,dc=seekplum,dc=io"
 }
 

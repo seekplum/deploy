@@ -14,29 +14,29 @@ MIN_DOCKER_VERSION='17.05.0'
 MIN_COMPOSE_VERSION='1.17.0'
 MIN_RAM=3072 # MB
 
-DOCKER_VERSION=$(docker version --format '{{.Server.Version}}')
-COMPOSE_VERSION=$(docker-compose --version | sed 's/docker-compose version \(.\{1,\}\),.*/\1/')
-RAM_AVAILABLE_IN_DOCKER=$(docker run --rm busybox free -m 2>/dev/null | awk '/Mem/ {print $2}');
+# DOCKER_VERSION=$(docker version --format '{{.Server.Version}}')
+# COMPOSE_VERSION=$(docker-compose --version | sed 's/docker-compose version \(.\{1,\}\),.*/\1/')
+# RAM_AVAILABLE_IN_DOCKER=$(docker run --rm busybox free -m 2>/dev/null | awk '/Mem/ {print $2}');
 
 # Compare dot-separated strings - function below is inspired by https://stackoverflow.com/a/37939589/808368
 function ver () { echo "$@" | awk -F. '{ printf("%d%03d%03d", $1,$2,$3); }'; }
 
-function pre_check() {
-    if [[ $(ver ${DOCKER_VERSION}) -lt $(ver ${MIN_DOCKER_VERSION}) ]]; then
-        echo "FAIL: Expected minimum Docker version to be $MIN_DOCKER_VERSION but found $DOCKER_VERSION"
-        exit -1
-    fi
+# function pre_check() {
+#     if [[ $(ver ${DOCKER_VERSION}) -lt $(ver ${MIN_DOCKER_VERSION}) ]]; then
+#         echo "FAIL: Expected minimum Docker version to be $MIN_DOCKER_VERSION but found $DOCKER_VERSION"
+#         exit -1
+#     fi
 
-    if [[ $(ver ${COMPOSE_VERSION}) -lt $(ver ${MIN_COMPOSE_VERSION}) ]]; then
-        echo "FAIL: Expected minimum docker-compose version to be $MIN_COMPOSE_VERSION but found $COMPOSE_VERSION"
-        exit -1
-    fi
+#     if [[ $(ver ${COMPOSE_VERSION}) -lt $(ver ${MIN_COMPOSE_VERSION}) ]]; then
+#         echo "FAIL: Expected minimum docker-compose version to be $MIN_COMPOSE_VERSION but found $COMPOSE_VERSION"
+#         exit -1
+#     fi
 
-    if [[ "$RAM_AVAILABLE_IN_DOCKER" -lt "$MIN_RAM" ]]; then
-        echo "FAIL: Expected minimum RAM available to Docker to be $MIN_RAM MB but found $RAM_AVAILABLE_IN_DOCKER MB"
-        exit -1
-    fi
-}
+#     if [[ "$RAM_AVAILABLE_IN_DOCKER" -lt "$MIN_RAM" ]]; then
+#         echo "FAIL: Expected minimum RAM available to Docker to be $MIN_RAM MB but found $RAM_AVAILABLE_IN_DOCKER MB"
+#         exit -1
+#     fi
+# }
 
 function replace_secret() {
     if [[ "`uname`" = "Darwin" ]]; then
@@ -54,31 +54,31 @@ function compose_up() {
     done
 }
 
-function deploy_sentry() {
-    # sentry 目录的内容来自 https://github.com/getsentry/onpremise
-    # 构建镜像
-    docker-compose build
+# function deploy_sentry() {
+#     # sentry 目录的内容来自 https://github.com/getsentry/onpremise
+#     # 构建镜像
+#     docker-compose build
 
-    # 生成密钥
-    # 注意！！！这一步操作后，需要把输出的密钥字符串写入到 .env `SENTRY_SECRET_KEY` 配置项中
-    SECRET_KEY=$(docker-compose run --rm sentry-web config generate-secret-key 2> /dev/null | tail -n1 | sed -e 's/[\/&]/\\&/g')
-    echo "SENTRY_SECRET_KEY: ${SECRET_KEY}"
-    replace_secret ${SECRET_KEY}
+#     # 生成密钥
+#     # 注意！！！这一步操作后，需要把输出的密钥字符串写入到 .env `SENTRY_SECRET_KEY` 配置项中
+#     SECRET_KEY=$(docker-compose run --rm sentry-web config generate-secret-key 2> /dev/null | tail -n1 | sed -e 's/[\/&]/\\&/g')
+#     echo "SENTRY_SECRET_KEY: ${SECRET_KEY}"
+#     replace_secret ${SECRET_KEY}
 
-    # 等待 postgres 服务启动完成
-    sleep 10
+#     # 等待 postgres 服务启动完成
+#     sleep 10
 
-    # 安装 sentry 并执行数据库迁移
-    docker-compose run --rm sentry-web upgrade --noinput
+#     # 安装 sentry 并执行数据库迁移
+#     docker-compose run --rm sentry-web upgrade --noinput
 
-    # 启动Sentry服务
-    compose_up sentry-web
-    docker-compose up -d cron worker
-    docker-compose exec nginx nginx -s reload
+#     # 启动Sentry服务
+#     compose_up sentry-web
+#     docker-compose up -d cron worker
+#     docker-compose exec nginx nginx -s reload
 
-    # 创建管理员用户
-    docker-compose run --rm sentry-web createuser --email admin@qq.com --password seekplum --superuser
-}
+#     # 创建管理员用户
+#     docker-compose run --rm sentry-web createuser --email admin@qq.com --password seekplum --superuser
+# }
 
 function uninstall() {
     find ${file_path}/conf/nginx/conf.d/* | grep -v -E "0-ws-prepare.conf|default.conf" | xargs sudo rm -f
@@ -103,11 +103,11 @@ function create_user() {
     fi
 }
 
-function drone_server() {
-    compose_up drone-server
-    docker-compose up -d drone-agent
-    docker-compose exec nginx nginx -s reload
-}
+# function drone_server() {
+#     compose_up drone-server
+#     docker-compose up -d drone-agent
+#     docker-compose exec nginx nginx -s reload
+# }
 
 function deploy_api() {
     compose_up api
@@ -126,31 +126,36 @@ function post_deploy() {
     if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
         echo "0.执行 bash -x $0 create_user 创建用户"
     fi
-    echo "1.在 gitea 的 hjd 用户的 设置 -> 应用 中创建 OAuth2 应用程序, 重定向URI为 http://drone.seekplum.top/login"
-    echo "2.修改 ${ENV_FILE} 中的 DRONE_GITEA_CLIENT_ID、DRONE_GITEA_CLIENT_SECRET 变量"
-    echo "3.执行 bash -x $0 drone_server 部署 Drone"
-    echo "4.按照说明文档更新 Jenkins 配置"
+    # echo "1.在 gitea 的 hjd 用户的 设置 -> 应用 中创建 OAuth2 应用程序, 重定向URI为 http://drone.seekplum.top/login"
+    # echo "2.修改 ${ENV_FILE} 中的 DRONE_GITEA_CLIENT_ID、DRONE_GITEA_CLIENT_SECRET 变量"
+    # echo "3.执行 bash -x $0 drone_server 部署 Drone"
+    echo "1.按照说明文档更新 Jenkins 配置"
 }
 
 function install() {
     mkdir -p ${VOLUMES_ROOT}
 
-    compose_up ldapadmin gerrit gitea jenkins
+    compose_up ldapadmin gerrit jenkins
     # jenkins的运行用户是 1000:1000, 但默认目录权限是 root:root
-    sudo chown -R $(whoami):$(groups | awk '{print $1}') ${VOLUMES_ROOT}/jenkins
-    docker-compose up -d ldap nginx
-    if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
-        docker-compose run --rm gitea2
+    if [[ "`uname`" = "Darwin" ]]; then
+        sudo chown -R $(whoami):$(groups | awk '{print $1}') ${VOLUMES_ROOT}/jenkins
+    else
+        sudo chown -R 1000:1000 ${VOLUMES_ROOT}/jenkins
     fi
+
+    docker-compose up -d ldap nginx
+    # if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
+    #     docker-compose run --rm gitea2
+    # fi
 }
 
 function print_help() {
-    echo "Usage: bash $0 {pre_check|install|uninstall|create_user|deploy_sentry|deploy_blog|deploy_api|deploy}"
+    echo "Usage: bash $0 {pre_check|install|reinstall|uninstall|create_user|deploy_blog|deploy_api}"
     echo "e.g: $0 uninstall ${CLEAR_VOLUMES}"
     echo "e.g: $0 pre_check"
     echo "e.g: $0 install ${CLEAR_VOLUMES}"
     echo "e.g: $0 crate_user"
-    echo "e.g: $0 deploy_sentry"
+    # echo "e.g: $0 deploy_sentry"
     echo "e.g: $0 deploy_blog"
     echo "e.g: $0 deploy_api"
     echo "e.g: $0 deploy"
@@ -172,13 +177,13 @@ case "$1" in
   create_user)
         create_user ${@:2}
         ;;
-  drone_server)
-        drone_server
-        ;;
-  deploy_sentry)
-        pre_check
-        deploy_sentry
-        ;;
+#   drone_server)
+#         drone_server
+#         ;;
+#   deploy_sentry)
+#         pre_check
+#         deploy_sentry
+#         ;;
   deploy_blog)
         deploy_blog
         ;;
@@ -191,8 +196,8 @@ case "$1" in
         create_user ${@:2}
         # sentry 需要的配置比较高，暂时不部署
         # deploy_sentry
-        deploy_api ${@:2}
-        deploy_blog
+        # deploy_api ${@:2}
+        # deploy_blog
         post_deploy
         ;;
   "")

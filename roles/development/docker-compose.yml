@@ -26,14 +26,14 @@ services:
       LDAP_ORGANISATION: "seekplum.io"
       LDAP_DOMAIN: "seekplum.io"
       LDAP_ADMIN_PASSWORD: "seekplum"
-      LDAP_CONFIG_PASSWORD: "seekplum"
-      LDAP_BACKEND: "mdb"
       LDAP_TLS: "false"
-      LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
       LDAP_READONLY_USER: "true"
       LDAP_READONLY_USER_USERNAME: "guest"
       LDAP_READONLY_USER_PASSWORD: "123456"
       LDAP_SERVER_IP: ldap
+      LDAP_CONFIG_PASSWORD: "seekplum"
+      LDAP_BACKEND: "mdb"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
     volumes:
       - ${VOLUMES_ROOT}/slapd/database:/var/lib/ldap
       - ${VOLUMES_ROOT}/slapd/config:/etc/ldap/slapd.d
@@ -55,7 +55,7 @@ services:
     image: openfrontier/gerrit:3.0.0
     depends_on:
       - ldap
-    ports: 
+    ports:
       - "29418:29418"
     volumes:
       - ${VOLUMES_ROOT}/gerrit:/var/gerrit/review_site
@@ -71,71 +71,14 @@ services:
       LDAP_USERNAME: cn=guest,dc=seekplum,dc=io
       LDAP_PASSWORD: 123456
       GERRIT_INIT_ARGS: --install-plugin=download-commands
+      INITIAL_ADMIN_USER: admin
+      INITIAL_ADMIN_PASSWORD: admin  # 固定值，设置后可以用 ldap 的 admin 密码登录
     restart: on-failure
     healthcheck:
       test: "if [ `curl -I -m 10 -o /dev/null -s -w %{http_code} http://gerrit:8080` -ne 200 ]; then exit 1; else exit 0; fi;"
       interval: 5s
       timeout: 1s
       retries: 14
-  gitea2:
-    image: gitea/gitea:1.10.2
-    depends_on:
-      - ldap
-      - gitea
-    restart: on-failure:1
-    user: git
-    command: ["/bin/sh", "/init-gitea.sh"]
-    environment:
-      - USER_UID=1000
-      - USER_GID=1000
-      - TZ=Asia/Shanghai
-    volumes:
-      - ${VOLUMES_ROOT}/gitea:/data
-      - ./bin/init-gitea.sh:/init-gitea.sh
-  gitea:
-    image: gitea/gitea:1.10.2
-    environment:
-      - USER_UID=1000
-      - USER_GID=1000
-      - TZ=Asia/Shanghai
-    ports:
-      - "2222:22" # git ssh登录端口，注意不要不要和系统的ssh登录端口重复了，同时要注意端口是否开放了
-    restart: always
-    volumes:
-      - ${VOLUMES_ROOT}/gitea:/data
-  drone-server:
-    image: drone/drone:1.6.4
-    depends_on:
-      - gitea
-    volumes:
-      - ${VOLUMES_ROOT}/drone:/data
-    external_links:
-      - gitea:gitea.seekplum.top
-    restart: always
-    environment:
-      - DRONE_GIT_ALWAYS_AUTH=false
-      - DRONE_GITEA_SERVER=http://gitea.seekplum.top:3000 # 需要在浏览器中和容器中都能访问
-      - DRONE_GITEA_CLIENT_ID=${DRONE_GITEA_CLIENT_ID}
-      - DRONE_GITEA_CLIENT_SECRET=${DRONE_GITEA_CLIENT_SECRET}
-      - DRONE_RUNNER_CAPACITY=2
-      - DRONE_SERVER_HOST=drone.seekplum.top
-      - DRONE_SERVER_PROTO=http
-      - DRONE_TLS_AUTOCERT=false
-      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
-      - DRONE_AGENTS_ENABLED=true
-      - DRONE_USER_CREATE=username:hjd,admin:true
-  drone-agent:
-    image: drone/agent:1.6.2
-    depends_on:
-      - drone-server
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: always
-    environment:
-      - DRONE_RPC_SERVER=http://drone.seekplum.top
-      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
-      - DRONE_RUNNER_CAPACITY=2
-      - DRONE_RUNNER_NAME=seekplum
   jenkins:
     image: jenkins/jenkins:lts
     volumes:
@@ -155,68 +98,127 @@ services:
       - ./data/www:/var/www:ro
       - ${VOLUMES_ROOT}/nginx/logs:/var/log/nginx
     restart: always
-  smtp:
-    restart: unless-stopped
-    image: tianon/exim4
+  # gitea2:
+  #   image: gitea/gitea:1.10.2
+  #   depends_on:
+  #     - ldap
+  #     - gitea
+  #   restart: on-failure:1
+  #   user: git
+  #   command: ["/bin/sh", "/init-gitea.sh"]
+  #   environment:
+  #     - USER_UID=1000
+  #     - USER_GID=1000
+  #     - TZ=Asia/Shanghai
+  #   volumes:
+  #     - ${VOLUMES_ROOT}/gitea:/data
+  #     - ./bin/init-gitea.sh:/init-gitea.sh
+  # gitea:
+  #   image: gitea/gitea:1.10.2
+  #   environment:
+  #     - USER_UID=1000
+  #     - USER_GID=1000
+  #     - TZ=Asia/Shanghai
+  #   ports:
+  #     - "2222:22" # git ssh登录端口，注意不要不要和系统的ssh登录端口重复了，同时要注意端口是否开放了
+  #   restart: always
+  #   volumes:
+  #     - ${VOLUMES_ROOT}/gitea:/data
+  # drone-server:
+  #   image: drone/drone:1.6.4
+  #   depends_on:
+  #     - gitea
+  #   volumes:
+  #     - ${VOLUMES_ROOT}/drone:/data
+  #   external_links:
+  #     - gitea:gitea.seekplum.top
+  #   restart: always
+  #   environment:
+  #     - DRONE_GIT_ALWAYS_AUTH=false
+  #     - DRONE_GITEA_SERVER=http://gitea.seekplum.top:3000 # 需要在浏览器中和容器中都能访问
+  #     - DRONE_GITEA_CLIENT_ID=${DRONE_GITEA_CLIENT_ID}
+  #     - DRONE_GITEA_CLIENT_SECRET=${DRONE_GITEA_CLIENT_SECRET}
+  #     - DRONE_RUNNER_CAPACITY=2
+  #     - DRONE_SERVER_HOST=drone.seekplum.top
+  #     - DRONE_SERVER_PROTO=http
+  #     - DRONE_TLS_AUTOCERT=false
+  #     - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
+  #     - DRONE_AGENTS_ENABLED=true
+  #     - DRONE_USER_CREATE=username:hjd,admin:true
+  # drone-agent:
+  #   image: drone/agent:1.6.2
+  #   depends_on:
+  #     - drone-server
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   restart: always
+  #   environment:
+  #     - DRONE_RPC_SERVER=http://drone.seekplum.top
+  #     - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
+  #     - DRONE_RUNNER_CAPACITY=2
+  #     - DRONE_RUNNER_NAME=seekplum
+  # smtp:
+  #   restart: unless-stopped
+  #   image: tianon/exim4
 
-  memcached:
-    restart: unless-stopped
-    image: memcached:1.5-alpine
+  # memcached:
+  #   restart: unless-stopped
+  #   image: memcached:1.5-alpine
 
-  redis:
-    restart: unless-stopped
-    image: redis:3.2-alpine
+  # redis:
+  #   restart: unless-stopped
+  #   image: redis:3.2-alpine
 
-  postgres:
-    restart: unless-stopped
-    image: postgres:9.5
-    volumes:
-      - ${VOLUMES_ROOT}/sentry-postgres:/var/lib/postgresql/data
+  # postgres:
+  #   restart: unless-stopped
+  #   image: postgres:9.5
+  #   volumes:
+  #     - ${VOLUMES_ROOT}/sentry-postgres:/var/lib/postgresql/data
 
-  sentry-web:
-    <<: *defaults
-    external_links:
-      - ldap:ldap.seekplum.top
+  # sentry-web:
+  #   <<: *defaults
+  #   external_links:
+  #     - ldap:ldap.seekplum.top
 
-  cron:
-    <<: *defaults
-    command: run cron
+#   cron:
+#     <<: *defaults
+#     command: run cron
 
-  worker:
-    <<: *defaults
-    command: run worker
+#   worker:
+#     <<: *defaults
+#     command: run worker
 
-  api:
-    image: api-server:develop
-    build:
-      context: ./api-server
-      dockerfile: deploy/Dockerfile
-    environment:
-      - GIT_PYTHON_REFRESH=quiet
-      - LOG_REQUEST=yes
-      - SERVER_PORT=8099
-      - BLOG_ROOT=/opt/blog/seekplum.github.io
-      - BLOG_REMOTE=git@github.com:seekplum/seekplum.github.io.git
-    restart: on-failure
-    volumes:
-      - ${VOLUMES_ROOT}/blog:/opt/blog
-      - ./data/config:/root/.ssh/config:ro
-      - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
-#    command: python wsgi.py
+#   api:
+#     image: api-server:develop
+#     build:
+#       context: ./api-server
+#       dockerfile: deploy/Dockerfile
+#     environment:
+#       - GIT_PYTHON_REFRESH=quiet
+#       - LOG_REQUEST=yes
+#       - SERVER_PORT=8099
+#       - BLOG_ROOT=/opt/blog/seekplum.github.io
+#       - BLOG_REMOTE=git@github.com:seekplum/seekplum.github.io.git
+#     restart: on-failure
+#     volumes:
+#       - ${VOLUMES_ROOT}/blog:/opt/blog
+#       - ./data/config:/root/.ssh/config:ro
+#       - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
+# #    command: python wsgi.py
 
-  init_blog:
-    image: tutum/curl:alpine
-    depends_on: 
-      - api
-    command: curl -X POST http://api:8099/api/update/blog
-  
-  blog:
-    image: blog:develop
-    build:
-      context: ./blog
-    environment: 
-      - LANG=C.UTF-8
-    restart: on-failure
-    volumes:
-      - ${VOLUMES_ROOT}/blog/seekplum.github.io:/opt/blog
-#    command: jekyll serve --trace --host=0.0.0.0
+#   init_blog:
+#     image: curlimages/curl
+#     depends_on:
+#       - api
+#     command: curl -X POST http://api:8099/api/update/blog
+
+#   blog:
+#     image: blog:develop
+#     build:
+#       context: ./blog
+#     environment:
+#       - LANG=C.UTF-8
+#     restart: on-failure
+#     volumes:
+#       - ${VOLUMES_ROOT}/blog/seekplum.github.io:/opt/blog
+# #    command: jekyll serve --trace --host=0.0.0.0
