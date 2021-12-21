@@ -149,6 +149,22 @@ function install() {
     # fi
 }
 
+function print_error () {
+    echo -e "\033[31m$1\033[0m"
+}
+
+function gen_ca() {
+    openssl dhparam -dsaparam -out ${file_path}/data/acme/.lego/certificates/dhparam.pem 4096
+
+    [[ -z ${ALICLOUD_ACCESS_KEY_FILE} ]] && print_error "Miss ALICLOUD_ACCESS_KEY_FILE" && exit 1
+    [[ -z ${ALICLOUD_SECRET_KEY_FILE} ]] && print_error "Miss ALICLOUD_SECRET_KEY_FILE" && exit 1
+
+    docker-compose run --rm \
+        --volume ${ALICLOUD_ACCESS_KEY_FILE}:/access_key:ro \
+        --volume ${ALICLOUD_SECRET_KEY_FILE}:/secret_key:ro \
+        acme
+}
+
 function print_help() {
     echo "Usage: bash $0 {pre_check|install|reinstall|uninstall|create_user|deploy_blog|deploy_api}"
     echo "e.g: $0 uninstall ${CLEAR_VOLUMES}"
@@ -166,6 +182,9 @@ start_time=$(date +%s)
 case "$1" in
   pre_check)
         pre_check
+        ;;
+  gen_ca)
+        gen_ca
         ;;
   uninstall)
         uninstall ${@:2}

@@ -10,6 +10,7 @@ test.py
 test.*
 hosts
 password
+roles/development/data/acme/.lego/certificates/
 roles/development/conf/nginx/conf.d
 roles/development/data/acme/.lego/certificates/dhparam.pem
 roles/development/dev-data*
