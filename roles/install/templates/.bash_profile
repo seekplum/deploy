@@ -88,7 +88,7 @@ alias cdw="cd ${WEBPROJECTSPATH}"
 alias cds="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum"
 alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
 alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe2012"
-alias cdd="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe-docs"
+alias cdd="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/deploy"
 
 # virtualenvwrappe 配置
 export WORKON_HOME=${HOME}/.virtualenvs
@@ -97,6 +97,7 @@ export VIRTUALENVWRAPPER_PYTHON={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/py
 export VIRTUALENVWRAPPER_VIRTUALENV={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenv
 # export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
 # source ${VIRTUALENVWRAPPER_SCRIPT}
+# export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
 export NVM_DIR="$HOME/.nvm"
 if [ -s "$NVM_DIR/nvm.sh" ]; then

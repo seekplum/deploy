@@ -8,6 +8,7 @@
 - include: golang.yml
 - include: java.yml
 - include: nodejs.yml
+- include: k3s.yml
 
 - name: check pyenv installed
   shell: "test -d {{ PYENV_ROOT }} && echo 0 || echo 1"

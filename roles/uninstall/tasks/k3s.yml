@@ -1,0 +1,57 @@
+---
+
+- name: Check that the k3s-uninstall.sh exists
+  stat:
+    path: /usr/local/bin/k3s-uninstall.sh
+  register: k3s_server_scripts
+  tags:
+    - remove_k3s
+
+- name: remove k3s
+  # server 节点
+  shell: "sh /usr/local/bin/k3s-uninstall.sh"
+  # agent 节点
+  # shell: "sh /usr/local/bin/k3s-agent-uninstall.sh"
+  changed_when: False
+  tags:
+    - remove_k3s
+  become: yes
+  become_method: sudo
+  when: is_linux_os and k3s_server_scripts.stat.exists == True
+
+- name: "删除文件"
+  file:
+    path: "{{ item }}"
+    state: absent
+    force: true
+  with_items:
+    - "{{ HOME_ROOT }}/.kube/"
+    - "/etc/rancher"
+  tags:
+    - remove_k3s
+  become: yes
+  become_method: sudo
+  when: is_linux_os
+
+- name: "remove helm"
+  file:
+    path: "{{ item }}"
+    state: absent
+    force: true
+  with_items:
+    - "{{ HOME_ROOT }}/linux-amd64"
+    - "/usr/local/bin/helm"
+  tags:
+    - remove_helm
+  become: yes
+  become_method: sudo
+  when: is_linux_os
+
+- name: 增加 KUBECONFIG 注释
+  replace:
+    path: '{{ HOME_ROOT }}/.bash_profile'
+    regexp: '^(export KUBECONFIG.*)'
+    replace: '# \1'
+  tags:
+    - remove_helm
+  when: is_linux_os

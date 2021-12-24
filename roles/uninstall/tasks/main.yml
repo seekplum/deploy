@@ -3,6 +3,7 @@
 
 - include: zsh.yml
 - include: docker.yml
+- include: k3s.yml
 
 - name: uninstall nvm npm and node
   file:

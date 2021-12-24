@@ -1,0 +1,256 @@
+---
+
+- name: "Ubuntu关闭防火墙"
+  service:
+    name: "ufw"
+    state: "stopped"
+    enabled: "no"
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_ubuntu_os
+
+- name: "RedHat关闭防火墙"
+  service:
+    name: "firewalld"
+    state: "stopped"
+    enabled: "no"
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_centos_os
+
+- name: "临时关闭交换分区"
+  shell: swapoff -a
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_linux_os
+
+- name: "Linux获取交换分区名字"
+  shell: cat /etc/fstab | grep " swap " | awk '{print $1}'
+  register: swap_name
+  changed_when: False
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_linux_os
+
+- name: "Linux永久关闭交换分区"
+  replace:
+    path: /etc/fstab
+    regexp: '^({{ swap_name.stdout }})'
+    replace: '# \1'
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_linux_os and "stdout" in swap_name and not swap_name.stdout.startswith("#")
+
+- name: "Ubuntu添加阿里源"
+  shell: "curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -"
+  changed_when: False
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_ubuntu_os
+
+- name: "Ubuntu修改k8s源内容"
+  shell:
+    cmd: |
+      tee /etc/apt/sources.list.d/kubernetes.list <<EOF
+      deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
+      EOF
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_ubuntu_os
+
+- name: "RedHat添加阿里源"
+  shell:
+    cmd: |
+      cat >/etc/yum.repos.d/kubernetes.repo<<EOF
+      [kubernetes]
+      name=kubernetes
+      baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+      gpgcheck=0
+      enable=1
+      EOF
+  changed_when: False
+  become: yes
+  become_method: sudo
+  tags:
+    - k3s
+  when: is_centos_os
+
+- name: "Linux配置k8s内核参数"
+  shell:
+    cmd: |
+      cat >/etc/sysctl.d/k8s.conf<<EOF
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      vm.swappiness=0
+      EOF
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_linux_os
+
+- name: "Linux生效内核参数"
+  shell: sysctl --system
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_linux_os
+
+- name: install k3s depends on Redhat
+  yum:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  with_items:
+    - containerd
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_centos_os
+
+- name: install k3s depends on Ubuntu
+  apt:
+    pkg: "{{ item }}"
+    state: present
+    update_cache: true
+  with_items:
+    - containerd
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_ubuntu_os
+
+- name: start containerd on Linux
+  service:
+    name: "containerd"
+    state: "started"
+    enabled: "yes"
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_linux_os
+
+- name: install k3s on Linux
+  shell: "curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_VERSION=v1.22.4+k3s1 INSTALL_K3S_EXEC='server --kube-apiserver-arg service-node-port-range=1-65000 --disable traefik --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 644' sh -s -"
+  register: k3s_install_result
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_linux_os
+
+- name: "输出安装信息"
+  debug:
+    msg: "{{ k3s_install_result }}"
+  tags:
+    - k3s
+  when: is_linux_os
+
+# 安装后 helm-install-traefik 的状态会是 Completed
+- name: "查询节点、Pod状态"
+  shell: "{{ item }}"
+  register: k3s_pods_info
+  with_items:
+    - kubectl get nodes,cs -o wide
+    - kubectl --namespace kube-system get pods -o wide
+    - kubectl get all --all-namespaces
+  tags:
+    - k3s
+  become: yes
+  become_method: sudo
+  when: is_linux_os
+
+- name: "输出Pod信息"
+  debug:
+    msg: "{{ k3s_pods_info }}"
+  tags:
+    - k3s
+  when: is_linux_os
+
+- name: check existing helm packages on Linux
+  shell: "test -f {{ HELM_PACKAGE_PATH_ON_LINUX }} && echo 0 || echo 1"
+  register: existing_of_helm_on_linux
+  changed_when: False
+  tags:
+    - helm
+  when: is_linux_os
+
+- name: check helm installed
+  shell: "helm version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_helm
+  changed_when: False
+  tags:
+    - helm
+  when: is_linux_os
+
+- name: install helm
+  block:
+    - name: download helm packages on Linux
+      get_url:
+        url: "{{ HELM_DOWNLOAD_URL_ON_LINUX }}"
+        dest: "{{ HELM_PACKAGE_PATH_ON_LINUX }}"
+        force: false
+      when: (is_linux_os) and existing_of_helm_on_linux.stdout == "1"
+
+    - name: unarchive helm on Linux
+      unarchive:
+        src: "{{ HELM_PACKAGE_PATH_ON_LINUX }}"
+        dest: "{{ HOME_ROOT }}"
+        remote_src: true
+      when: (is_linux_os) and installed_of_helm.stdout == "1"
+
+    - name: copy helm
+      copy:
+        src: "{{ HOME_ROOT }}/linux-amd64/helm"
+        dest: "/usr/local/bin"
+        mode: 0755
+        force: true
+        remote_src: true
+  tags:
+    - helm
+
+- name: add repo
+  shell: "{{ item }}"
+  register: helm_repo_info
+  with_items:
+    - helm repo remove stable || echo "stable not exists"
+    - helm repo add stable https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
+    - helm repo update
+    - helm list --all-namespaces
+  tags:
+    - helm
+  when: is_linux_os
+
+- name: "输出repo信息"
+  debug:
+    msg: "{{ helm_repo_info }}"
+  tags:
+    - helm
+  when: is_linux_os
+
+- name: 取消 KUBECONFIG 注释
+  replace:
+    path: '{{ HOME_ROOT }}/.bash_profile'
+    regexp: '^#\s*(export KUBECONFIG.*)'
+    replace: '\1'
+  tags:
+    - helm
+  when: is_linux_os
