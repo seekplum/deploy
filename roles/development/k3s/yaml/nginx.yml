@@ -30,7 +30,8 @@ spec:
             path: /root/PythonProjects/github.com/seekplum/deploy/roles/development/conf/nginx/nginx.conf
         - name: nginx-volume-www
           hostPath:
-            path: /root/PythonProjects/github.com/seekplum/deploy/roles/development/data/www
+            # path: /root/PythonProjects/github.com/seekplum/deploy/roles/development/data/www
+            path: /root/PythonProjects/github.com/seekplum/deploy/roles/development/fe/dist/avatar-app
         - name: nginx-volume-logs
           hostPath:
             path: /root/data/develop/nginx/logs

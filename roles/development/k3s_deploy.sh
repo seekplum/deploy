@@ -84,7 +84,7 @@ function install() {
     SERVERS=$*
     for name in ${SERVERS}; do
         CONF_PATH="${ROOT_DIR}/conf/nginx/.conf.d/${name}.conf"
-        test -f ${CONF_PATH} && scp ${CONF_PATH} ${ROOT_DIR}/conf/nginx/conf.d || print_warning "${name}.conf not exists"
+        # test -f ${CONF_PATH} && scp ${CONF_PATH} ${ROOT_DIR}/conf/nginx/conf.d || print_warning "${name}.conf not exists"
         test -f "${ROOT_K3S_ENV}/${name}".yml && kubectl apply -f "${ROOT_K3S_ENV}/${name}".yml
         if [[ "${name}" == "jenkins" ]]; then
             mkdir -p /root/data/develop/jenkins

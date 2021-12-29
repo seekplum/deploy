@@ -17,6 +17,13 @@ spec:
                 name: whoami-svc
                 port:
                   number: 80
+            path: /whoami
+            pathType: Exact
+          - backend:
+              service:
+                name: nginx-svc
+                port:
+                  number: 80
             path: /
             pathType: Prefix
     - host: gerrit.seekplum.top
