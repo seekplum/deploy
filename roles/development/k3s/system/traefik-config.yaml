@@ -11,3 +11,6 @@ spec:
     api:
       dashboard: true
       debug: true
+    ports:
+      web:
+        redirectTo: websecure
