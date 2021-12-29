@@ -16,8 +16,11 @@ num="$(python -c 'import random;print(random.randint(11, 99))')"
 [[ -z ${LDAP_SERVER_IP} ]] && export LDAP_SERVER_IP="127.0.0.1"
 
 export VOLUMES_ROOT="${file_path}/dev-data${num}"
+GERRIT_ROOT="${VOLUMES_ROOT}/gerrit"
 
 sudo rm -rf ${file_path}/dev-data*
+mkdir -p ${GERRIT_ROOT}/plugins
+scp ${file_path}/data/gerrit/plugins/login-redirect.jar ${GERRIT_ROOT}/plugins
 
 
 docker run -d  \
@@ -85,7 +88,7 @@ docker run -d \
     -e INITIAL_ADMIN_USER=admin \
     -e INITIAL_ADMIN_PASSWORD=admin \
     -e LISTEN_ADDR="*:30418" \
-    openfrontier/gerrit:3.0.0
+    openfrontier/gerrit:3.3.2
 
 set +e
 

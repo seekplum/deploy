@@ -54,7 +54,7 @@ services:
       PHPLDAPADMIN_HTTPS: "false"
     restart: on-failure
   gerrit:
-    image: openfrontier/gerrit:3.0.0
+    image: openfrontier/gerrit:3.3.2
     depends_on:
       - ldap
     ports:

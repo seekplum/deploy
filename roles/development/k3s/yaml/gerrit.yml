@@ -20,7 +20,7 @@ spec:
             type: DirectoryOrCreate
       containers:
       - name: gerrit
-        image: openfrontier/gerrit:3.0.0
+        image: openfrontier/gerrit:3.3.2
         imagePullPolicy: IfNotPresent
         envFrom:
         - configMapRef:

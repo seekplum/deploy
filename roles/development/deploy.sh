@@ -133,7 +133,8 @@ function post_deploy() {
 }
 
 function install() {
-    mkdir -p ${VOLUMES_ROOT}
+    mkdir -p ${VOLUMES_ROOT}/gerrit/plugins
+    scp ${file_path}/data/gerrit/plugins/login-redirect.jar ${VOLUMES_ROOT}/gerrit/plugins
 
     compose_up ldapadmin gerrit jenkins
     # jenkins的运行用户是 1000:1000, 但默认目录权限是 root:root

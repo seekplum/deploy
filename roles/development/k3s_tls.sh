@@ -65,12 +65,14 @@ function gen_tls() {
     test -f "${CERT_MANAGER_PATH}" || curl -fSL --connect-timeout 5 --retry 100 --retry-connrefused --retry-delay 1 --retry-max-time 100 https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.yaml -o ${CERT_MANAGER_PATH}
     kubectl apply -f ${CERT_MANAGER_PATH} > /dev/null 2>&1
 
+    set +e
     num=0
     while [ ${num} -lt 6 ]
         do
             let "num=$(kubectl get all -n cert-manager | grep '1/1' | wc -l)"
             sleep 1
         done
+    set -e
 
     kubectl apply -f "${ROOT_K3S_SYSTEM}"/letsencrypt-issuer-production.yaml
     kubectl apply -f "${ROOT_K3S_SYSTEM}"/letsencrypt-issuer-staging.yaml

@@ -90,6 +90,10 @@ function install() {
             mkdir -p /root/data/develop/jenkins
             sudo chown -R 1000:1000 /root/data/develop/jenkins
         fi
+        if [[ "${name}" == "gerrit" ]]; then
+            mkdir -p /root/data/develop/gerrit/plugins
+            scp ${ROOT_DIR}/data/gerrit/plugins/login-redirect.jar /root/data/develop/gerrit/plugins
+        fi
         kubectl apply -f "${ROOT_K3S_YAML}/${name}".yml
     done
     kubectl rollout restart deployments -n ${NAMESPACE}
