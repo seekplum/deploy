@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ldap
+  namespace: seekplum
+spec:
+  selector:
+    matchLabels:
+      app: ldap
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ldap
+    spec:
+      volumes:
+        - name: ldap-volume-database
+          hostPath:
+            path: /root/data/develop/slapd/database
+            type: DirectoryOrCreate
+        - name: ldap-volume-config
+          hostPath:
+            path: /root/data/develop/slapd/config
+            type: DirectoryOrCreate
+        - name: ldap-volume-ldap-sh
+          hostPath:
+            path: /root/PythonProjects/github.com/seekplum/deploy/roles/development/bin/ldap.sh
+        - name: ldap-volume-users-ldif
+          hostPath:
+            path: /root/PythonProjects/github.com/seekplum/deploy/roles/development/conf/ldap/users.ldif
+      containers:
+      - name: ldap
+        image: osixia/openldap:1.3.0
+        imagePullPolicy: IfNotPresent
+        args: ["--copy-service", "--loglevel=debug"]
+        envFrom:
+        - configMapRef:
+            name: ldap
+        ports:
+        - name: tcp
+          containerPort: 389
+        - name: ssl
+          containerPort: 636
+        volumeMounts:
+          - name: ldap-volume-database
+            mountPath: /var/lib/ldap
+          - name: ldap-volume-config
+            mountPath: /etc/ldap/slapd.d
+          - name: ldap-volume-ldap-sh
+            mountPath: /tmp/ldap.sh
+            readOnly: true
+          - name: ldap-volume-users-ldif
+            mountPath: /tmp/users.ldif
+            readOnly: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ldap-svc
+  namespace: seekplum
+spec:
+  ports:
+  - name: tcp
+    port: 389
+    protocol: TCP
+    targetPort: 389
+  - name: ssl
+    port: 636
+    protocol: TCP
+    targetPort: 636
+  selector:
+    app: ldap
+status:
+  loadBalancer: {}

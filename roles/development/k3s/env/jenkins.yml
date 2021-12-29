@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins
+  namespace: seekplum
+data:
+  LDAP_INHIBIT_INFER_ROOTDN: "false"
+  LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"

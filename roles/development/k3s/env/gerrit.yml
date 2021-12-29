@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gerrit
+  namespace: seekplum
+data:
+  WEBURL: "http://gerrit.seekplum.top"
+  GITWEB_TYPE: "gitiles"
+  AUTH_TYPE: "LDAP"
+  LDAP_SERVER: "ldap://ldap-svc"
+  LDAP_ACCOUNTBASE: "dc=seekplum,dc=io"
+  LDAP_ACCOUNTPATTERN: "(cn=${username})"
+  LDAP_ACCOUNTSSHUSERNAME: "${cn}"
+  LDAP_ACCOUNTFULLNAME: "${sn}"
+  LDAP_USERNAME: "cn=guest,dc=seekplum,dc=io"
+  LDAP_PASSWORD: "123456"
+  GERRIT_INIT_ARGS: "--install-plugin=download-commands"
+  INITIAL_ADMIN_USER: "admin"
+  INITIAL_ADMIN_PASSWORD: "admin"

@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: acme
+  namespace: seekplum
+spec:
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      name: acme
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: acme-volume-work
+          hostPath:
+            path: /root/PythonProjects/github.com/seekplum/deploy/roles/development/data/acme
+            type: DirectoryOrCreate
+        - name: acme-volume-cert-sh
+          hostPath:
+            path: /root/PythonProjects/github.com/seekplum/deploy/roles/development/bin/cert.sh
+        - name: acme-volume-access-key-file
+          hostPath:
+            path: /root/data/aliyun/access_key
+        - name: acme-volume-access-secret-file
+          hostPath:
+            path: /root/data/aliyun/secret_key
+      containers:
+      - name: acme
+        image: goacme/lego:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh"]
+        args: ["/cert.sh"]
+        envFrom:
+        - configMapRef:
+            name: acme
+        workingDir: /work
+        volumeMounts:
+          - name: acme-volume-work
+            mountPath: /work
+          - name: acme-volume-cert-sh
+            mountPath: /cert.sh
+          - name: acme-volume-access-key-file
+            mountPath: /access_key
+          - name: acme-volume-access-secret-file
+            mountPath: /secret_key
