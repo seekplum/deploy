@@ -6,7 +6,7 @@ ETVAL=0
 # LDAP_SERVER_IP="127.0.0.1"
 LDAP_SERVER_PORT="389"
 LDAP_ADMIN_USER="cn=admin,dc=seekplum,dc=io"
-LDAP_ADMIN_PASS="seekplum"
+LDAP_ADMIN_PASS="admin@123!"
 
 
 function print_error () {

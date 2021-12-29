@@ -77,7 +77,7 @@ function compose_up() {
 #     docker-compose exec nginx nginx -s reload
 
 #     # 创建管理员用户
-#     docker-compose run --rm sentry-web createuser --email admin@qq.com --password seekplum --superuser
+#     docker-compose run --rm sentry-web createuser --email admin@qq.com --password admin@@123! --superuser
 # }
 
 function uninstall() {
@@ -97,9 +97,9 @@ function uninstall() {
 function create_user() {
     if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
         # 创建用户
-        docker-compose exec ldap ldapadd -c -H ldap://ldap -w seekplum -D 'cn=admin,dc=seekplum,dc=io' -f /tmp/users.ldif
-        docker-compose exec ldap bash /tmp/ldap.sh create zhangsan 123456 张三
-        docker-compose exec ldap bash /tmp/ldap.sh create lisi 123456 李四
+        docker-compose exec ldap ldapadd -c -H ldap://ldap -w admin@123! -D 'cn=admin,dc=seekplum,dc=io' -f /tmp/users.ldif || echo "goups exists"
+        docker-compose exec ldap bash /tmp/ldap.sh create zhangsan zhangsann@123! 张三
+        docker-compose exec ldap bash /tmp/ldap.sh create lisi lisi@123! 李四
     fi
 }
 

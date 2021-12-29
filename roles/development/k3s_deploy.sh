@@ -65,9 +65,9 @@ function create_user() {
     if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
         ldap_pod_name=$(kubectl get pods -n ${NAMESPACE} -l app=ldap -o custom-columns=NAME:.metadata.name --no-headers | head -n 1)
         # 创建用户
-        kubectl -n ${NAMESPACE} exec ${ldap_pod_name} -- ldapadd -c -H ldap://localhost -w seekplum -D 'cn=admin,dc=seekplum,dc=io' -f /tmp/users.ldif
-        kubectl -n ${NAMESPACE} exec ${ldap_pod_name} -- bash /tmp/ldap.sh create zhangsan 123456 张三
-        kubectl -n ${NAMESPACE} exec ${ldap_pod_name} -- bash /tmp/ldap.sh create lisi 123456 李四
+        kubectl -n ${NAMESPACE} exec ${ldap_pod_name} -- ldapadd -c -H ldap://localhost -w admin@123! -D 'cn=admin,dc=seekplum,dc=io' -f /tmp/users.ldif || print_warning "goups exists"
+        kubectl -n ${NAMESPACE} exec ${ldap_pod_name} -- bash /tmp/ldap.sh create zhangsan zhangsan@123! 张三
+        kubectl -n ${NAMESPACE} exec ${ldap_pod_name} -- bash /tmp/ldap.sh create lisi lisi@123! 李四
     fi
 }
 

@@ -27,11 +27,11 @@ docker run -d  \
     -v ${VOLUMES_ROOT}/slapd/config:/etc/ldap/slapd.d  \
     -e LDAP_ORGANISATION='seekplum.io'  \
     -e LDAP_DOMAIN='seekplum.io'  \
-    -e LDAP_ADMIN_PASSWORD='seekplum'  \
+    -e LDAP_ADMIN_PASSWORD='admin@123!'  \
     -e LDAP_TLS='false'  \
     -e LDAP_READONLY_USER='true'  \
     -e LDAP_READONLY_USER_USERNAME='guest'  \
-    -e LDAP_READONLY_USER_PASSWORD='123456'  \
+    -e LDAP_READONLY_USER_PASSWORD='guest@123!'  \
     --name ldap  \
     osixia/openldap:1.3.0 \
     --copy-service
@@ -39,18 +39,18 @@ docker run -d  \
 sleep 5
 
 # 创建用户组, -c 选项是忽略所有错误，继续执行
-ldapadd -c -h localhost -p 389 -w seekplum -D 'cn=admin,dc=seekplum,dc=io' -f conf/ldap/users.ldif || echo "goups exists"
+ldapadd -c -h localhost -p 389 -w admin@123! -D 'cn=admin,dc=seekplum,dc=io' -f conf/ldap/users.ldif || echo "goups exists"
 
 # 创建用户
-bash bin/ldap.sh create zhangsan 123456 张三
-bash bin/ldap.sh create lisi 123456 李四
+bash bin/ldap.sh create zhangsan zhangsan@123! 张三
+bash bin/ldap.sh create lisi lisi@123! 李四
 
 # 检查用户名密码是否正确
-ldapwhoami -h localhost -p 389 -D 'cn=admin,dc=seekplum,dc=io' -w seekplum
-ldapwhoami -h localhost -p 389 -D 'cn=guest,dc=seekplum,dc=io' -w 123456
-ldapwhoami -h localhost -p 389 -D 'cn=hjd,ou=users,dc=seekplum,dc=io' -w 123456
-ldapwhoami -h localhost -p 389 -D 'cn=zhangsan,ou=users,dc=seekplum,dc=io' -w 123456
-ldapwhoami -h localhost -p 389 -D 'cn=lisi,ou=users,dc=seekplum,dc=io' -w 123456
+ldapwhoami -h localhost -p 389 -D 'cn=admin,dc=seekplum,dc=io' -w admin@123!
+ldapwhoami -h localhost -p 389 -D 'cn=guest,dc=seekplum,dc=io' -w guest@123!
+ldapwhoami -h localhost -p 389 -D 'cn=hjd,ou=users,dc=seekplum,dc=io' -w hjd@123!
+ldapwhoami -h localhost -p 389 -D 'cn=zhangsan,ou=users,dc=seekplum,dc=io' -w zhangsan@123!
+ldapwhoami -h localhost -p 389 -D 'cn=lisi,ou=users,dc=seekplum,dc=io' -w lisi@123!
 
 docker run -d  \
     --privileged  \
@@ -80,7 +80,7 @@ docker run -d \
     -e LDAP_ACCOUNTSSHUSERNAME='${cn}' \
     -e LDAP_ACCOUNTFULLNAME='${sn}' \
     -e LDAP_USERNAME='cn=guest,dc=seekplum,dc=io' \
-    -e LDAP_PASSWORD='123456' \
+    -e LDAP_PASSWORD='guest@123!' \
     -e GERRIT_INIT_ARGS='--install-plugin=download-commands' \
     -e INITIAL_ADMIN_USER=admin \
     -e INITIAL_ADMIN_PASSWORD=admin \

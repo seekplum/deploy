@@ -13,7 +13,7 @@ data:
   LDAP_ACCOUNTSSHUSERNAME: "${cn}"
   LDAP_ACCOUNTFULLNAME: "${sn}"
   LDAP_USERNAME: "cn=guest,dc=seekplum,dc=io"
-  LDAP_PASSWORD: "123456"
+  LDAP_PASSWORD: "guest@123!"
   GERRIT_INIT_ARGS: "--install-plugin=download-commands"
   INITIAL_ADMIN_USER: "admin"
   INITIAL_ADMIN_PASSWORD: "admin"

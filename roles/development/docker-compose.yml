@@ -25,13 +25,13 @@ services:
     environment:
       LDAP_ORGANISATION: "seekplum.io"
       LDAP_DOMAIN: "seekplum.io"
-      LDAP_ADMIN_PASSWORD: "seekplum"
+      LDAP_ADMIN_PASSWORD: "admin@123!"
       LDAP_TLS: "false"
       LDAP_READONLY_USER: "true"
       LDAP_READONLY_USER_USERNAME: "guest"
-      LDAP_READONLY_USER_PASSWORD: "123456"
+      LDAP_READONLY_USER_PASSWORD: "guest@123!"
       LDAP_SERVER_IP: ldap
-      LDAP_CONFIG_PASSWORD: "seekplum"
+      LDAP_CONFIG_PASSWORD: "admin@123!"
       LDAP_BACKEND: "mdb"
       LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
     volumes:
@@ -72,7 +72,7 @@ services:
       LDAP_ACCOUNTSSHUSERNAME: $${cn}
       LDAP_ACCOUNTFULLNAME: $${sn}
       LDAP_USERNAME: cn=guest,dc=seekplum,dc=io
-      LDAP_PASSWORD: 123456
+      LDAP_PASSWORD: "guest@123!"
       GERRIT_INIT_ARGS: --install-plugin=download-commands
       INITIAL_ADMIN_USER: admin
       INITIAL_ADMIN_PASSWORD: admin  # 固定值，设置后可以用 ldap 的 admin 密码登录
