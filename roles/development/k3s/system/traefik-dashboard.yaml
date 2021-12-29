@@ -28,6 +28,7 @@ metadata:
 spec:
   entryPoints:
     - web
+    - websecure
   routes:
     - match: Host(`www.seekplum.top`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
       kind: Rule
