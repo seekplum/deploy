@@ -10,7 +10,7 @@ ROOT_K3S="${ROOT_DIR}/k3s"
 ROOT_K3S_ENV="${ROOT_K3S}/env"
 ROOT_K3S_YAML="${ROOT_K3S}/yaml"
 ROOT_K3S_SYSTEM="${ROOT_K3S}/system"
-DEFAULT_SERVERS=(ldap ldapadmin gerrit)
+DEFAULT_SERVERS=(whoami ldap ldapadmin gerrit jenkins)
 
 function print_error () {
     echo -e "\033[31m$1\033[0m"
@@ -68,14 +68,6 @@ function create_user() {
         kubectl -n ${NAMESPACE} exec ${ldap_pod_name} -- ldapadd -c -H ldap://localhost -w seekplum -D 'cn=admin,dc=seekplum,dc=io' -f /tmp/users.ldif
         kubectl -n ${NAMESPACE} exec ${ldap_pod_name} -- bash /tmp/ldap.sh create zhangsan 123456 张三
         kubectl -n ${NAMESPACE} exec ${ldap_pod_name} -- bash /tmp/ldap.sh create lisi 123456 李四
-    fi
-}
-
-function whoami() {
-    kubectl delete -f "${ROOT_K3S_YAML}"/whoami.yml > /dev/null 2>&1 || print_warning "delete whoami"
-    if [[ "$1" != "remove" ]]; then
-        kubectl apply -f "${ROOT_K3S_YAML}"/whoami.yml
-        kubectl get pods -o wide --show-labels
     fi
 }
 
@@ -152,9 +144,6 @@ case "$1" in
         ;;
   create_user)
         create_user ${@:2}
-        ;;
-  whoami)
-        whoami ${@:2}
         ;;
   reinstall)
         install ${@:2}

@@ -1,0 +1,26 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cert-seekplum-top
+  namespace: seekplum
+spec:
+  secretName: cert-seekplum-top-tls
+  duration: 2160h # 90d 有效期
+  renewBefore: 360h # 15d 到期前15天进行续订
+  subject:
+    # 证书上要使用的组织
+    organizations:
+      - jetstack
+  # DNSNames是要在证书上设置的DNS subjectAltNames的列表 域名需要解析之后 Certificate才能创建成功
+  # 否则会报错 Issuing certificate as Secret does not exist
+  dnsNames:
+    - www.seekplum.top
+  commonName: www.seekplum.top
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+    group: cert-manager.io
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048

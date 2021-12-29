@@ -2,9 +2,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx-ingress
-  namespace: default
+  namespace: seekplum
   annotations:
     kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # cert-manager.io/cluster-issuer: letsencrypt-staging
 spec:
   rules:
     - host: www.seekplum.top
@@ -17,3 +19,40 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
+    - host: gerrit.seekplum.top
+      http:
+        paths:
+          - backend:
+              service:
+                name: gerrit
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: jenkins.seekplum.top
+      http:
+        paths:
+          - backend:
+              service:
+                name: jenkins
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: ldap.seekplum.top
+      http:
+        paths:
+          - backend:
+              service:
+                name: ldapadmin
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - www.seekplum.top
+        - gerrit.seekplum.top
+        - jenkins.seekplum.top
+        - ldap.seekplum.top
+      secretName: cert-seekplum-top-tls
