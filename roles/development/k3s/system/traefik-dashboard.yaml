@@ -1,0 +1,38 @@
+# create secret from password file
+# htpasswd -c ./users cellerich
+# kubectl create secret generic seekplum-traefik-secret --from-file users -n kube-system
+apiVersion: v1
+kind: Secret
+metadata:
+  name: seekplum-traefik-secret
+  namespace: kube-system
+data:
+  users: |2
+    dGVzdDokYXByMSRINnVza2trVyRJZ1hMUDZld1RyU3VCa1RycUU4d2ovCnRlc3QyOiRhcHIxJGQ5
+    aHI5SEJCJDRIeHdnVWlyM0hQNEVzZ2dQL1FObzAK
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: seekplum-traefik-auth
+  namespace: kube-system
+spec:
+  basicAuth:
+    secret: seekplum-traefik-secret
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: seekplum-traefik-dashboard
+  namespace: kube-system
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`www.seekplum.top`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+      middlewares:
+        - name: seekplum-traefik-auth

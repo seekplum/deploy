@@ -9,6 +9,7 @@ NAMESPACE="seekplum"
 ROOT_K3S="${ROOT_DIR}/k3s"
 ROOT_K3S_ENV="${ROOT_K3S}/env"
 ROOT_K3S_YAML="${ROOT_K3S}/yaml"
+ROOT_K3S_SYSTEM="${ROOT_K3S}/system"
 DEFAULT_SERVERS=(ldap ldapadmin gerrit)
 
 function print_error () {
@@ -105,6 +106,22 @@ function install() {
     done
     kubectl -n ${NAMESPACE} get pods -o wide --show-labels
 }
+
+function dashboard() {
+    kubectl delete -f "${ROOT_K3S_SYSTEM}"/ingress.yml > /dev/null 2>&1 || print_warning "delete ingress"
+    kubectl delete -f "${ROOT_K3S_SYSTEM}"/traefik-dashboard.yaml > /dev/null 2>&1 || print_warning "delete traefik-dashboard"
+    # kubectl -n kube-system delete IngressRoute traefik-dashboard || print_warning "delete IngressRoute"
+    sudo rm -f /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+
+    if [[ "$1" != "remove" ]]; then
+        scp ${ROOT_K3S_SYSTEM}/traefik-config.yaml /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+
+        kubectl apply -f "${ROOT_K3S_SYSTEM}"/ingress.yml
+        kubectl apply -f "${ROOT_K3S_SYSTEM}"/traefik-dashboard.yaml
+        kubectl get ingress -A && kubectl get IngressRoute -A
+        # kubectl -n kube-system logs -f $(kubectl get pods -n kube-system -l app.kubernetes.io/name=traefik -o custom-columns=NAME:.metadata.name --no-headers | head -n 1)
+        # helm -n kube-system get values traefik
+    fi
 }
 
 function print_help() {
@@ -148,6 +165,9 @@ case "$1" in
         install ${DEFAULT_SERVERS[@]}
         create_user ${@:2}
         post_deploy
+        ;;
+  dashboard)
+        dashboard ${@:2}
         ;;
   "")
   # -h|--help)
