@@ -45,6 +45,8 @@ services:
       - --loglevel=debug
   ldapadmin:
     image: osixia/phpldapadmin:0.9.0
+    ports:
+      - "8089:80"
     depends_on:
       - ldap
     environment:
@@ -56,6 +58,7 @@ services:
     depends_on:
       - ldap
     ports:
+      - "8088:8080"
       - "29418:29418"
     volumes:
       - ${VOLUMES_ROOT}/gerrit:/var/gerrit/review_site
@@ -81,6 +84,8 @@ services:
       retries: 14
   jenkins:
     image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
     volumes:
       - ${VOLUMES_ROOT}/jenkins:/var/jenkins_home
     environment:

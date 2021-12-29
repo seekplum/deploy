@@ -12,7 +12,7 @@ set -e
 file_path="$( cd "$( dirname "$BASH_SOURCE[0]" )" && pwd )"
 num="$(python -c 'import random;print(random.randint(11, 99))')"
 
-export LDAP_SERVER_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | grep -v "172." | grep -v "10.244" | awk '{print $2}' | cut -d":" -f 2)
+# export LDAP_SERVER_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | grep -v "172." | grep -v "10.244" | awk '{print $2}' | cut -d":" -f 2 | head -n 1)
 [[ -z ${LDAP_SERVER_IP} ]] && export LDAP_SERVER_IP="127.0.0.1"
 
 export VOLUMES_ROOT="${file_path}/dev-data${num}"
@@ -36,7 +36,7 @@ docker run -d  \
     osixia/openldap:1.3.0 \
     --copy-service
 
-sleep 2
+sleep 5
 
 # 创建用户组, -c 选项是忽略所有错误，继续执行
 ldapadd -c -h localhost -p 389 -w seekplum -D 'cn=admin,dc=seekplum,dc=io' -f conf/ldap/users.ldif || echo "goups exists"
