@@ -59,7 +59,7 @@ services:
       - ldap
     ports:
       - "8088:8080"
-      - "29418:29418"
+      - "30418:30418"
     volumes:
       - ${VOLUMES_ROOT}/gerrit:/var/gerrit/review_site
     environment:
@@ -76,6 +76,7 @@ services:
       GERRIT_INIT_ARGS: --install-plugin=download-commands
       INITIAL_ADMIN_USER: admin
       INITIAL_ADMIN_PASSWORD: admin  # 固定值，设置后可以用 ldap 的 admin 密码登录
+      LISTEN_ADDR: "*:30418"
     restart: on-failure
     healthcheck:
       test: "if [ `curl -I -m 10 -o /dev/null -s -w %{http_code} http://gerrit:8080` -ne 200 ]; then exit 1; else exit 0; fi;"

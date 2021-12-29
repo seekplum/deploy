@@ -17,3 +17,4 @@ data:
   GERRIT_INIT_ARGS: "--install-plugin=download-commands"
   INITIAL_ADMIN_USER: "admin"
   INITIAL_ADMIN_PASSWORD: "admin"
+  LISTEN_ADDR: "*:30418"

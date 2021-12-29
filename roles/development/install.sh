@@ -68,7 +68,7 @@ docker run -d \
     --name gerrit \
     -p 8088:8080 \
     -p 8087:8082 \
-    -p 29418:29418 \
+    -p 30418:30418 \
     -v ${VOLUMES_ROOT}/gerrit:/var/gerrit/review_site \
     --link ldap:ldap \
     -e WEBURL=http://${LDAP_SERVER_IP}:8088 \
@@ -84,6 +84,7 @@ docker run -d \
     -e GERRIT_INIT_ARGS='--install-plugin=download-commands' \
     -e INITIAL_ADMIN_USER=admin \
     -e INITIAL_ADMIN_PASSWORD=admin \
+    -e LISTEN_ADDR="*:30418" \
     openfrontier/gerrit:3.0.0
 
 set +e

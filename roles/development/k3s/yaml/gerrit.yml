@@ -29,7 +29,7 @@ spec:
           - name: http
             containerPort: 8080
           - name: ssh
-            containerPort: 29418
+            containerPort: 30418
         volumeMounts:
           - name: gerrit-volume-home
             mountPath: /var/gerrit/review_site
@@ -64,10 +64,29 @@ spec:
     protocol: TCP
     targetPort: 8080
   - name: ssh
-    port: 29418
+    port: 30418
     protocol: TCP
-    targetPort: 29418
+    targetPort: 30418
   selector:
     app: gerrit
 status:
   loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gerrit-svc-node
+  namespace: seekplum
+spec:
+  type: NodePort
+  selector:
+    app: gerrit
+  ports:
+      # 默认情况下，为了方便起见，`targetPort` 被设置为与 `port` 字段相同的值。
+    - name: ssh
+      port: 30418
+      targetPort: 30418
+      # 可选字段
+      # 默认情况下，为了方便起见，Kubernetes 控制平面会从某个范围内分配一个端口号（默认：30000-32767）
+      nodePort: 30418
+
