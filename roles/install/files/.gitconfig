@@ -19,3 +19,5 @@
 [http]
 	lowSpeedLimit = 0
 	lowSpeedTime = 999999
+[alias]
+	hs = log --pretty='%C(cyan)%ad %C(yellow)%h %C(cyan)%d %Creset%s' --date-order --graph --date=format:%Y-%m-%d\\ %H:%M:%S
