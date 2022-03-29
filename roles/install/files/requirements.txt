@@ -4,18 +4,13 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
---index-url https://mirrors.aliyun.com/pypi/simple
---extra-index-url https://pypi.org/simple
---trusted-host mirrors.aliyun.com
---trusted-host pypi.org
-
 ansible==4.10.0
     # via -r requirements.in
 ansible-core==2.11.7
     # via ansible
 argparse==1.4.0
     # via plum-tools
-backports.entry-points-selectable==1.1.1
+backports-entry-points-selectable==1.1.1
     # via virtualenv
 bcrypt==3.2.0
     # via paramiko
@@ -37,13 +32,7 @@ distlib==0.3.4
 filelock==3.4.2
     # via virtualenv
 importlib-metadata==4.10.0
-    # via
-    #   -r requirements.in
-    #   backports.entry-points-selectable
-    #   click
-    #   pep517
-    #   stevedore
-    #   virtualenv
+    # via -r requirements.in
 importlib-resources==5.4.0
     # via -r requirements.in
 jinja2==3.0.3
@@ -52,7 +41,7 @@ markupsafe==2.0.1
     # via jinja2
 packaging==21.3
     # via ansible-core
-paramiko==2.9.1
+paramiko==2.10.1
     # via plum-tools
 pbr==5.8.0
     # via stevedore
@@ -83,6 +72,7 @@ schema==0.7.5
 six==1.16.0
     # via
     #   bcrypt
+    #   paramiko
     #   plum-tools
     #   pynacl
     #   virtualenv
@@ -94,8 +84,6 @@ tomli==2.0.0
     # via pep517
 trash-cli==0.21.10.24
     # via -r requirements.in
-typing-extensions==4.0.1
-    # via importlib-metadata
 virtualenv==20.10.0
     # via
     #   -r requirements.in
@@ -111,10 +99,7 @@ you-get==0.4.1555
 youtube-dl==2021.12.17
     # via -r requirements.in
 zipp==3.6.0
-    # via
-    #   importlib-metadata
-    #   importlib-resources
-    #   pep517
+    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
