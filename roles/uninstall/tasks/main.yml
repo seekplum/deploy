@@ -5,6 +5,12 @@
 - include: docker.yml
 - include: k3s.yml
 
+- name: uninstall brew on macOS
+  shell: '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"'
+  tags:
+    - remove_brew
+  when: is_mac_os and ansible_user_id != "root"
+
 - name: uninstall nvm npm and node
   file:
     path: "{{ HOME_ROOT }}/{{ item }}"

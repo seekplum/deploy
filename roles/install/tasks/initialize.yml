@@ -10,7 +10,7 @@
   when: is_mac_os and ansible_user_id != "root"
 
 - name: install brew on macOS
-  shell: 'ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
+  shell: 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
   tags:
     - initialize
   when: is_mac_os and ansible_user_id != "root" and existing_of_brew.stdout == "1"
@@ -127,6 +127,7 @@
     - sqlite
     - the_silver_searcher
     - pyenv
+    - mitmproxy
   changed_when: False
   ignore_errors: True
   tags:
@@ -190,12 +191,12 @@
     - initialize
   when: existing_of_py_pip is defined and existing_of_pip.stdout == "1"
 
-- name: check trash installed
-  shell: "trash --version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: existing_of_trash
-  changed_when: False
-  tags:
-    - initialize
+# - name: check trash installed
+#   shell: "trash --version >/dev/null 2>&1 && echo 0 || echo 1"
+#   register: existing_of_trash
+#   changed_when: False
+#   tags:
+#     - initialize
 
 # - name: install trash-cli
 #   shell: "pip install trash-cli"

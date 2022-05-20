@@ -4,28 +4,28 @@
   register: existing_of_pyconcreate
   changed_when: False
   tags:
-    - virtualenv
+    - pyconcreate
 
 - name: download pyconcreate
   get_url:
-    url: "https://github.com/Falldog/pyconcrete/archive/0.10.2.tar.gz"
+    url: "https://github.com/Falldog/pyconcrete/archive/{{ PYCONCREATE_VERSION }}.tar.gz"
     dest: "{{ PYCONCREATE_PATH }}"
     force: false
   tags:
-    - virtualenv
+    - pyconcreate
   when: existing_of_pyconcreate is defined and existing_of_pyconcreate.stdout == "1"
 
 - name: check pyconcrete unarchive
-  shell: "test -d {{ HOME_ROOT }}/pyconcrete-0.10.2 && echo 0 || echo 1"
+  shell: "test -d {{ PYCONCREATE_DIRECTORY }} && echo 0 || echo 1"
   register: unarchive_of_pyconcrete
   tags:
-    - zsh
+    - pyconcreate
 
 - name: unarchive pyconcrete
   shell: "tar -zxvf {{ PYCONCREATE_PATH }} -C {{ HOME_ROOT }}"
   register: result_of_unarchive_pyconcrete
   tags:
-    - virtualenv
+    - pyconcreate
   when: unarchive_of_pyconcrete is defined and unarchive_of_pyconcrete.stdout == "1"
 
 - name: make env
@@ -33,3 +33,4 @@
   with_items: "{{ VIRTUAL_ENVS }}"
   tags:
     - virtualenv
+    - pyconcreate
