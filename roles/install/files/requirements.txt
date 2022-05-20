@@ -15,45 +15,83 @@ ansible-core==2.11.7
     # via ansible
 argparse==1.4.0
     # via plum-tools
+asgiref==3.3.4
+    # via mitmproxy
 backports.entry-points-selectable==1.1.1
     # via virtualenv
 bcrypt==3.2.0
     # via paramiko
+blinker==1.4
+    # via mitmproxy
+brotli==1.0.9
+    # via mitmproxy
+certifi==2022.5.18.1
+    # via mitmproxy
 cffi==1.15.0
     # via
     #   bcrypt
     #   cryptography
     #   pynacl
-click==8.0.3
-    # via pip-tools
+click==7.1.2
+    # via
+    #   flask
+    #   mitmproxy
+    #   pip-tools
 contextlib2==21.6.0
     # via schema
-cryptography==36.0.1
+cryptography==3.2.1
     # via
     #   ansible-core
+    #   mitmproxy
     #   paramiko
+    #   pyopenssl
 distlib==0.3.4
     # via virtualenv
 filelock==3.4.2
     # via virtualenv
+flask==1.1.4
+    # via mitmproxy
+h11==0.13.0
+    # via wsproto
+h2==4.1.0
+    # via mitmproxy
+hpack==4.0.0
+    # via h2
+hyperframe==6.0.1
+    # via
+    #   h2
+    #   mitmproxy
 importlib-metadata==4.10.0
     # via
     #   -r requirements.in
     #   backports.entry-points-selectable
-    #   click
     #   pep517
     #   stevedore
     #   virtualenv
 importlib-resources==5.4.0
     # via -r requirements.in
-jinja2==3.0.3
-    # via ansible-core
+itsdangerous==1.1.0
+    # via flask
+jinja2==2.11.3
+    # via
+    #   ansible-core
+    #   flask
+kaitaistruct==0.9
+    # via mitmproxy
+ldap3==2.8.1
+    # via mitmproxy
 markupsafe==2.0.1
     # via jinja2
+mitmproxy==5.3.0
+    # via -r requirements.in
+msgpack==1.0.3
+    # via mitmproxy
 packaging==21.3
     # via ansible-core
 paramiko==2.9.1
     # via plum-tools
+passlib==1.7.4
+    # via mitmproxy
 pbr==5.8.0
     # via stevedore
 pep517==0.12.0
@@ -64,38 +102,68 @@ platformdirs==2.4.1
     # via virtualenv
 plum-tools==0.2.2
     # via -r requirements.in
+protobuf==3.13.0
+    # via mitmproxy
 psutil==5.8.0
     # via trash-cli
+publicsuffix2==2.20191221
+    # via mitmproxy
+pyasn1==0.4.8
+    # via
+    #   ldap3
+    #   mitmproxy
 pycparser==2.21
     # via cffi
 pynacl==1.4.0
     # via paramiko
-pyparsing==3.0.6
-    # via packaging
+pyopenssl==19.1.0
+    # via mitmproxy
+pyparsing==2.4.7
+    # via
+    #   mitmproxy
+    #   packaging
+pyperclip==1.8.2
+    # via mitmproxy
 pyyaml==6.0
     # via
     #   ansible-core
     #   plum-tools
 resolvelib==0.5.5
     # via ansible-core
+ruamel.yaml==0.16.13
+    # via mitmproxy
+ruamel.yaml.clib==0.2.6
+    # via ruamel.yaml
 schema==0.7.5
     # via plum-tools
 six==1.16.0
     # via
     #   bcrypt
+    #   cryptography
     #   plum-tools
+    #   protobuf
     #   pynacl
+    #   pyopenssl
     #   virtualenv
+sortedcontainers==2.2.2
+    # via mitmproxy
 stevedore==3.5.0
     # via virtualenvwrapper
 supervisor==4.2.2
     # via -r requirements.in
 tomli==2.0.0
     # via pep517
+tornado==6.1
+    # via mitmproxy
 trash-cli==0.21.10.24
     # via -r requirements.in
 typing-extensions==4.0.1
-    # via importlib-metadata
+    # via
+    #   asgiref
+    #   h11
+    #   importlib-metadata
+urwid==2.1.2
+    # via mitmproxy
 virtualenv==20.10.0
     # via
     #   -r requirements.in
@@ -104,8 +172,12 @@ virtualenv-clone==0.5.7
     # via virtualenvwrapper
 virtualenvwrapper==4.8.4
     # via -r requirements.in
+werkzeug==1.0.1
+    # via flask
 wheel==0.37.1
     # via pip-tools
+wsproto==0.15.0
+    # via mitmproxy
 you-get==0.4.1555
     # via -r requirements.in
 youtube-dl==2021.12.17
@@ -115,6 +187,8 @@ zipp==3.6.0
     #   importlib-metadata
     #   importlib-resources
     #   pep517
+zstandard==0.14.1
+    # via mitmproxy
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
