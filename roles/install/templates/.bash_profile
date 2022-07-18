@@ -47,7 +47,7 @@ export CLICOLOR='Yes' # 是否输出颜色
 export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
 # 自定义使用Python版本
 export PYENV_ROOT="{{PYENV_ROOT}}"
-export PYTHON_VERSION="{{PYTHON_VERSION}}"
+export PYTHON_VERSION="{{PYTHON3_VERSION}}"
 export PYTHON_VIRTUEL_ROOT="{{VIRTUEL_ROOT}}/${PYTHON_VERSION}"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 export PATH="${PATH}:/usr/local/opt/ncurses/bin"

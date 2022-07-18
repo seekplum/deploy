@@ -19,10 +19,28 @@
 
 - name: download pyenv
   git:
-    repo: git://github.com/pyenv/pyenv
+    repo: "{{ PYENV_REPOSITORY }}"
     dest: "{{ PYENV_ROOT }}"
     accept_hostkey: true
   when: installed_of_pyenv.stdout == "1"
+  tags:
+    - pyenv
+
+- name: pull pyenv
+  block:
+    - name: repository set-url
+      git_config:
+          repo: "{{ PYENV_ROOT }}"
+          scope: "local"
+          name: "remote.origin.url"
+          value: "{{ PYENV_REPOSITORY }}"
+    - name: pull repository
+      git:
+        repo: "{{ PYENV_REPOSITORY }}"
+        dest: "{{ PYENV_ROOT }}"
+        update: yes
+        version: master
+  when: installed_of_pyenv.stdout == "0"
   tags:
     - pyenv
 

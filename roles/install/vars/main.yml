@@ -19,8 +19,9 @@ PYCONCREATE_DIRECTORY: "{{ HOME_ROOT }}/pyconcrete-{{ PYCONCREATE_VERSION[1:] }}
 PACKAGES_ROOT: "{{ HOME_ROOT }}/packages"
 NODE_VERSION: "v14.18.2"
 PYENV_ROOT: "{{ HOME_ROOT }}/.pyenv"
+PYENV_REPOSITORY: "git@github.com:pyenv/pyenv.git"
 VIRTUEL_ROOT: "{{ PACKAGES_ROOT }}/pythonenv"
 PY_PIP_PATH: "{{ HOME_ROOT }}/get-pip.py"
 VIRTUAL_ENVS:
-  - version: 2.7.18
-  - version: 3.7.10
+  - version: "{{ PYTHON2_VERSION }}"
+  - version: "{{ PYTHON3_VERSION }}"
