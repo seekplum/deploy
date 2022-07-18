@@ -3,6 +3,7 @@ virtualenvwrapper
 pip-tools
 importlib-metadata
 importlib-resources
+six
 plum_tools
 trash-cli
 supervisor
