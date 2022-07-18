@@ -1,22 +1,5 @@
 ---
-- name: check existing of pyconcrete of env
-  shell: "test -f {{ VIRTUEL_ROOT }}/{{ item.version }}/bin/pyconcrete-admin.py && echo 0 || echo 1"
-  register: result_of_check_pyconcrete
-  changed_when: false
-  tags:
-    - virtualenv
-
 - name: make virtualenv
   shell: "{{ PYENV_ROOT }}/versions/{{ item.version }}/bin/virtualenv --python={{ PYENV_ROOT }}/versions/{{ item.version }}/bin/python {{ VIRTUEL_ROOT }}/{{ item.version }}"
   tags:
     - virtualenv
-
-- name: install pyconcrete into virtualenv
-  shell:
-    ". {{ VIRTUEL_ROOT }}/{{ item.version }}/bin/activate && \
-    python setup.py install --passphrase=$PASSPHRASE"
-  args:
-    chdir: "{{ PYCONCREATE_DIRECTORY }}"
-  tags:
-    - pyconcreate
-  when: result_of_unarchive_pyconcrete.changed or result_of_check_pyconcrete.stdout == "1"
