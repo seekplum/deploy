@@ -150,7 +150,7 @@
 
 - name: install k3s on Linux
   # --kube-apiserver-arg service-node-port-range=1-65000 --disable traefik
-  shell: "curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_VERSION=v1.22.4+k3s1 INSTALL_K3S_EXEC='server --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600' sh -s -"
+  shell: "curl -sfL https://rancher-mirror.oss-cn-beijing.aliyuncs.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_COMMIT=30fc909581ba8395da0860c22830d9db3913f7b1 INSTALL_K3S_EXEC='server --docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600' sh -s -"
   register: k3s_install_result
   tags:
     - k3s
