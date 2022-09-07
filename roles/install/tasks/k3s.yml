@@ -111,46 +111,46 @@
   become_method: sudo
   when: is_linux_os
 
-- name: install k3s depends on Redhat
-  yum:
-    name: "{{ item }}"
-    state: present
-    update_cache: true
-  with_items:
-    - containerd
-  tags:
-    - k3s
-  become: yes
-  become_method: sudo
-  when: is_centos_os
+# - name: install k3s depends on Redhat
+#   yum:
+#     name: "{{ item }}"
+#     state: present
+#     update_cache: true
+#   with_items:
+#     - containerd
+#   tags:
+#     - k3s
+#   become: yes
+#   become_method: sudo
+#   when: is_centos_os
 
-- name: install k3s depends on Ubuntu
-  apt:
-    pkg: "{{ item }}"
-    state: present
-    update_cache: true
-  with_items:
-    - containerd
-  tags:
-    - k3s
-  become: yes
-  become_method: sudo
-  when: is_ubuntu_os
+# - name: install k3s depends on Ubuntu
+#   apt:
+#     pkg: "{{ item }}"
+#     state: present
+#     update_cache: true
+#   with_items:
+#     - containerd
+#   tags:
+#     - k3s
+#   become: yes
+#   become_method: sudo
+#   when: is_ubuntu_os
 
-- name: start containerd on Linux
-  service:
-    name: "containerd"
-    state: "started"
-    enabled: "yes"
-  tags:
-    - k3s
-  become: yes
-  become_method: sudo
-  when: is_linux_os
+# - name: start containerd on Linux
+#   service:
+#     name: "containerd"
+#     state: "started"
+#     enabled: "yes"
+#   tags:
+#     - k3s
+#   become: yes
+#   become_method: sudo
+#   when: is_linux_os
 
 - name: install k3s on Linux
   # --kube-apiserver-arg service-node-port-range=1-65000 --disable traefik
-  shell: "curl -sfL https://rancher-mirror.oss-cn-beijing.aliyuncs.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_COMMIT=30fc909581ba8395da0860c22830d9db3913f7b1 INSTALL_K3S_EXEC='server --docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600' sh -s -"
+  shell: "curl -sfL https://get.k3s.io | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --no-deploy traefik' sh -s -"
   register: k3s_install_result
   tags:
     - k3s
