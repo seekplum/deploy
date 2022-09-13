@@ -11,6 +11,10 @@ ROOT_K3S_ENV="${ROOT_K3S}/env"
 ROOT_K3S_YAML="${ROOT_K3S}/yaml"
 ROOT_K3S_SYSTEM="${ROOT_K3S}/system"
 DEFAULT_SERVERS=(whoami ldap ldapadmin gerrit jenkins)
+DATA_DIR="/root/data/develop"
+
+services=()
+is_clear_volumes=0
 
 function print_error () {
     echo -e "\033[31m$1\033[0m"
@@ -44,25 +48,31 @@ function gen_ca() {
 }
 
 function uninstall() {
+    if [[ ${#services[@]} -eq 0 ]]; then
+        cd "${ROOT_K3S_YAML}"
+        kubectl delete --force -f . > /dev/null 2>&1 || print_warning "delete configmap"
 
-    cd "${ROOT_K3S_YAML}"
-    kubectl delete --force -f . > /dev/null 2>&1 || print_warning "delete configmap"
+        cd "${ROOT_K3S_ENV}"
+        kubectl delete --force -f  > /dev/null 2>&1 || print_warning "delete pod"
 
-    cd "${ROOT_K3S_ENV}"
-    kubectl delete --force -f  > /dev/null 2>&1 || print_warning "delete pod"
+        cd "${ROOT_K3S}"
+        kubectl delete -f namespace.json > /dev/null 2>&1 || print_warning "delete namespanme"
 
-    cd "${ROOT_K3S}"
-    kubectl delete -f namespace.json > /dev/null 2>&1 || print_warning "delete namespanme"
+        if [[ "${is_clear_volumes}" == "1" ]]; then
+            [ -d ${DATA_DIR} ] && sudo rm -rf ${DATA_DIR} || print_warning "delete data"
+        fi
 
-    if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
-        sudo rm -rf /root/data/develop
+        find ${ROOT_DIR}/conf/nginx/conf.d/* | grep -v -E "0-ws-prepare.conf|default.conf" | xargs sudo rm -f
+    else
+        for name in ${services[@]}; do
+            test -f "${ROOT_K3S_ENV}/${name}".yml && kubectl delete --force -f "${ROOT_K3S_ENV}/${name}".yml || print_warning "delete configmap"
+            kubectl delete --force -f "${ROOT_K3S_YAML}/${name}".yml > /dev/null 2>&1 || print_warning "delete pod"
+        done
     fi
-
-    find ${ROOT_DIR}/conf/nginx/conf.d/* | grep -v -E "0-ws-prepare.conf|default.conf" | xargs sudo rm -f
 }
 
 function create_user() {
-    if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
+    if [[ "${is_clear_volumes}" == "1" ]]; then
         ldap_pod_name=$(kubectl get pods -n ${NAMESPACE} -l app=ldap -o custom-columns=NAME:.metadata.name --no-headers | head -n 1)
         # 创建用户
         kubectl -n ${NAMESPACE} exec ${ldap_pod_name} -- ldapadd -c -H ldap://localhost -w admin@123! -D 'cn=admin,dc=seekplum,dc=io' -f /tmp/users.ldif || print_warning "goups exists"
@@ -72,32 +82,28 @@ function create_user() {
 }
 
 function post_deploy() {
-    if [[ "$1" == "${CLEAR_VOLUMES}" ]]; then
+    if [[ "${is_clear_volumes}" != "1" ]]; then
         echo "0.执行 bash -x $0 create_user 创建用户"
     fi
     echo "1.按照说明文档更新 Jenkins 配置"
 }
 
 function install() {
-    mkdir -p /root/data/develop
-
-    SERVERS=$*
-    for name in ${SERVERS}; do
-        CONF_PATH="${ROOT_DIR}/conf/nginx/.conf.d/${name}.conf"
-        # test -f ${CONF_PATH} && scp ${CONF_PATH} ${ROOT_DIR}/conf/nginx/conf.d || print_warning "${name}.conf not exists"
+    mkdir -p ${DATA_DIR}
+    for name in ${services[@]}; do
         test -f "${ROOT_K3S_ENV}/${name}".yml && kubectl apply -f "${ROOT_K3S_ENV}/${name}".yml
         if [[ "${name}" == "jenkins" ]]; then
-            mkdir -p /root/data/develop/jenkins
-            sudo chown -R 1000:1000 /root/data/develop/jenkins
+            mkdir -p ${DATA_DIR}/jenkins
+            sudo chown -R 1000:1000 ${DATA_DIR}/jenkins
         fi
         if [[ "${name}" == "gerrit" ]]; then
-            mkdir -p /root/data/develop/gerrit/plugins
-            scp ${ROOT_DIR}/data/gerrit/plugins/login-redirect.jar /root/data/develop/gerrit/plugins
+            mkdir -p ${DATA_DIR}/gerrit/plugins
+            scp ${ROOT_DIR}/data/gerrit/plugins/login-redirect.jar ${DATA_DIR}/gerrit/plugins
         fi
         kubectl apply -f "${ROOT_K3S_YAML}/${name}".yml
     done
-    kubectl rollout restart deployments -n ${NAMESPACE}
-    for name in ${SERVERS}; do
+    for name in ${services[@]}; do
+        kubectl rollout restart deployment/"${name}" -n ${NAMESPACE}
         kubectl rollout status deployment/"${name}" -n ${NAMESPACE}
     done
     kubectl -n ${NAMESPACE} get pods -o wide --show-labels
@@ -109,7 +115,7 @@ function dashboard() {
     # kubectl -n kube-system delete IngressRoute traefik-dashboard || print_warning "delete IngressRoute"
     sudo rm -f /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
 
-    if [[ "$1" != "remove" ]]; then
+    if [[ "${!#}" != "remove" ]]; then
         scp ${ROOT_K3S_SYSTEM}/traefik-config.yaml /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
 
         kubectl apply -f "${ROOT_K3S_SYSTEM}"/ingress.yml
@@ -128,35 +134,51 @@ function print_help() {
     echo "e.g: $0 deploy"
 }
 
+function parse_params() {
+    if [ $# -eq 0 ]; then
+        services=${DEFAULT_SERVERS[@]}
+    else
+        for param in $*; do
+            if [[ "${param}" == "${CLEAR_VOLUMES}" ]]; then
+                is_clear_volumes=1
+            else
+                services+=("${param}")
+            fi
+        done
+    fi
+}
+
+parse_params ${@:2}
 
 start_time=$(date +%s)
 
 case "$1" in
   uninstall)
-        uninstall ${@:2}
+        uninstall
         ;;
   install)
         create_namespace
-        install ${DEFAULT_SERVERS[@]}
-        post_deploy ${@:2}
+        install
+        post_deploy
         ;;
   create_namespace)
-        create_namespace ${@:2}
+        create_namespace
         ;;
   gen_ca)
-        gen_ca ${@:2}
+        create_namespace
+        gen_ca
         ;;
   create_user)
-        create_user ${@:2}
+        create_user
         ;;
   reinstall)
-        install ${@:2}
+        install
         ;;
   deploy)
-        uninstall ${@:2}
+        uninstall
         create_namespace
-        install ${DEFAULT_SERVERS[@]}
-        create_user ${@:2}
+        install
+        create_user
         post_deploy
         ;;
   dashboard)

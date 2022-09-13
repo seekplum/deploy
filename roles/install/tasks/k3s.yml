@@ -149,8 +149,8 @@
 #   when: is_linux_os
 
 - name: install k3s on Linux
-  # --kube-apiserver-arg service-node-port-range=1-65000 --disable traefik
-  shell: "curl -sfL https://get.k3s.io | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --no-deploy traefik' sh -s -"
+  # --kube-apiserver-arg service-node-port-range=1-65000 --no-deploy traefik
+  shell: "curl -sfL https://get.k3s.io | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
   register: k3s_install_result
   tags:
     - k3s
