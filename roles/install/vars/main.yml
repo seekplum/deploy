@@ -13,6 +13,8 @@ GO_DOWNLOAD_URL_ON_MAC: "https://golang.org/dl/go{{ GO_VERSION }}.darwin-amd64.t
 GO_DOWNLOAD_URL_ON_LINUX: "https://golang.org/dl/go{{ GO_VERSION }}.linux-amd64.tar.gz"
 JAVA_DOWNLOAD_URL_ON_LINUX: "https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_linux-x64_bin.tar.gz"
 HELM_DOWNLOAD_URL_ON_LINUX: "https://get.helm.sh/helm-{{ HELM_VERSION }}-linux-amd64.tar.gz"
+STERN_VERSION: "1.11.0"
+STERN_DOWNLOAD_URL_ON_LINUX: "https://github.com/wercker/stern/releases/download/{{ STERN_VERSION }}/stern_linux_amd64"
 PYCONCREATE_VERSION: "v0.15.1"
 PYCONCREATE_PATH: "{{ HOME_ROOT }}/pyconcrete-{{ PYCONCREATE_VERSION }}.tar.gz"
 PYCONCREATE_DIRECTORY: "{{ HOME_ROOT }}/pyconcrete-{{ PYCONCREATE_VERSION[1:] }}"

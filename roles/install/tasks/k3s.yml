@@ -186,6 +186,26 @@
     - k3s
   when: is_linux_os
 
+- name: check stern installed
+  shell: "helm version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_stern
+  changed_when: False
+  tags:
+    - k3s
+    - stern
+  when: is_linux_os
+
+- name: install stern
+  get_url:
+    url: "{{ STERN_DOWNLOAD_URL_ON_LINUX }}"
+    dest: "/usr/local/bin/stern"
+    force: false
+    mode: 0755
+  tags:
+    - k3s
+    - stern
+  when: (is_linux_os) and installed_of_stern.stdout == "1"
+
 - name: check existing helm packages on Linux
   shell: "test -f {{ HELM_PACKAGE_PATH_ON_LINUX }} && echo 0 || echo 1"
   register: existing_of_helm_on_linux
