@@ -100,6 +100,10 @@ function install() {
             mkdir -p ${DATA_DIR}/gerrit/plugins
             scp ${ROOT_DIR}/data/gerrit/plugins/login-redirect.jar ${DATA_DIR}/gerrit/plugins
         fi
+        if [[ "${name}" == "nginx" ]]; then
+            cd "${ROOT_DIR}"
+            bash ./build_fe.sh
+        fi
         kubectl apply -f "${ROOT_K3S_YAML}/${name}".yml
     done
     for name in ${services[@]}; do
