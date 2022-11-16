@@ -13,7 +13,7 @@ export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk-12.0.1.jdk/Contents/Home
 {% else %}
 export JAVA_HOME="{{JAVA_HOME}}"
 {% endif %}
-export CLASSPATH="${JAVA_HOME}/lib"
+export CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar:${JAVA_HOME}/lib/dt.jar"
 
 export M2_HOME="${HOME}/packages/apache-maven-3.5.4"
 
