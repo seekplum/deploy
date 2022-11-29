@@ -12,6 +12,7 @@
     - "{{ GOPATH }}"
     - "{{ PythonProjects }}"
     - "{{ WebProjects }}"
+    - "{{ JavaProjects }}"
   tags:
     - configure
 

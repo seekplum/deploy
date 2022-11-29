@@ -24,13 +24,16 @@ export GOPROXY=https://mirrors.aliyun.com/goproxy/
 export PYTHONSTARTUP="${HOME}/.pythonrc"
 export PYTHONPROJECTSPATH="{{PythonProjects}}"
 export WEBPROJECTSPATH="{{WebProjects}}"
+export JAVAPROJECTSPATH="{{JavaProjects}}"
 
 export LDFLAGS="-L/usr/local/opt/zlib/lib"
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/sqlite/lib"
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/openssl/lib"
+export LDFLAGS="${LDFLAGS} -L/usr/local/opt/mysql-client/lib"
 export CPPFLAGS="-I/usr/local/opt/openssl/include"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/sqlite/include"
+export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/mysql-client/include"
 export CFLAGS="${CFLAGS} -I/usr/local/opt/openssl/include"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/sqlite/lib/pkgconfig"
@@ -48,6 +51,7 @@ export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
 # 自定义使用Python版本
 export PYENV_ROOT="{{PYENV_ROOT}}"
 export PYTHON_VERSION="{{PYTHON3_VERSION}}"
+export PYTHON2_VIRTUEL_ROOT="{{VIRTUEL_ROOT}}/{{PYTHON2_VERSION}}"
 export PYTHON_VIRTUEL_ROOT="{{VIRTUEL_ROOT}}/${PYTHON_VERSION}"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 export PATH="${PATH}:/usr/local/opt/ncurses/bin"
@@ -67,6 +71,7 @@ export PATH="${PATH}:${PYENV_ROOT}/bin"
 export PATH="${PATH}:${HOME}/.poetry/bin"
 export PATH="${PATH}:${PYENV_ROOT}/bin"
 
+alias senv2="source ${PYTHON2_VIRTUEL_ROOT}/bin/activate"
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
 alias senv="senv3"
 
@@ -84,6 +89,7 @@ alias rm='echo -e "\033[33mThis is not the command you are looking for.\033[0m";
 alias cdg='cd ${GOPATH}/src'
 alias cdp="cd ${PYTHONPROJECTSPATH}"
 alias cdw="cd ${WEBPROJECTSPATH}"
+alias cdj="cd ${JAVAPROJECTSPATH}"
 
 alias cds="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum"
 alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
