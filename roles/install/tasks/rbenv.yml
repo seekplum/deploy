@@ -1,0 +1,86 @@
+---
+- name: check rbenv installed
+  shell: "test -d {{ RBENV_ROOT }} && echo 0 || echo 1"
+  register: installed_of_rbenv
+  changed_when: False
+  tags:
+    - rbenv
+
+- name: download rbenv
+  git:
+    repo: "{{ RBENV_REPOSITORY }}"
+    dest: "{{ RBENV_ROOT }}"
+    accept_hostkey: true
+  when: installed_of_rbenv.stdout == "1"
+  tags:
+    - rbenv
+
+- name: pull rbenv
+  block:
+    - name: repository set-url
+      git_config:
+        repo: "{{ RBENV_ROOT }}"
+        scope: "local"
+        name: "remote.origin.url"
+        value: "{{ RBENV_REPOSITORY }}"
+    - name: pull repository
+      git:
+        repo: "{{ RBENV_REPOSITORY }}"
+        dest: "{{ RBENV_ROOT }}"
+        update: yes
+        version: master
+  when: installed_of_rbenv.stdout == "0"
+  tags:
+    - rbenv
+
+- name: check rbenv plugins installed
+  shell: "test -d {{ RBENV_ROOT }}/plugins/ruby-build && echo 0 || echo 1"
+  register: installed_of_rbenv_plugins
+  changed_when: False
+  tags:
+    - rbenv
+
+- name: download rbenv plugins
+  git:
+    repo: "{{ RUBY_BUILD_REPOSITORY }}"
+    dest: "{{ RUBY_BUILD_ROOT }}"
+    accept_hostkey: true
+  when: installed_of_rbenv_plugins.stdout == "1"
+  tags:
+    - rbenv
+
+- name: pull rbenv plugins
+  block:
+    - name: repository set-url
+      git_config:
+        repo: "{{ RUBY_BUILD_ROOT }}"
+        scope: "local"
+        name: "remote.origin.url"
+        value: "{{ RUBY_BUILD_REPOSITORY }}"
+    - name: pull repository
+      git:
+        repo: "{{ RUBY_BUILD_REPOSITORY }}"
+        dest: "{{ RUBY_BUILD_ROOT }}"
+        update: yes
+        version: master
+  when: installed_of_rbenv.stdout == "0"
+  tags:
+    - rbenv
+
+- name: check ruby installed
+  shell: "ruby --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_ruby
+  changed_when: False
+  tags:
+    - rbenv
+
+- name: install ruby
+  shell: "{{ RBENV_ROOT }}/bin/rbenv --verbose install 2.7.7"
+  when: installed_of_ruby.stdout == "1"
+  tags:
+    - rbenv
+
+- name: set global ruby
+  shell: "{{ RBENV_ROOT }}/bin/rbenv global 2.7.7"
+  tags:
+    - rbenv

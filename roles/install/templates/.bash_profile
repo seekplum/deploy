@@ -50,6 +50,7 @@ export CLICOLOR='Yes' # 是否输出颜色
 export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
 # 自定义使用Python版本
 export PYENV_ROOT="{{PYENV_ROOT}}"
+export RBENV_ROOT="{{RBENV_ROOT}}"
 export PYTHON_VERSION="{{PYTHON3_VERSION}}"
 export PYTHON2_VIRTUEL_ROOT="{{VIRTUEL_ROOT}}/{{PYTHON2_VERSION}}"
 export PYTHON_VIRTUEL_ROOT="{{VIRTUEL_ROOT}}/${PYTHON_VERSION}"
@@ -67,9 +68,10 @@ export PATH="${PATH}:${HOME}/packages/redis/src"
 export PATH="${PATH}:${HOME}/packages/mongodb/bin"
 export PATH="${PATH}:/usr/local/Cellar/rabbitmq/3.7.14/sbin"
 export PATH="${PATH}:${HOME}/packages/apache-maven-3.5.4/bin"
-export PATH="${PATH}:${PYENV_ROOT}/bin"
 export PATH="${PATH}:${HOME}/.poetry/bin"
 export PATH="${PATH}:${PYENV_ROOT}/bin"
+export PATH="${PATH}:${RBENV_ROOT}/bin"
+export PATH="${PATH}:{{ RUBY_BUILD_ROOT }}/bin"
 
 alias senv2="source ${PYTHON2_VIRTUEL_ROOT}/bin/activate"
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
@@ -115,4 +117,7 @@ fi
 
 if which pyenv > /dev/null;
   then eval "$(pyenv init -)";
+fi
+if which rbenv > /dev/null;
+  then eval "$(rbenv init -)";
 fi
