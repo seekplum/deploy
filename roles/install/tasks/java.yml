@@ -42,3 +42,38 @@
       when: (is_linux_os) and installed_of_java.stdout == "1"
   tags:
     - java
+
+- name: check existing mvn packages on Linux
+  shell: "test -f {{ MVN_PACKAGE_PATH_ON_LINUX }} && echo 0 || echo 1"
+  register: existing_of_mvn_on_linux
+  changed_when: False
+  tags:
+    - java
+  when: is_linux_os
+
+- name: check mvn installed
+  shell: "mvn --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_mvn
+  changed_when: False
+  tags:
+    - java
+  when: is_linux_os
+
+- name: install mvn
+  block:
+    - name: download mvn packages on Linux
+      get_url:
+        url: "{{ MVN_DOWNLOAD_URL_ON_LINUX }}"
+        dest: "{{ MVN_PACKAGE_PATH_ON_LINUX }}"
+        force: false
+      when: (is_linux_os) and existing_of_mvn_on_linux.stdout == "1"
+
+    - name: unarchive mvn on Linux
+      unarchive:
+        src: "{{ MVN_PACKAGE_PATH_ON_LINUX }}"
+        dest: "{{ MVN_HOME }}"
+        remote_src: true
+        extra_opts: ['--strip-components=1']
+      when: (is_linux_os) and installed_of_mvn.stdout == "1"
+  tags:
+    - java

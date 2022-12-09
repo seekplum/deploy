@@ -15,6 +15,12 @@
     - initialize
   when: is_mac_os and ansible_user_id != "root" and existing_of_brew.stdout == "1"
 
+- name: add mysql repo on Redhat
+  shell: sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+  tags:
+    - initialize
+  when: is_centos_os
+
 - name: install packages on Redhat
   yum:
     name: "{{ item }}"
