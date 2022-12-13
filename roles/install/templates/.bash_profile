@@ -9,7 +9,7 @@ export ORACLE_HOME="${HOME}/packages/oracle"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${ORACLE_HOME}"
 export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}:${ORACLE_HOME}:${MYSQL_HOME}/lib"
 {% if is_mac_os %}
-export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk-12.0.1.jdk/Contents/Home"
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home"
 {% else %}
 export JAVA_HOME="{{JAVA_HOME}}"
 {% endif %}
