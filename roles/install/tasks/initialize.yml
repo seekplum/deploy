@@ -19,6 +19,8 @@
   shell: sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
   tags:
     - initialize
+  changed_when: False
+  ignore_errors: True
   when: is_centos_os
 
 - name: install packages on Redhat

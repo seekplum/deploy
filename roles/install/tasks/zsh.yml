@@ -65,7 +65,7 @@
 
     - name: download zsh autosuggestions
       git:
-        repo: git://github.com/zsh-users/zsh-autosuggestions
+        repo: git@github.com:zsh-users/zsh-autosuggestions
         dest: "{{ HOME_ROOT }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
         accept_hostkey: true
       when: installed_of_oh_my_zsh_autosuggestions.stdout == "1"
