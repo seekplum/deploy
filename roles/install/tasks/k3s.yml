@@ -165,6 +165,17 @@
     - k3s
   when: is_linux_os
 
+- name: start k3s on ubuntu or Redhat
+  service:
+    name: "k3s"
+    state: "started"
+    enabled: "yes"
+  register: log
+  ignore_errors: True
+  tags:
+    - k3s
+  when: is_linux_os
+
 # 安装后 helm-install-traefik 的状态会是 Completed
 - name: "查询节点、Pod状态"
   shell: "{{ item }}"
@@ -187,7 +198,7 @@
   when: is_linux_os
 
 - name: check stern installed
-  shell: "helm version >/dev/null 2>&1 && echo 0 || echo 1"
+  shell: "stern version >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_stern
   changed_when: False
   tags:
@@ -196,15 +207,36 @@
   when: is_linux_os
 
 - name: install stern
-  get_url:
-    url: "{{ STERN_DOWNLOAD_URL_ON_LINUX }}"
-    dest: "/usr/local/bin/stern"
-    force: false
-    mode: 0755
+  block:
+    - name: check existing java packages on Linux
+      shell: "test -f {{ STERN_PACKAGE_PATH_ON_LINUX }} && echo 0 || echo 1"
+      register: existing_of_stern_on_linux
+      changed_when: False
+      when: (is_linux_os) and installed_of_stern.stdout == "1"
+
+    - name: download stern packages on Linux
+      get_url:
+        url: "{{ STERN_DOWNLOAD_URL_ON_LINUX }}"
+        dest: "{{ STERN_PACKAGE_PATH_ON_LINUX }}"
+        force: false
+      when: is_linux_os and existing_of_stern_on_linux.stdout == "1"
+    - name: unarchive stern on Linux
+      unarchive:
+        src: "{{ STERN_PACKAGE_PATH_ON_LINUX }}"
+        dest: "/tmp"
+        remote_src: true
+      when: (is_linux_os) and installed_of_stern.stdout == "1"
+    - name: copy stern
+      copy:
+        src: "/tmp/stern"
+        dest: "/usr/local/bin"
+        mode: 0755
+        force: true
+        remote_src: true
+      when: (is_linux_os) and installed_of_stern.stdout == "1"
   tags:
     - k3s
     - stern
-  when: (is_linux_os) and installed_of_stern.stdout == "1"
 
 - name: check existing helm packages on Linux
   shell: "test -f {{ HELM_PACKAGE_PATH_ON_LINUX }} && echo 0 || echo 1"
@@ -234,13 +266,13 @@
     - name: unarchive helm on Linux
       unarchive:
         src: "{{ HELM_PACKAGE_PATH_ON_LINUX }}"
-        dest: "{{ HOME_ROOT }}"
+        dest: "/tmp"
         remote_src: true
       when: (is_linux_os) and installed_of_helm.stdout == "1"
 
     - name: copy helm
       copy:
-        src: "{{ HOME_ROOT }}/linux-amd64/helm"
+        src: "/tmp/linux-amd64/helm"
         dest: "/usr/local/bin"
         mode: 0755
         force: true
