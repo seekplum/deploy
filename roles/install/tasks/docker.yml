@@ -36,6 +36,10 @@
     - docker
   when: is_centos_os and installed_of_docker.stdout == "1"
 
+# 添加docker源
+# yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+# 安装containerd
+# yum install https://download.docker.com/linux/centos/8/x86_64/stable/Packages/containerd.io-1.6.9-3.1.el8.x86_64.rpm
 - name: Install docker on Redhat
   yum:
     name: "{{ item }}"
