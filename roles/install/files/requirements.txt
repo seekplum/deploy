@@ -4,11 +4,6 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
---index-url https://mirrors.aliyun.com/pypi/simple
---extra-index-url https://pypi.org/simple
---trusted-host mirrors.aliyun.com
---trusted-host pypi.org
-
 ansible==6.1.0
     # via -r requirements.in
 ansible-core==2.13.1
@@ -128,8 +123,6 @@ resolvelib==0.8.1
     # via ansible-core
 ruamel-yaml==0.17.21
     # via mitmproxy
-ruamel-yaml-clib==0.2.6
-    # via ruamel-yaml
 schema==0.7.5
     # via plum-tools
 six==1.16.0
@@ -145,9 +138,7 @@ stevedore==4.0.0
 supervisor==4.2.4
     # via -r requirements.in
 tomli==2.0.1
-    # via
-    #   build
-    #   pep517
+    # via pep517
 tornado==6.2
     # via mitmproxy
 trash-cli==0.22.4.16
@@ -164,7 +155,7 @@ virtualenvwrapper==4.8.4
     # via -r requirements.in
 werkzeug==2.1.2
     # via flask
-wheel==0.37.1
+wheel==0.38.1
     # via pip-tools
 wsproto==1.1.0
     # via mitmproxy
@@ -173,9 +164,7 @@ you-get==0.4.1620
 youtube-dl==2021.12.17
     # via -r requirements.in
 zipp==3.8.1
-    # via
-    #   importlib-metadata
-    #   importlib-resources
+    # via importlib-metadata
 zstandard==0.17.0
     # via mitmproxy
 
