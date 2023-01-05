@@ -49,7 +49,7 @@
     - k3s
   become: yes
   become_method: sudo
-  when: is_linux_os and "stdout" in swap_name and not swap_name.stdout.startswith("#")
+  when: is_linux_os and "stdout" in swap_name and swap_name.stdout and not swap_name.stdout.startswith("#")
 
 - name: "Ubuntu添加阿里源"
   shell: "curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -"
@@ -198,7 +198,7 @@
   when: is_linux_os
 
 - name: check stern installed
-  shell: "stern version >/dev/null 2>&1 && echo 0 || echo 1"
+  shell: "stern --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_stern
   changed_when: False
   tags:
@@ -219,7 +219,7 @@
         url: "{{ STERN_DOWNLOAD_URL_ON_LINUX }}"
         dest: "{{ STERN_PACKAGE_PATH_ON_LINUX }}"
         force: false
-      when: is_linux_os and existing_of_stern_on_linux.stdout == "1"
+      when: is_linux_os and installed_of_stern.stdout == "1" and existing_of_stern_on_linux.stdout == "1"
     - name: unarchive stern on Linux
       unarchive:
         src: "{{ STERN_PACKAGE_PATH_ON_LINUX }}"
