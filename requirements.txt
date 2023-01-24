@@ -4,14 +4,9 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
---index-url https://mirrors.aliyun.com/pypi/simple
---extra-index-url https://pypi.org/simple
---trusted-host mirrors.aliyun.com
---trusted-host pypi.org
-
-ansible==4.10.0
+ansible==7.0.0
     # via -r requirements.in
-ansible-core==2.11.7
+ansible-core==2.14.1
     # via ansible
 ansible-lint==5.3.1
     # via -r requirements.in
@@ -64,18 +59,12 @@ rich==10.16.1
     # via
     #   ansible-lint
     #   enrich
-ruamel.yaml==0.17.19
+ruamel-yaml==0.17.19
     # via ansible-lint
-ruamel.yaml.clib==0.2.6
-    # via ruamel.yaml
 six==1.16.0
     # via ansible-runner
 tenacity==8.0.1
     # via ansible-lint
-typing-extensions==4.0.1
-    # via
-    #   ansible-lint
-    #   rich
 wcmatch==8.3
     # via ansible-lint
 
