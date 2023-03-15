@@ -136,6 +136,8 @@
     - the_silver_searcher
     - pyenv
     - mitmproxy
+    - gnupg
+    - pinentry-mac
   changed_when: False
   ignore_errors: True
   tags:

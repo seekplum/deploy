@@ -10,7 +10,8 @@
     pathnameencoding = utf-8
 [user]
 	name = seekplum
-	email = 1131909224m@sina.cn
+	email = 1131909224@qq.com
+	signingkey = CA199FB545BEB6CB
 [core]
 	ignorecase = false
         quotepath = false
@@ -20,4 +21,15 @@
 	lowSpeedLimit = 0
 	lowSpeedTime = 999999
 [alias]
-	hs = log --pretty='%C(cyan)%ad %C(yellow)%h %C(cyan)%d %Creset%s' --date-order --graph --date=format:%Y-%m-%d\\ %H:%M:%S
+	hs = log --pretty='%C(cyan)%cd %C(yellow)%h %Creset%cn %C(cyan)%d %Creset%s' --date-order --graph --date=format:%Y-%m-%d\\ %H:%M:%S
+[commit]
+	gpgsign = true
+
+[includeIf "gitdir:~/PythonProjects/meideng.net/"]
+  	path = .gitconfig-huangjiandong
+[includeIf "gitdir:~/JavaProjects/meideng.net/"]
+  	path = .gitconfig-huangjiandong
+[includeIf "gitdir:~/WebProjects/meideng.net/"]
+  	path = .gitconfig-huangjiandong
+[includeIf "gitdir:~/GolangProjects/src/meideng.net/"]
+  	path = .gitconfig-huangjiandong
