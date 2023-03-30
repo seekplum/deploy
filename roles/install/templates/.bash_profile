@@ -38,6 +38,9 @@ export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/mysql-client/include"
 export CFLAGS="${CFLAGS} -I/usr/local/opt/openssl/include"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/sqlite/lib/pkgconfig"
+export NODE_HOME=/usr/local
+export N_PREFIX=/usr/local
+export NODE_PATH="${PATH}:${NODE_HOME}/lib/node_modules"
 
 export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node # 配置 nvm 源
 
@@ -73,6 +76,7 @@ export PATH="${PATH}:${HOME}/.poetry/bin"
 export PATH="${PATH}:${PYENV_ROOT}/bin"
 export PATH="${PATH}:${RBENV_ROOT}/bin"
 export PATH="${PATH}:{{ RUBY_BUILD_ROOT }}/bin"
+export PATH="${PATH}:${NODE_HOME}/bin"
 
 alias senv2="source ${PYTHON2_VIRTUEL_ROOT}/bin/activate"
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"

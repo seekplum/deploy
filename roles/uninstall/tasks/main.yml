@@ -13,13 +13,18 @@
 
 - name: uninstall nvm npm and node
   file:
-    path: "{{ HOME_ROOT }}/{{ item }}"
+    path: "{{ item }}"
     state: absent
   with_items:
-    - .nvm
-    - .npm
-    - .node-gyp
-    - .npminstall_tarball
+    - "{{ HOME_ROOT }}/.nvm"
+    - "{{ HOME_ROOT }}/.npm"
+    - "{{ HOME_ROOT }}/.yarn"
+    - "{{ HOME_ROOT }}/.pnpm-state "
+    - "{{ HOME_ROOT }}/.node-gyp"
+    - "{{ HOME_ROOT }}/.npminstall_tarball"
+    - "/usr/local/n"
+    - "/usr/local/bin/node"
+    - "/usr/local/bin/npm"
   become: yes
   become_method: sudo
   tags:
