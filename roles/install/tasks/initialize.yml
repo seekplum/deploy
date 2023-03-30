@@ -33,7 +33,7 @@
     - python3-pip
     - zip
     - unzip
-    # - util-linux-user
+    - util-linux-user
     - epel-release
     - gcc
     - gcc-c++

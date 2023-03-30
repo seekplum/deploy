@@ -2,6 +2,7 @@
 - include: configure.yml
 - include: initialize.yml
 - include: zsh.yml
+- include: pyenv.yml
 - include: python.yml
 - include: virtualenv.yml
 - include: docker.yml
@@ -9,7 +10,6 @@
 - include: java.yml
 - include: nodejs.yml
 - include: k3s.yml
-- include: pyenv.yml
 - include: rbenv.yml
 
 - name: check existing ansible

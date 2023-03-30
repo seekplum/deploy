@@ -65,7 +65,7 @@ ansible-playbook site.yml -i hosts -l common -t common,remove_docker
 * 执行安装操作
 
 ```bash
-ansible-playbook site.yml -i hosts -t install --skip-tags "configure,initialize,zsh,python,virtualenv,pyenv,rbenv,docker,golang,java,nodejs,helm,k3s,ansible"
+ansible-playbook site.yml -i hosts -t install --skip-tags "configure,initialize,zsh,pyenv,python,virtualenv,rbenv,docker,golang,java,nodejs,helm,k3s,ansible"
 
 ansible-playbook site.yml -i hosts -l common -t common,docker
 ```
