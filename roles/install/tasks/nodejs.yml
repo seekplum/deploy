@@ -38,9 +38,15 @@
       tags:
         - nodejs
 
-    - name: install npm
+    - name: install nvm
       shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ NVM_VERSION }}/install.sh | bash
-      when: installed_of_npm.stdout == "1"
+      when: installed_of_nvm.stdout == "1"
+      tags:
+        - nodejs
+
+    - name: install nodejs
+      shell: ". {{ HOME_ROOT }}/.bash_profile && nvm install {{ NODE_VERSION }}"
+      when: installed_of_node.stdout == "1"
       tags:
         - nodejs
 

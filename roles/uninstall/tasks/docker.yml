@@ -29,6 +29,7 @@
     - docker-logrotate
     - docker-selinux
     - docker-engine-selinux
+    - containerd.io
   tags:
     - remove_docker
   when: is_centos_os

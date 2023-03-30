@@ -120,9 +120,9 @@ if [ -s "$NVM_DIR/bash_completion" ]; then
     . "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 fi
 
-if which pyenv > /dev/null;
+if which pyenv > /dev/null 2>&1;
   then eval "$(pyenv init -)";
 fi
-if which rbenv > /dev/null;
+if which rbenv > /dev/null 2>&1;
   then eval "$(rbenv init -)";
 fi

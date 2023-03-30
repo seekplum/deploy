@@ -28,6 +28,7 @@
     name: "{{ item }}"
     state: present
     update_cache: true
+    nobest: true
   with_items:
     # - python2-pip
     - python3-pip

@@ -40,11 +40,17 @@
 # yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 # 安装containerd
 # yum install https://download.docker.com/linux/centos/8/x86_64/stable/Packages/containerd.io-1.6.9-3.1.el8.x86_64.rpm
+
+# almalinux 9 docker 无法启动https://github.com/docker/cli/issues/2104
+# 编辑 /etc/default/grub 设置 GRUB_CMDLINE_LINUX="console=tty0 console=ttyS0,115200n8 no_timer_check biosdevname=0 net.ifnames=0 cgroup_enable=memory swapaccount=1 systemd.unified_cgroup_hierarchy=0"
+# dnf install -y grubby && grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=0"
+# reboot
 - name: Install docker on Redhat
   yum:
     name: "{{ item }}"
     state: present
     update_cache: true
+    nobest: true
   with_items:
     - docker-ce
   tags:
