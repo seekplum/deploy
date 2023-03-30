@@ -4,4 +4,3 @@
   with_items: "{{ VIRTUAL_ENVS }}"
   tags:
     - virtualenv
-    - pyconcreate
