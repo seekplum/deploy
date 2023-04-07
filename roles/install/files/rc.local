@@ -3,9 +3,8 @@
 set -e
 
 function start() {
-    mount -o remount,rw /
     echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local start" >> ~/mystart.log
-    systemctl daemon-reload && systemctl restart systemd-resolved
+    bash ~/packages/mystart.sh | tee -a ~/mystart.log
 }
 
 function print_help() {

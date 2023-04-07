@@ -13,6 +13,7 @@
     - "{{ PythonProjects }}"
     - "{{ WebProjects }}"
     - "{{ JavaProjects }}"
+    - "{{ PACKAGES_ROOT }}"
   tags:
     - configure
 
@@ -23,6 +24,15 @@
     mode: 0644
     force: true
     backup: true # 进行备份
+  tags:
+    - configure
+
+- name: copy mystart.sh script template
+  template:
+    src: mystart.sh
+    dest: "{{ PACKAGES_ROOT }}"
+    mode: 0755
+    force: true
   tags:
     - configure
 
@@ -158,7 +168,7 @@
   become_method: sudo
   tags:
     - configure
-  when: is_ubuntu_os
+  when: is_linux_os
 
 - name: 配置DNS
   block:
