@@ -75,7 +75,7 @@
   apt:
     pkg: "{{ item }}"
     state: present
-    update_cache: true
+    # update_cache: true
   # https://stackoverflow.com/questions/51622712/ansible-requires-python-apt-but-its-already-installed
   # ansible -i hosts common -m "apt name=python-apt state=latest" --become-user root
   # shell: "sudo apt-get install -y {{ item }}"
@@ -87,7 +87,7 @@
     - git
     - bzip2
     - python-setuptools
-    - python-dev
+    - python3-dev
     - wget
     - screen
     - make
@@ -112,6 +112,7 @@
     - gnupg2
     - python-apt
     - libffi-dev
+    - python3
     - python3-pip
   tags:
     - initialize

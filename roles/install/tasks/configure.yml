@@ -166,6 +166,7 @@
         enabled: "yes"
   become: yes
   become_method: sudo
+  ignore_errors: True
   tags:
     - configure
   when: is_linux_os
