@@ -25,7 +25,7 @@
     - "/usr/local/n"
     - "/usr/local/bin/node"
     - "/usr/local/bin/npm"
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - remove_nodejs
@@ -34,7 +34,7 @@
   file:
     path: "{{ GOROOT }}"
     state: absent
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - remove_golang
@@ -42,7 +42,7 @@
 - name: remove java on RedHat
   shell: "rpm -qa | grep java | xargs rpm -e --noscripts"
   ignore_errors: True
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - remove_java
@@ -52,7 +52,7 @@
   file:
     path: "{{ JAVA_HOME }}"
     state: absent
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - remove_java

@@ -2,7 +2,7 @@
 
 - name: change terminal
   shell: "chsh -s /bin/bash {{ ansible_user_id }}"
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - remove_zsh
@@ -68,7 +68,7 @@
     - "{{ HOME_ROOT }}/.zshrc_history"
     - "{{ HOME_ROOT }}/.zshrc.pre-oh-my-zsh"
     - "{{ HOME_ROOT }}/.oh-my-zsh"
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - remove_zsh

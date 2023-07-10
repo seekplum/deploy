@@ -15,7 +15,7 @@
   changed_when: False
   tags:
     - remove_k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_linux_os and k3s_server_scripts.stat.exists == True
 
@@ -29,7 +29,7 @@
     - "/etc/rancher"
   tags:
     - remove_k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_linux_os
 
@@ -43,7 +43,7 @@
     - "/usr/local/bin/helm"
   tags:
     - remove_helm
-  become: yes
+  become: true
   become_method: sudo
   when: is_linux_os
 

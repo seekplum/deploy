@@ -57,19 +57,19 @@
         - nodejs
 
     - name: change directory mode
-      shell: "chown -R $(whoami) /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share /usr/local/n"
+      shell: "chown -R $(whoami) /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share"
       when: installed_of_node.stdout == "1"
       tags:
         - nodejs
-      become: yes
+      become: true
       become_method: sudo
 
     - name: install node
-      shell: "n {{ NODE_VERSION }}"
+      shell: ". {{ HOME_ROOT }}/.bash_profile && n {{ NODE_VERSION }}"
       when: installed_of_node.stdout == "1"
       tags:
         - nodejs
-      become: yes
+      become: true
       become_method: sudo
   tags:
     - nodejs

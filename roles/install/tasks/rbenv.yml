@@ -75,7 +75,7 @@
     - rbenv
 
 - name: install ruby
-  shell: "{{ RBENV_ROOT }}/bin/rbenv --verbose install 2.7.7"
+  shell: "{{ RBENV_ROOT }}/bin/rbenv install 2.7.7"
   when: installed_of_ruby.stdout == "1"
   tags:
     - rbenv

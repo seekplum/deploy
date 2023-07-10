@@ -67,7 +67,7 @@
   with_flattened:
     - '{{ groups["masters"] }}'
     - '{{ groups["slaves"] }}'
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - remove_kubeadm
@@ -78,7 +78,7 @@
     path: /etc/hosts
     regexp: "# k8s node"
     state: absent
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - remove_kubeadm

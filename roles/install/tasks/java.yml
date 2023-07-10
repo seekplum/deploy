@@ -4,6 +4,8 @@
     dest: "{{ JAVA_HOME }}"
     state: directory
     mode: 0755
+  become: true
+  become_method: sudo
   tags:
     - java
   when: is_linux_os
@@ -39,6 +41,8 @@
         dest: "{{ JAVA_HOME }}"
         remote_src: true
         extra_opts: ['--strip-components=1']
+      become: true
+      become_method: sudo
       when: (is_linux_os) and installed_of_java.stdout == "1"
   tags:
     - java

@@ -49,7 +49,7 @@
     - "containerd.io"
     - "containerd"
     - "runc"
-  become: yes
+  become: true
   become_method: sudo
   ignore_errors: True
   tags:
@@ -83,7 +83,7 @@
     - "{{ HOME_ROOT }}/Library/Caches/com.docker.docker"
     - "{{ HOME_ROOT }}/Library/Containers/com.docker.docker"
     - "{{ HOME_ROOT }}/Library/Containers/com.docker.helper"
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - remove_docker

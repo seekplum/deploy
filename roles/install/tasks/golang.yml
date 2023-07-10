@@ -55,13 +55,13 @@
         src: "{{ GO_PACKAGE_PATH_ON_LINUX }}"
         dest: "{{ SOFT_INSTALL_ROOT }}"
         remote_src: true
-      become: yes
+      become: true
       become_method: sudo
       when: is_linux_os and installed_of_go.stdout == "1"
 
     - name: unarchive golang on macOS
       shell: "tar -zxvf {{ GO_PACKAGE_PATH_ON_MAC }} -C {{ SOFT_INSTALL_ROOT }}"
-      become: yes
+      become: true
       become_method: sudo
       when: is_mac_os and installed_of_go.stdout == "1"
   tags:

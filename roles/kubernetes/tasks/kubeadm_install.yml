@@ -5,7 +5,7 @@
     path: /etc/hosts
     regexp: "# k8s node"
     state: absent
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - kubeadm
@@ -18,7 +18,7 @@
     marker: "# k8s node"
     block: |
       {{ hostvars[item].ansible_default_ipv4.address }} {{ hostvars[item].ansible_hostname }}
-  become: yes
+  become: true
   become_method: sudo
   with_flattened:
     - '{{ groups["masters"] }}'

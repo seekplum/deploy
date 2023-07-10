@@ -39,7 +39,7 @@
     - zsh
   tags:
     - zsh
-  become: yes
+  become: true
   become_method: sudo
   when: is_ubuntu_os and installed_of_zsh.stdout == "1"
 
@@ -74,7 +74,7 @@
 
 - name: change terminal
   shell: "chsh -s /bin/zsh {{ ansible_user_id }}"
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - zsh

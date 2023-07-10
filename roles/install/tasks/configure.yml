@@ -103,7 +103,7 @@
     dest: "/etc/apt/"
     mode: 0644
     force: true
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - configure
@@ -115,7 +115,7 @@
     dest: "/etc/apt/sources.list.d/"
     mode: 0644
     force: true
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - configure
@@ -131,7 +131,7 @@
   with_items:
     - "CentOS-Base.repo"
     - "wandisco-git.repo"
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - configure
@@ -139,7 +139,7 @@
 
 - name: import gpg key on Redhat
   shell: "rpm --import http://opensource.wandisco.com/RPM-GPG-KEY-WANdisco"
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - configure
@@ -164,7 +164,7 @@
         name: "my-rc-local"
         state: "started"
         enabled: "yes"
-  become: yes
+  become: true
   become_method: sudo
   ignore_errors: True
   tags:
@@ -184,7 +184,7 @@
         state: "restarted"
         enabled: "yes"
         daemon_reload: yes
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - configure

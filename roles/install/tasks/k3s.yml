@@ -7,7 +7,7 @@
     enabled: "no"
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_ubuntu_os
 
@@ -18,7 +18,7 @@
     enabled: "no"
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_centos_os
 
@@ -26,7 +26,7 @@
   shell: swapoff -a
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_linux_os
 
@@ -36,7 +36,7 @@
   changed_when: False
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_linux_os
 
@@ -47,7 +47,7 @@
     replace: '# \1'
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_linux_os and "stdout" in swap_name and swap_name.stdout and not swap_name.stdout.startswith("#")
 
@@ -56,7 +56,7 @@
   changed_when: False
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_ubuntu_os
 
@@ -68,7 +68,7 @@
       EOF
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_ubuntu_os
 
@@ -83,7 +83,7 @@
       enable=1
       EOF
   changed_when: False
-  become: yes
+  become: true
   become_method: sudo
   tags:
     - k3s
@@ -99,7 +99,7 @@
       EOF
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_linux_os
 
@@ -107,7 +107,7 @@
   shell: sysctl --system
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_linux_os
 
@@ -120,7 +120,7 @@
 #     - containerd
 #   tags:
 #     - k3s
-#   become: yes
+#   become: true
 #   become_method: sudo
 #   when: is_centos_os
 
@@ -133,7 +133,7 @@
 #     - containerd
 #   tags:
 #     - k3s
-#   become: yes
+#   become: true
 #   become_method: sudo
 #   when: is_ubuntu_os
 
@@ -144,7 +144,7 @@
 #     enabled: "yes"
 #   tags:
 #     - k3s
-#   become: yes
+#   become: true
 #   become_method: sudo
 #   when: is_linux_os
 
@@ -154,7 +154,7 @@
   register: k3s_install_result
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_linux_os
 
@@ -186,7 +186,7 @@
     - kubectl get all --all-namespaces
   tags:
     - k3s
-  become: yes
+  become: true
   become_method: sudo
   when: is_linux_os
 
