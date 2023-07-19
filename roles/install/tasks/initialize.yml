@@ -115,6 +115,9 @@
     - python3
     - python3-pip
     - pinentry-gtk2
+    - python-tk
+    - python3-tk
+    - tk-dev
   tags:
     - initialize
   ignore_errors: True
