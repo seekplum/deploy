@@ -14,7 +14,8 @@
 	signingkey = CA199FB545BEB6CB
 [core]
 	ignorecase = false
-        quotepath = false
+	quotepath = false
+	pager = more
 [pull]
 	rebase = false
 [http]
