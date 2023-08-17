@@ -1,15 +1,52 @@
 #!/bin/bash
 
-set -xe
+set -e
 
-# 增加 ssh key 到可信列表
-# ssh-add -K ~/.ssh/seekplum >/dev/null 2&> 1
+SUPERVISORD="${HOME}/packages/pythonenv/{{PYTHON3_VERSION}}/bin/supervisord"
+SUPERVISORCTL="${HOME}/packages/pythonenv/{{PYTHON3_VERSION}}/bin/supervisorctl"
+SUPERVISOR_CONF="${HOME}/packages/supervisor/supervisord.conf"
 
-# 启动相关服务
-${HOME}/packages/pythonenv/{{PYTHON3_VERSION}}/bin/supervisord -c ${HOME}/packages/supervisor/supervisord.conf
+function start() {
+    # 增加 ssh key 到可信列表
+    # ssh-add -K ~/.ssh/seekplum >/dev/null 2&> 1
 
-# 开启第二个微信页面
-# screen -S weixin /Applications/WeChat.app/Contents/MacOS/WeChat
+    # 启动相关服务
+    ${SUPERVISORD} -c ${SUPERVISOR_CONF}
 
-# mount -o remount,rw /
-# systemctl daemon-reload && systemctl restart systemd-resolved
+    # 开启第二个微信页面
+    # screen -S weixin /Applications/WeChat.app/Contents/MacOS/WeChat
+
+    # mount -o remount,rw /
+    # sudo systemctl daemon-reload && sudo systemctl restart systemd-resolved
+}
+
+function stop() {
+    ${SUPERVISORCTL} -c ${SUPERVISOR_CONF} shutdown
+}
+
+function print_help() {
+    echo "Usage: bash $0 {start|stop|restart}"
+    echo "e.g: $0 start"
+}
+
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart)
+        stop
+        sleep 3
+        start
+        ;;
+  ""|-h|--help)
+        print_help  # 参数为空时执行
+        ;;
+  *)  # 匹配都失败执行
+        print_help
+esac
+
+exit 0
