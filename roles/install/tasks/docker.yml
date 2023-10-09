@@ -57,18 +57,19 @@
     - docker
   when: is_centos_os and installed_of_docker.stdout == "1"
 
-# - name: Add gpg key on Ubuntu
-#   shell: "{{ item }}"
-#   with_items:
-#     - sudo apt-get remove docker docker.io containerd runc
-#     - sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-#     - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-#     - sudo apt-get update
-    # become: true
-    # become_method: sudo
-#   tags:
-#     - docker
-#   when: is_ubuntu_os and installed_of_docker.stdout == "1"
+- name: Add gpg key on Ubuntu
+  shell: "{{ item }}"
+  with_items:
+    - sudo apt-get autoremove -y docker docker.io containerd runc
+    - sudo curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -n -o /usr/share/keyrings/docker-archive-keyring.gpg
+    - |-
+      echo \
+      "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://mirrors.aliyun.com/docker-ce/linux/ubuntu \
+      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    - sudo apt-get update
+  tags:
+    - docker
+  when: is_ubuntu_os and installed_of_docker.stdout == "1"
 
 - name: Install docker on Ubuntu
   apt:
@@ -81,6 +82,7 @@
     - containerd.io
   tags:
     - docker
+  ignore_errors: True
   become: true
   become_method: sudo
   when: is_ubuntu_os and installed_of_docker.stdout == "1"
@@ -111,7 +113,7 @@
 - name: install docker-compose on Linux
   shell: "{{ item }}"
   with_items:
-    - 'curl -L "https://github.com/docker/compose/releases/download/2.14.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose'
+    - 'curl -L "https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose'
     - 'chmod +x /usr/local/bin/docker-compose'
   become: true
   become_method: sudo

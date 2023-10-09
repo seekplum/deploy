@@ -149,8 +149,8 @@
 #   when: is_linux_os
 
 - name: install k3s on Linux
-  # --kube-apiserver-arg service-node-port-range=1-65000 --disable traefik
-  shell: "curl -sfL https://rancher-mirror.oss-cn-beijing.aliyuncs.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --kubelet-arg container-log-max-files=3 container-log-max-size=5 cgroup-driver=systemd image-gc-high-threshold=100 --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --disable traefik --prefer-bundled-bin {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
+  # INSTALL_K3S_VERSION=v1.25.7+k3s1 --kube-apiserver-arg service-node-port-range=1-65000 --disable traefik
+  shell: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --kubelet-arg container-log-max-files=3 container-log-max-size=5 cgroup-driver=systemd image-gc-high-threshold=100 --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --disable traefik --prefer-bundled-bin {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
   register: k3s_install_result
   tags:
     - k3s
