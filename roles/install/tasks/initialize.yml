@@ -60,6 +60,7 @@
     # - haveged
     # - the_silver_searcher
     - patch
+    - pcre-devel
   tags:
     - initialize
   when: is_centos_os
@@ -118,6 +119,7 @@
     - python-tk
     - python3-tk
     - tk-dev
+    - libpcre3-dev
   tags:
     - initialize
   ignore_errors: True
