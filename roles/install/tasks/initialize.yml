@@ -61,6 +61,7 @@
     # - the_silver_searcher
     - patch
     - pcre-devel
+    - ripgrep
   tags:
     - initialize
   when: is_centos_os
@@ -120,6 +121,7 @@
     - python3-tk
     - tk-dev
     - libpcre3-dev
+    - ripgrep
   tags:
     - initialize
   ignore_errors: True
@@ -147,6 +149,7 @@
     - mitmproxy
     - gnupg
     - pinentry-mac
+    - ripgrep
   changed_when: False
   ignore_errors: True
   tags:
