@@ -1,17 +1,4 @@
 ---
-- name: check nvm installed
-  shell: "nvm --version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: installed_of_nvm
-  changed_when: False
-  tags:
-    - nodejs
-
-- name: check npm installed
-  shell: "npm --version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: installed_of_npm
-  changed_when: False
-  tags:
-    - nodejs
 
 - name: check n installed
   shell: "n --version >/dev/null 2>&1 && echo 0 || echo 1"
@@ -29,35 +16,14 @@
 
 - name: install nodejs
   block:
-    - name: create nvm dir
-      file:
-        dest: "{{ HOME_ROOT }}/.nvm"
-        state: directory
-        mode: 0755
-      when: installed_of_nvm.stdout == "1"
-      tags:
-        - nodejs
-
-    - name: install nvm
-      shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ NVM_VERSION }}/install.sh | bash
-      when: installed_of_nvm.stdout == "1"
-      tags:
-        - nodejs
-
-    - name: install nodejs
-      shell: ". {{ HOME_ROOT }}/.bash_profile && nvm install {{ NODE_VERSION }}"
-      when: installed_of_node.stdout == "1"
-      tags:
-        - nodejs
-
     - name: install n
-      shell: ". {{ HOME_ROOT }}/.bash_profile && npm install -g n yarn pnpm --registry=https://registry.npm.taobao.org"
+      shell: "export N_PREFIX=/usr/local/n && curl -L https://bit.ly/n-install | bash -s -- -y"
       when: installed_of_n.stdout == "1"
       tags:
         - nodejs
 
     - name: change directory mode
-      shell: "chown -R $(whoami) /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share"
+      shell: "chown -R $(whoami):$(whoami) /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share"
       when: installed_of_node.stdout == "1"
       tags:
         - nodejs
@@ -65,7 +31,7 @@
       become_method: sudo
 
     - name: install node
-      shell: ". {{ HOME_ROOT }}/.bash_profile && n {{ NODE_VERSION }}"
+      shell: "/usr/local/n/bin/n {{ NODE_VERSION }}"
       when: installed_of_node.stdout == "1"
       tags:
         - nodejs

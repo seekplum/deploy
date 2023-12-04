@@ -25,6 +25,8 @@
     - "/usr/local/n"
     - "/usr/local/bin/node"
     - "/usr/local/bin/npm"
+    - "/usr/local/bin/n"
+    - "/usr/local/lib/node_modules"
   become: true
   become_method: sudo
   tags:
