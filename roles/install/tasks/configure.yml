@@ -141,6 +141,7 @@
   shell: "rpm --import http://opensource.wandisco.com/RPM-GPG-KEY-WANdisco"
   become: true
   become_method: sudo
+  ignore_errors: True
   tags:
     - configure
   when: is_centos_os

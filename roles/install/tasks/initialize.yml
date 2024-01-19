@@ -23,6 +23,14 @@
   ignore_errors: True
   when: is_centos_os
 
+- name: add RPM-GPG-KEY-EPEL on Redhat
+  shell: sudo curl -fSL --connect-timeout 5 --retry 100 --retry-connrefused --retry-delay 1 --retry-max-time 100 https://archive.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 -o /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-9
+  tags:
+    - initialize
+  changed_when: False
+  ignore_errors: True
+  when: is_centos_os
+
 - name: install packages on Redhat
   yum:
     name: "{{ item }}"
