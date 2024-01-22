@@ -8,16 +8,23 @@
     - remove_k3s
 
 - name: remove k3s
-  # server 节点
-  shell: "sh /usr/local/bin/k3s-uninstall.sh"
-  # agent 节点
-  # shell: "sh /usr/local/bin/k3s-agent-uninstall.sh"
+  shell: "sh {{ item }}"
   changed_when: False
+  with_items:
+    - "/usr/local/bin/k3s-uninstall.sh"
+    - "/usr/local/bin/k3s-agent-uninstall.sh"
   tags:
     - remove_k3s
   become: true
   become_method: sudo
   when: is_linux_os and k3s_server_scripts.stat.exists == True
+
+- name: uninstall k3s on Redhat
+  shell: yum remove -y k3s*
+  ignore_errors: True
+  tags:
+    - remove_k3s
+  when: is_centos_os
 
 - name: "删除文件"
   file:
