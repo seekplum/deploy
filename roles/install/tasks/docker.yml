@@ -51,8 +51,10 @@
     state: present
     update_cache: true
     nobest: true
+  # yum list docker-ce --showduplicates | grep "^docker" | sort -r
   with_items:
-    - docker-ce
+    - docker-ce-cli{{ DOCKER_CLI_VERSION | default('') }}
+    - docker-ce{{ DOCKER_VERSION | default('') }}
   tags:
     - docker
   when: is_centos_os and installed_of_docker.stdout == "1"
@@ -76,10 +78,11 @@
     pkg: "{{ item }}"
     state: present
     # update_cache: true
+  # sudo apt-cache madison docker-ce
   with_items:
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
+    - docker-ce-cli{{ DOCKER_CLI_VERSION | default('') }}
+    - docker-ce{{ DOCKER_VERSION | default('') }}
+    - containerd.io{{ CONTAINERD_VERSION | default('') }}
   tags:
     - docker
   ignore_errors: True
