@@ -128,6 +128,7 @@ if which rbenv > /dev/null 2>&1;
 fi
 
 function proxy_on() {
+  export ALL_PROXY=socks5://127.0.0.1:7890
   export http_proxy=http://127.0.0.1:7890
   export https_proxy=${http_proxy}
   echo -e "终端代理已开启。"

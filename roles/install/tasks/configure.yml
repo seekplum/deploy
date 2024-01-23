@@ -9,10 +9,10 @@
   with_items:
     - "{{ HOME_ROOT }}/.ssh"
     - "{{ HOME_ROOT }}/.pip"
-    - "{{ GOPATH }}"
-    - "{{ PythonProjects }}"
-    - "{{ WebProjects }}"
-    - "{{ JavaProjects }}"
+    # - "{{ GOPATH }}"
+    # - "{{ PythonProjects }}"
+    # - "{{ WebProjects }}"
+    # - "{{ JavaProjects }}"
     - "{{ PACKAGES_ROOT }}"
   tags:
     - configure

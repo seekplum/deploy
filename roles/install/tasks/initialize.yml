@@ -15,16 +15,16 @@
     - initialize
   when: is_mac_os and ansible_user_id != "root" and existing_of_brew.stdout == "1"
 
-- name: add mysql repo on Redhat
-  shell: sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
-  tags:
-    - initialize
-  changed_when: False
-  ignore_errors: True
-  when: is_centos_os
+# - name: add mysql repo on Redhat
+#   shell: sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+#   tags:
+#     - initialize
+#   changed_when: False
+#   ignore_errors: True
+#   when: is_centos_os
 
 - name: add RPM-GPG-KEY-EPEL on Redhat
-  shell: sudo curl -fSL --connect-timeout 5 --retry 100 --retry-connrefused --retry-delay 1 --retry-max-time 100 https://archive.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 -o /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-9
+  shell: sudo curl -fSL --connect-timeout 5 --retry 100 --retry-connrefused --retry-delay 1 --retry-max-time 100 https://archive.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }} -o /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}
   tags:
     - initialize
   changed_when: False

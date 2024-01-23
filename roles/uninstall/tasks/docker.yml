@@ -29,6 +29,8 @@
     - docker-logrotate
     - docker-selinux
     - docker-engine-selinux
+    - docker-buildx-plugin
+    - docker-compose-plugin
     - containerd.io
   tags:
     - remove_docker
@@ -78,6 +80,7 @@
   with_items:
     - "/var/lib/docker"
     - "/etc/apparmor.d/docker"
+    - "/etc/yum.repos.d/docker-ce.repo"
     - "/var/run/docker.sock"
     - "/usr/local/bin/docker-compose"
     - "{{ HOME_ROOT }}/Library/Caches/com.docker.docker"

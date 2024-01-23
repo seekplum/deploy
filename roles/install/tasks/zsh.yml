@@ -30,6 +30,7 @@
     - zsh
   when: is_centos_os and installed_of_zsh.stdout == "1"
 
+# sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A1715D88E1DF1F24
 - name: install zsh on Ubuntu
   apt:
     pkg: "{{ item }}"
