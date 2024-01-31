@@ -148,9 +148,32 @@
 #   become_method: sudo
 #   when: is_linux_os
 
+- name: create rancher dir
+  file:
+    dest: "/etc/rancher/k3s"
+    state: directory
+    mode: 0755
+  tags:
+    - k3s
+  become: true
+  become_method: sudo
+  when: is_linux_os
+
+- name: copy kubelet.config
+  copy:
+    src: kubelet.config
+    dest: "/etc/rancher/k3s"
+    mode: 0644
+    force: true
+  tags:
+    - k3s
+  become: true
+  become_method: sudo
+  when: is_linux_os
+
 - name: install k3s on Linux
   # INSTALL_K3S_VERSION=v1.25.7+k3s1 --kube-apiserver-arg service-node-port-range=1-65000 --disable traefik
-  shell: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --kubelet-arg container-log-max-files=3 container-log-max-size=5 cgroup-driver=systemd image-gc-high-threshold=100 --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --disable traefik --prefer-bundled-bin {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
+  shell: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_VERSION={{ INSTALL_K3S_VERSION | default('') }} INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --kubelet-arg container-log-max-files=3 --kubelet-arg container-log-max-size=5 --kubelet-arg cgroup-driver=systemd --kubelet-arg image-gc-high-threshold=100 --kubelet-arg config=/etc/rancher/k3s/kubelet.config --kube-apiserver-arg default-not-ready-toleration-seconds=10 --kube-apiserver-arg default-unreachable-toleration-seconds=10 --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --disable traefik --prefer-bundled-bin {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
   register: k3s_install_result
   tags:
     - k3s

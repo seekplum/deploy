@@ -7,17 +7,32 @@
   tags:
     - remove_k3s
 
-- name: remove k3s
-  shell: "sh {{ item }}"
+- name: Check that the k3s-agent-uninstall.sh exists
+  stat:
+    path: /usr/local/bin/k3s-agent-uninstall.sh
+  register: k3s_agent_scripts
+  tags:
+    - remove_k3s
+
+- name: remove k3s server
+  shell: "sh /usr/local/bin/k3s-uninstall.sh"
+  ignore_errors: True
   changed_when: False
-  with_items:
-    - "/usr/local/bin/k3s-uninstall.sh"
-    - "/usr/local/bin/k3s-agent-uninstall.sh"
   tags:
     - remove_k3s
   become: true
   become_method: sudo
   when: is_linux_os and k3s_server_scripts.stat.exists == True
+
+- name: remove k3s agent
+  shell: "sh /usr/local/bin/k3s-agent-uninstall.sh"
+  ignore_errors: True
+  changed_when: False
+  tags:
+    - remove_k3s
+  become: true
+  become_method: sudo
+  when: is_linux_os and k3s_agent_scripts.stat.exists == True
 
 - name: uninstall k3s on Redhat
   shell: yum remove -y k3s*
@@ -34,6 +49,9 @@
   with_items:
     - "{{ HOME_ROOT }}/.kube/"
     - "/etc/rancher"
+    - "/var/lib/rancher"
+    - "/usr/local/bin/k3s-killall.sh"
+    - "/usr/local/bin/k3s"
   tags:
     - remove_k3s
   become: true
