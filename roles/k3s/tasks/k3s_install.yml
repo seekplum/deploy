@@ -6,7 +6,7 @@
     state: "stopped"
     enabled: "no"
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
   when: is_ubuntu_os
@@ -17,7 +17,8 @@
     state: "stopped"
     enabled: "no"
   tags:
-    - k3s
+    - k3s_common
+  ignore_errors: True
   become: true
   become_method: sudo
   when: is_centos_os
@@ -25,7 +26,7 @@
 - name: "临时关闭交换分区"
   shell: swapoff -a
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
   when: is_linux_os
@@ -35,7 +36,7 @@
   register: swap_name
   changed_when: False
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
   when: is_linux_os
@@ -46,7 +47,7 @@
     regexp: '^({{ swap_name.stdout }})'
     replace: '# \1'
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
   when: is_linux_os and "stdout" in swap_name and swap_name.stdout and not swap_name.stdout.startswith("#")
@@ -55,7 +56,7 @@
   shell: "curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -"
   changed_when: False
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
   when: is_ubuntu_os
@@ -67,7 +68,7 @@
       deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
       EOF
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
   when: is_ubuntu_os
@@ -86,7 +87,7 @@
   become: true
   become_method: sudo
   tags:
-    - k3s
+    - k3s_common
   when: is_centos_os
 
 - name: "Linux配置k8s内核参数"
@@ -98,7 +99,7 @@
       vm.swappiness=0
       EOF
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
   when: is_linux_os
@@ -106,7 +107,7 @@
 - name: "Linux生效内核参数"
   shell: sysctl --system
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
   when: is_linux_os
@@ -119,7 +120,7 @@
 #   with_items:
 #     - containerd
 #   tags:
-#     - k3s
+#     - k3s_common
 #   become: true
 #   become_method: sudo
 #   when: is_centos_os
@@ -132,7 +133,7 @@
 #   with_items:
 #     - containerd
 #   tags:
-#     - k3s
+#     - k3s_common
 #   become: true
 #   become_method: sudo
 #   when: is_ubuntu_os
@@ -143,7 +144,7 @@
 #     state: "started"
 #     enabled: "yes"
 #   tags:
-#     - k3s
+#     - k3s_common
 #   become: true
 #   become_method: sudo
 #   when: is_linux_os
@@ -154,7 +155,7 @@
     state: directory
     mode: 0755
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
   when: is_linux_os
@@ -166,27 +167,40 @@
     mode: 0644
     force: true
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
   when: is_linux_os
 
-- name: install k3s on Linux
-  # INSTALL_K3S_VERSION=v1.25.7+k3s1 --kube-apiserver-arg service-node-port-range=1-65000 --disable traefik
-  shell: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_VERSION={{ INSTALL_K3S_VERSION | default('') }} INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --kubelet-arg container-log-max-files=3 --kubelet-arg container-log-max-size=5 --kubelet-arg cgroup-driver=systemd --kubelet-arg image-gc-high-threshold=100 --kubelet-arg config=/etc/rancher/k3s/kubelet.config --kube-apiserver-arg default-not-ready-toleration-seconds=10 --kube-apiserver-arg default-unreachable-toleration-seconds=10 --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --disable traefik --prefer-bundled-bin {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
-  register: k3s_install_result
+- name: "删除旧的iptables"
+  shell: "update-alternatives --remove {{ item }} /usr/local/sbin/{{ item }}"
+  with_items:
+    - iptables
+    - ip6tables
   tags:
-    - k3s
+    - k3s_common
   become: true
   become_method: sudo
+  ignore_errors: True
   when: is_linux_os
+
+- name: install k3s server on Linux
+  # https://update.k3s.io/v1-release/channels/stable
+  # INSTALL_K3S_VERSION=v1.25.7+k3s1 --kube-apiserver-arg service-node-port-range=1-65000 --disable traefik
+  shell: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_VERSION={{ INSTALL_K3S_VERSION | default('') }} INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --node-label worker.node=true --kubelet-arg container-log-max-files=3 --kubelet-arg container-log-max-size=5 --kubelet-arg cgroup-driver=systemd --kubelet-arg image-gc-high-threshold=100 --kubelet-arg config=/etc/rancher/k3s/kubelet.config --kube-apiserver-arg default-not-ready-toleration-seconds=10 --kube-apiserver-arg default-unreachable-toleration-seconds=10 --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --disable traefik --prefer-bundled-bin {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
+  register: k3s_install_result
+  tags:
+    - k3s_server
+  become: true
+  become_method: sudo
+  when: is_linux_os and is_master_node
 
 - name: "输出安装信息"
   debug:
     msg: "{{ k3s_install_result }}"
   tags:
-    - k3s
-  when: is_linux_os
+    - k3s_server
+  when: is_linux_os and is_master_node
 
 - name: start k3s on ubuntu or Redhat
   service:
@@ -196,38 +210,37 @@
   register: log
   ignore_errors: True
   tags:
-    - k3s
-  when: is_linux_os
+    - k3s_server
+  when: is_linux_os and is_master_node
 
 # 安装后 helm-install-traefik 的状态会是 Completed
 - name: "查询节点、Pod状态"
   shell: "{{ item }}"
   register: k3s_pods_info
   with_items:
-    - kubectl get nodes,cs -o wide
-    - kubectl --namespace kube-system get pods -o wide
-    - kubectl get all --all-namespaces
+    - /usr/local/bin/kubectl get nodes,cs -o wide
+    - /usr/local/bin/kubectl --namespace kube-system get pods -o wide
+    - /usr/local/bin/kubectl get all --all-namespaces
   tags:
-    - k3s
+    - k3s_server
   become: true
   become_method: sudo
-  when: is_linux_os
+  when: is_linux_os and is_master_node
 
 - name: "输出Pod信息"
   debug:
     msg: "{{ k3s_pods_info }}"
   tags:
-    - k3s
-  when: is_linux_os
+    - k3s_server
+  when: is_linux_os and is_master_node
 
 - name: check stern installed
   shell: "stern --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_stern
   changed_when: False
   tags:
-    - k3s
     - stern
-  when: is_linux_os
+  when: is_linux_os and is_master_node
 
 - name: install stern
   block:
@@ -242,13 +255,13 @@
         url: "{{ STERN_DOWNLOAD_URL_ON_LINUX }}"
         dest: "{{ STERN_PACKAGE_PATH_ON_LINUX }}"
         force: false
-      when: is_linux_os and installed_of_stern.stdout == "1" and existing_of_stern_on_linux.stdout == "1"
+      when: is_linux_os and is_master_node and installed_of_stern.stdout == "1" and existing_of_stern_on_linux.stdout == "1"
     - name: unarchive stern on Linux
       unarchive:
         src: "{{ STERN_PACKAGE_PATH_ON_LINUX }}"
         dest: "/tmp"
         remote_src: true
-      when: (is_linux_os) and installed_of_stern.stdout == "1"
+      when: is_linux_os and is_master_node and installed_of_stern.stdout == "1"
     - name: copy stern
       copy:
         src: "/tmp/stern"
@@ -256,9 +269,8 @@
         mode: 0755
         force: true
         remote_src: true
-      when: (is_linux_os) and installed_of_stern.stdout == "1"
+      when: is_linux_os and is_master_node and installed_of_stern.stdout == "1"
   tags:
-    - k3s
     - stern
 
 - name: check existing helm packages on Linux
@@ -267,7 +279,7 @@
   changed_when: False
   tags:
     - helm
-  when: is_linux_os
+  when: is_linux_os and is_master_node
 
 - name: check helm installed
   shell: "helm version >/dev/null 2>&1 && echo 0 || echo 1"
@@ -275,7 +287,7 @@
   changed_when: False
   tags:
     - helm
-  when: is_linux_os
+  when: is_linux_os and is_master_node
 
 - name: install helm
   block:
@@ -284,14 +296,14 @@
         url: "{{ HELM_DOWNLOAD_URL_ON_LINUX }}"
         dest: "{{ HELM_PACKAGE_PATH_ON_LINUX }}"
         force: false
-      when: (is_linux_os) and existing_of_helm_on_linux.stdout == "1"
+      when: is_linux_os and is_master_node and existing_of_helm_on_linux.stdout == "1"
 
     - name: unarchive helm on Linux
       unarchive:
         src: "{{ HELM_PACKAGE_PATH_ON_LINUX }}"
         dest: "/tmp"
         remote_src: true
-      when: (is_linux_os) and installed_of_helm.stdout == "1"
+      when: is_linux_os and is_master_node and installed_of_helm.stdout == "1"
 
     - name: copy helm
       copy:
@@ -300,6 +312,7 @@
         mode: 0755
         force: true
         remote_src: true
+      when: is_linux_os and is_master_node
   tags:
     - helm
 
@@ -313,14 +326,14 @@
     - helm list --all-namespaces
   tags:
     - helm
-  when: is_linux_os
+  when: is_linux_os and is_master_node
 
 - name: "输出repo信息"
   debug:
     msg: "{{ helm_repo_info }}"
   tags:
     - helm
-  when: is_linux_os
+  when: is_linux_os and is_master_node
 
 - name: 取消 KUBECONFIG 注释
   replace:
@@ -329,4 +342,4 @@
     replace: '\1'
   tags:
     - helm
-  when: is_linux_os
+  when: is_linux_os and is_master_node

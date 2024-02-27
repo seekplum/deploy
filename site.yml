@@ -27,6 +27,15 @@
     PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
     PASSPHRASE: test
 
+- name: k3s
+  hosts: masters,slaves
+  gather_facts: False
+  roles:
+    - common
+    - k3s
+  tags:
+    - k3s
+
 - name: kubernetes
   hosts: masters,slaves
   gather_facts: False

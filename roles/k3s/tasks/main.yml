@@ -1,0 +1,6 @@
+---
+# tasks file for k3s
+
+- include_tasks: k3s_uninstall.yml
+- include_tasks: k3s_install.yml
+- include_tasks: k3s_join.yml

@@ -3,7 +3,6 @@
 
 - include: zsh.yml
 - include: docker.yml
-- include: k3s.yml
 
 - name: uninstall brew on macOS
   shell: '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"'

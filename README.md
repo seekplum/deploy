@@ -70,6 +70,15 @@ ansible-playbook site.yml -i hosts -t install --skip-tags "configure,initialize,
 ansible-playbook site.yml -i hosts -l common -t common,docker --extra-vars DOCKER_VERSION=-23.0.3-1.el7 --extra-vars DOCKER_CLI_VERSION=-23.0.3-1.el7
 ```
 
+* 安装k3s
+
+```bash
+ansible-playbook site.yml -i hosts -t k3s --skip-tags "remove_k3s,remove_helm,remove_stern,k3s_common,k3s_server,k3s_agent,stern,helm"
+
+ansible-playbook site.yml -i hosts -l slaves -t remove_k3s,k3s_common
+ansible-playbook site.yml -i hosts -l masters,slaves -t k3s_agent
+```
+
 * kubeadm安装kubernets
 
 ```bash

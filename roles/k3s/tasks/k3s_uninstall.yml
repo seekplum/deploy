@@ -6,6 +6,7 @@
   register: k3s_server_scripts
   tags:
     - remove_k3s
+  when: is_linux_os and is_master_node
 
 - name: Check that the k3s-agent-uninstall.sh exists
   stat:
@@ -13,6 +14,7 @@
   register: k3s_agent_scripts
   tags:
     - remove_k3s
+  when: is_linux_os and is_slaves_node
 
 - name: remove k3s server
   shell: "sh /usr/local/bin/k3s-uninstall.sh"
@@ -22,7 +24,7 @@
     - remove_k3s
   become: true
   become_method: sudo
-  when: is_linux_os and k3s_server_scripts.stat.exists == True
+  when: is_linux_os and is_master_node and k3s_server_scripts.stat.exists == True
 
 - name: remove k3s agent
   shell: "sh /usr/local/bin/k3s-agent-uninstall.sh"
@@ -32,7 +34,14 @@
     - remove_k3s
   become: true
   become_method: sudo
-  when: is_linux_os and k3s_agent_scripts.stat.exists == True
+  when: is_linux_os and is_slaves_node and k3s_agent_scripts.stat.exists == True
+
+- name: uninstall k3s-selinux on Redhat
+  shell: yum remove -y k3s-selinux
+  ignore_errors: True
+  tags:
+    - remove_k3s
+  when: is_centos_os
 
 - name: uninstall k3s on Redhat
   shell: yum remove -y k3s*
@@ -52,11 +61,28 @@
     - "/var/lib/rancher"
     - "/usr/local/bin/k3s-killall.sh"
     - "/usr/local/bin/k3s"
+    - "/usr/local/bin/kubectl"
+    - "/usr/local/bin/ctr"
+    - "/usr/local/bin/crictl"
   tags:
     - remove_k3s
   become: true
   become_method: sudo
   when: is_linux_os
+
+- name: "remove stern"
+  file:
+    path: "{{ item }}"
+    state: absent
+    force: true
+  with_items:
+    - "/tmp/stern"
+    - "/usr/local/bin/remove_stern"
+  tags:
+    - remove_stern
+  become: true
+  become_method: sudo
+  when: is_linux_os and is_master_node
 
 - name: "remove helm"
   file:
@@ -70,7 +96,7 @@
     - remove_helm
   become: true
   become_method: sudo
-  when: is_linux_os
+  when: is_linux_os and is_master_node
 
 - name: 增加 KUBECONFIG 注释
   replace:
@@ -79,4 +105,4 @@
     replace: '# \1'
   tags:
     - remove_helm
-  when: is_linux_os
+  when: is_linux_os and is_master_node

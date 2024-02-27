@@ -9,7 +9,6 @@
 - include: golang.yml
 - include: java.yml
 - include: nodejs.yml
-- include: k3s.yml
 - include: rbenv.yml
 
 - name: check existing ansible

@@ -29,6 +29,7 @@
     msg: "[{{ ansible_hostname }}] is_linux_os: {{ is_linux_os }}, is_ubuntu_os: {{ is_ubuntu_os }}, is_centos_os: {{ is_centos_os }}, is_mac_os: {{ is_mac_os }}"
   tags:
     - common
+    - always
   when: done_once_role is not defined
 
 - name: "检查当前节点类型"
@@ -38,6 +39,7 @@
     is_slaves_node: '{{ "slaves" in group_names }}'
   tags:
     - common
+    - always
   when: done_once_role is not defined
 
 - name: "输出节点类型"
@@ -45,6 +47,7 @@
     msg: "[{{ ansible_hostname }}] Group Names: {{ group_names }}, Is Common Node {{ is_common_node }}, Is Master Node {{ is_master_node }}, Is Slaves Node {{ is_slaves_node }}."
   tags:
     - common
+    - always
   when: done_once_role is not defined
 
 - set_fact: done_once_role=1
