@@ -7,15 +7,11 @@
     "https://registry.docker-cn.com",
     "http://hub-mirror.c.163.com"
   ],
-  "dns": [
-    "8.8.8.8",
-    "8.8.4.4"
-  ],
-  "exec-opts": [
-    "native.cgroupdriver=systemd"
-  ],
+  "dns": ["8.8.8.8", "8.8.4.4"],
+  "exec-opts": ["native.cgroupdriver=systemd"],
   "log-opts": {
     "max-size": "10m",
     "max-file": "3"
-  }
+  },
+  "live-restore": true
 }

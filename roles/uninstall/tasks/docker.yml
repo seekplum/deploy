@@ -79,6 +79,10 @@
     force: true
   with_items:
     - "/var/lib/docker"
+    - "/var/run/docker"
+    - "/run/docker"
+    - "/etc/docker"
+    - "/usr/libexec/docker"
     - "/etc/apparmor.d/docker"
     - "/etc/yum.repos.d/docker-ce.repo"
     - "/var/run/docker.sock"

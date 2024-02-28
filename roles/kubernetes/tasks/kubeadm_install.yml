@@ -45,17 +45,6 @@
     - kubeadm
   when: is_centos_os
 
-- name: "Linux修改docker启动配置"
-  copy:
-    src: daemon.json
-    dest: /etc/docker/daemon.json
-    mode: 0644
-    force: true
-    backup: true # 进行备份
-  tags:
-    - kubeadm
-  when: is_linux_os
-
 - name: "临时关闭交换分区"
   shell: swapoff -a
   tags:

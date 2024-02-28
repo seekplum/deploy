@@ -1,6 +1,6 @@
 {
-  "debug" : true,
-  "registry-mirrors" : [
+  "debug": true,
+  "registry-mirrors": [
     "https://dockerhub.azk8s.cn/",
     "https://kfwkfulq.mirror.aliyuncs.com",
     "https://2lqq34jg.mirror.aliyuncs.com",
@@ -8,11 +8,11 @@
     "https://registry.docker-cn.com",
     "http://hub-mirror.c.163.com"
   ],
-  "builder" : {
-    "gc" : {
-      "enabled" : true,
-      "defaultKeepStorage" : "20GB"
+  "builder": {
+    "gc": {
+      "enabled": true,
+      "defaultKeepStorage": "20GB"
     }
   },
-  "experimental" : false
+  "experimental": false
 }

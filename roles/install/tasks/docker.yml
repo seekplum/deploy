@@ -139,6 +139,17 @@
     - docker
   when: is_linux_os
 
+- name: "Linux修改docker启动配置"
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+    mode: 0644
+    force: true
+    backup: true # 进行备份
+  tags:
+    - docker
+  when: is_linux_os
+
 - name: "macOS修改docker启动配置"
   copy:
     src: mac-daemon.json
