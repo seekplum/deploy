@@ -1,6 +1,4 @@
 ---
-
-
 - name: "获取 k3s server token"
   shell: "cat /var/lib/rancher/k3s/server/node-token | awk -F ':' '{print $4}'"
   register: k3s_server_token
@@ -25,11 +23,10 @@
 
 - name: "设置 k3s_url 变量"
   set_fact:
-    k3s_server_url: "https://{{ ansible_default_ipv4.address }}:6443"
+    k3s_server_url: "https://{{ K3S_SERVER_IP | default(ansible_default_ipv4.address) }}:6443"
   tags:
     - k3s_agent
   when: is_linux_os and is_master_node
-
 
 - name: "设置加入节点命令"
   set_fact:

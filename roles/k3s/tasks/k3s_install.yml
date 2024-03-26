@@ -184,10 +184,25 @@
   ignore_errors: True
   when: is_linux_os
 
+
+- name: "设置安装k3s-server命令"
+  set_fact:
+    # https://update.k3s.io/v1-release/channels/stable
+    # INSTALL_K3S_VERSION=v1.25.7+k3s1 INSTALL_K3S_EXTRA="--kube-apiserver-arg service-node-port-range=1-65000 --kube-apiserver-arg default-not-ready-toleration-seconds=10 --kube-apiserver-arg default-unreachable-toleration-seconds=10 --node-label worker.node=true"
+    k3s_server_cmd: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_VERSION={{ INSTALL_K3S_VERSION | default('') }} INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --kubelet-arg container-log-max-files=3 --kubelet-arg container-log-max-size=5 --kubelet-arg cgroup-driver=systemd --kubelet-arg image-gc-high-threshold=100 --kubelet-arg config=/etc/rancher/k3s/kubelet.config --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --disable traefik --prefer-bundled-bin {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
+  tags:
+    - k3s_server
+  when: is_linux_os and is_master_node
+
+- name: "输出安装k3s-server命令"
+  debug:
+    msg: "{{ k3s_server_cmd }}"
+  tags:
+    - k3s_server
+  when: is_linux_os and is_master_node and k3s_server_cmd is defined
+
 - name: install k3s server on Linux
-  # https://update.k3s.io/v1-release/channels/stable
-  # INSTALL_K3S_VERSION=v1.25.7+k3s1 --kube-apiserver-arg service-node-port-range=1-65000 --disable traefik
-  shell: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_VERSION={{ INSTALL_K3S_VERSION | default('') }} INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --node-label worker.node=true --kubelet-arg container-log-max-files=3 --kubelet-arg container-log-max-size=5 --kubelet-arg cgroup-driver=systemd --kubelet-arg image-gc-high-threshold=100 --kubelet-arg config=/etc/rancher/k3s/kubelet.config --kube-apiserver-arg default-not-ready-toleration-seconds=10 --kube-apiserver-arg default-unreachable-toleration-seconds=10 --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --disable traefik --prefer-bundled-bin {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
+  shell: "{{ k3s_server_cmd }}"
   register: k3s_install_result
   tags:
     - k3s_server
