@@ -1,8 +1,8 @@
 ---
 # tasks file for uninstall
 
-- include: zsh.yml
-- include: docker.yml
+- include_tasks: zsh.yml
+- include_tasks: docker.yml
 
 - name: uninstall brew on macOS
   shell: '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"'
