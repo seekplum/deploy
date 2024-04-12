@@ -100,7 +100,6 @@ alias cdj="cd ${JAVAPROJECTSPATH}"
 
 alias cds="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum"
 alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
-alias cdm="cd ${PYTHONPROJECTSPATH}/meideng.net/meideng/meizhe2012"
 alias cdd="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/deploy"
 
 # virtualenvwrappe 配置
