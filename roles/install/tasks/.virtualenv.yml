@@ -3,3 +3,10 @@
   shell: "{{ PYENV_ROOT }}/versions/{{ item.version }}/bin/virtualenv --python={{ PYENV_ROOT }}/versions/{{ item.version }}/bin/python {{ VIRTUEL_ROOT }}/{{ item.version }}"
   tags:
     - virtualenv
+
+- name: install packages
+  shell: "{{ PYENV_ROOT }}/versions/{{ item.version }}/bin/trash --version || {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/pip install -r {{lookup('pipe', 'pwd')}}/roles/install/files/requirements.txt"
+  with_items: "{{ VIRTUAL_ENVS }}"
+  tags:
+    - virtualenv
+  when: item.version.startswith("3.")
