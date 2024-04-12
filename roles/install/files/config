@@ -1,11 +1,13 @@
 Host *
+#    UseKeychain yes
+    AddKeysToAgent yes
     ForwardAgent yes
     ServerAliveInterval 3
     ServerAliveCountMax 20
     TCPKeepAlive no
     ControlMaster auto
-    ControlPath ~/.ssh/connection-%r@%h:%p
-    ControlPersist 4h
+#     ControlPath ~/.ssh/connection-%r@%h:%p
+#     ControlPersist 4h
     Compression yes
     StrictHostKeyChecking no
 

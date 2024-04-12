@@ -42,8 +42,6 @@ export NODE_HOME=/usr/local
 export N_PREFIX=/usr/local
 export NODE_PATH="${PATH}:${NODE_HOME}/lib/node_modules"
 
-export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node # 配置 nvm 源
-
 {% if is_mac_os %}
 export PS1="\h@\u: \W \$ " # 终端提示符
 {% else %}
@@ -110,14 +108,6 @@ export VIRTUALENVWRAPPER_VIRTUALENV={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bi
 # export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
 # source ${VIRTUALENVWRAPPER_SCRIPT}
 # export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-
-export NVM_DIR="$HOME/.nvm"
-if [ -s "$NVM_DIR/nvm.sh" ]; then
-    . "$NVM_DIR/nvm.sh"  # This loads nvm
-fi
-if [ -s "$NVM_DIR/bash_completion" ]; then
-    . "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-fi
 
 if which pyenv > /dev/null 2>&1;
   then eval "$(pyenv init -)";
