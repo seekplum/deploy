@@ -73,7 +73,7 @@ ansible-playbook site.yml -i hosts -l common -t common,docker --extra-vars DOCKE
 * 安装k3s
 
 ```bash
-ansible-playbook site.yml -i hosts -t k3s --skip-tags "remove_k3s,remove_helm,remove_stern,k3s_common,k3s_server,k3s_agent,stern,helm"
+ansible-playbook site.yml -i hosts -t k3s --skip-tags "remove_k3s,remove_helm,remove_stern,k3s_common,k3s_server,k3s_agent,stern,helm" --extra-vars INSTALL_K3S_VERSION="v1.29.6+k3s1" --extra-vars 'INSTALL_K3S_EXTRA="--node-label worker.node=true"'
 
 ansible-playbook site.yml -i hosts -l slaves -t remove_k3s,k3s_common
 ansible-playbook site.yml -i hosts -l masters,slaves -t k3s_agent

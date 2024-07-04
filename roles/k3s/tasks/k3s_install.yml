@@ -188,7 +188,7 @@
 - name: "设置安装k3s-server命令"
   set_fact:
     # https://update.k3s.io/v1-release/channels/stable
-    # INSTALL_K3S_VERSION=v1.25.7+k3s1 INSTALL_K3S_EXTRA="--kube-apiserver-arg service-node-port-range=1-65000 --kube-apiserver-arg default-not-ready-toleration-seconds=10 --kube-apiserver-arg default-unreachable-toleration-seconds=10 --node-label worker.node=true"
+    # INSTALL_K3S_VERSION=v1.25.7+k3s1 --extra-vars 'INSTALL_K3S_EXTRA="--kube-apiserver-arg service-node-port-range=1-65000 --kube-apiserver-arg default-not-ready-toleration-seconds=10 --kube-apiserver-arg default-unreachable-toleration-seconds=10 --node-label worker.node=true"'
     k3s_server_cmd: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_VERSION={{ INSTALL_K3S_VERSION | default('') }} INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker --kubelet-arg container-log-max-files=5 container-log-max-size=15Mi cgroup-driver=systemd image-gc-high-threshold=100 config=/etc/rancher/k3s/kubelet.config --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 600 --disable traefik --prefer-bundled-bin {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
   tags:
     - k3s_server
