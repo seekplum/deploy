@@ -134,6 +134,8 @@ export PS1='[%M] %n %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)%(?:%{$fg_
 unsetopt nomatch
 
 export GPG_TTY=$(tty)
+{% if is_linux_os %}
 # eval `keychain --eval --agents ssh seekplum`
 /usr/bin/keychain $HOME/.ssh/seekplum
 source $HOME/.keychain/$HOST-sh
+{% endif %}

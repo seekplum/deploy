@@ -1,8 +1,14 @@
 ---
 - name: check pyenv installed
-  shell: "test -d {{ PYENV_ROOT }} && echo 0 || echo 1"
+  shell: "command -v pyenv >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_pyenv
   changed_when: False
+  tags:
+    - pyenv
+
+- name: output check pyenv installed
+  debug:
+    msg: "{{ installed_of_pyenv }}"
   tags:
     - pyenv
 
@@ -29,6 +35,6 @@
         dest: "{{ PYENV_ROOT }}"
         update: yes
         version: master
-  when: installed_of_pyenv.stdout == "0"
+  when: installed_of_pyenv.stdout == "1"
   tags:
     - pyenv

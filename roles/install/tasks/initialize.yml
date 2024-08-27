@@ -53,8 +53,8 @@
     - rsync
     - git
     - bzip2
-#    - python-setuptools
-#    - python-devel
+    #    - python-setuptools
+    #    - python-devel
     - wget
     - screen
     - make
@@ -138,7 +138,7 @@
   when: is_ubuntu_os
 
 - name: install xcode-select on macOS
-  shell: 'xcode-select -v >/dev/null 2>&1 ||xcode-select --install'
+  shell: "xcode-select -v >/dev/null 2>&1 ||xcode-select --install"
   changed_when: False
   ignore_errors: True
   tags:
@@ -181,45 +181,51 @@
   when: is_mac_os and ansible_user_id != "root" and existing_of_sshpass_on_mac.stdout == "1"
 
 - name: check pip installed
-  shell: "pip -V >/dev/null 2>&1 && echo 0 || echo 1"
+  shell: "command -v pip >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_pip
   changed_when: False
   tags:
     - initialize
 
-- name: install pip
-  shell: "easy_install pip"
-  register: result_of_install_pip
-  changed_when: False
-  ignore_errors: True
+- name: output check pip installed
+  debug:
+    msg: "{{ existing_of_pip }}"
   tags:
     - initialize
-  when: existing_of_pip.stdout == "1"
 
-- name: check existing get-pip.py
-  shell: "test -f {{ PY_PIP_PATH }} && echo 0 || echo 1"
-  register: existing_of_py_pip
-  changed_when: False
-  tags:
-    - initialize
-  when: '"failed" in result_of_install_pip and result_of_install_pip.failed'
+# - name: install pip
+#   shell: "easy_install pip"
+#   register: result_of_install_pip
+#   changed_when: False
+#   ignore_errors: True
+#   tags:
+#     - initialize
+#   when: existing_of_pip.stdout == "1"
 
-- name: download get-pip.py
-  get_url:
-    url: https://bootstrap.pypa.io/pip/2.7/get-pip.py
-    dest: "{{ PY_PIP_PATH }}"
-    force: true
-  tags:
-    - initialize
-  when: existing_of_py_pip is defined and "stdout" in existing_of_py_pip and existing_of_py_pip.stdout == "1"
+# - name: check existing get-pip.py
+#   shell: "test -f {{ PY_PIP_PATH }} && echo 0 || echo 1"
+#   register: existing_of_py_pip
+#   changed_when: False
+#   tags:
+#     - initialize
+#   when: '"failed" in result_of_install_pip and result_of_install_pip.failed'
 
-- name: install pip of get-pip.py
-  shell: "python get-pip.py"
-  become: true
-  become_method: sudo
-  tags:
-    - initialize
-  when: existing_of_py_pip is defined and existing_of_pip.stdout == "1"
+# - name: download get-pip.py
+#   get_url:
+#     url: https://bootstrap.pypa.io/pip/2.7/get-pip.py
+#     dest: "{{ PY_PIP_PATH }}"
+#     force: true
+#   tags:
+#     - initialize
+#   when: existing_of_py_pip is defined and "stdout" in existing_of_py_pip and existing_of_py_pip.stdout == "1"
+
+# - name: install pip of get-pip.py
+#   shell: "python get-pip.py"
+#   become: true
+#   become_method: sudo
+#   tags:
+#     - initialize
+#   when: existing_of_py_pip is defined and existing_of_pip.stdout == "1"
 
 # - name: check trash installed
 #   shell: "trash --version >/dev/null 2>&1 && echo 0 || echo 1"

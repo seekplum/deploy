@@ -22,6 +22,8 @@ export GOROOT="{{GOROOT}}"
 export GOPATH="{{GOPATH}}"
 export GOPROXY=https://mirrors.aliyun.com/goproxy/
 
+export PYTHON_BUILD_MIRROR_URL="https://registry.npmmirror.com/-/binary/python/"
+export PYTHON_BUILD_MIRROR_URL_SKIP_CHECKSUM=1
 export PYTHONSTARTUP="${HOME}/.pythonrc"
 export PYTHONPROJECTSPATH="{{PythonProjects}}"
 export WEBPROJECTSPATH="{{WebProjects}}"
@@ -31,11 +33,17 @@ export LDFLAGS="-L/usr/local/opt/zlib/lib"
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/sqlite/lib"
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/openssl/lib"
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/mysql-client/lib"
+{% if is_mac_os %}
+export LDFLAGS="${LDFLAGS} -L$(brew --prefix openssl)/lib"
+{% endif %}
 export CPPFLAGS="-I/usr/local/opt/openssl/include"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/sqlite/include"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/mysql-client/include"
 export CFLAGS="${CFLAGS} -I/usr/local/opt/openssl/include"
+{% if is_mac_os %}
+CFLAGS="${CFLAGS} -I$(brew --prefix openssl)/include"
+{% endif %}
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/sqlite/lib/pkgconfig"
 export NODE_HOME=/usr/local
@@ -75,6 +83,7 @@ export PATH="${PATH}:${PYENV_ROOT}/bin"
 export PATH="${PATH}:${RBENV_ROOT}/bin"
 export PATH="${PATH}:{{ RUBY_BUILD_ROOT }}/bin"
 export PATH="${PATH}:${NODE_HOME}/bin"
+export PATH="${PATH}:/usr/local/opt/sqlite/bin"
 
 alias senv2="source ${PYTHON2_VIRTUEL_ROOT}/bin/activate"
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
