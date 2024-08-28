@@ -62,7 +62,6 @@ export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
 export PYENV_ROOT="{{PYENV_ROOT}}"
 export RBENV_ROOT="{{RBENV_ROOT}}"
 export PYTHON_VERSION="{{PYTHON3_VERSION}}"
-export PYTHON2_VIRTUEL_ROOT="{{VIRTUEL_ROOT}}/{{PYTHON2_VERSION}}"
 export PYTHON_VIRTUEL_ROOT="{{VIRTUEL_ROOT}}/${PYTHON_VERSION}"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 export PATH="${PATH}:/usr/local/opt/ncurses/bin"
@@ -85,7 +84,6 @@ export PATH="${PATH}:{{ RUBY_BUILD_ROOT }}/bin"
 export PATH="${PATH}:${NODE_HOME}/bin"
 export PATH="${PATH}:/usr/local/opt/sqlite/bin"
 
-alias senv2="source ${PYTHON2_VIRTUEL_ROOT}/bin/activate"
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
 alias senv="senv3"
 

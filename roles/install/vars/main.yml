@@ -32,5 +32,4 @@ RUBY_BUILD_REPOSITORY: "git@github.com:rbenv/ruby-build.git"
 VIRTUEL_ROOT: "{{ PACKAGES_ROOT }}/pythonenv"
 PY_PIP_PATH: "{{ HOME_ROOT }}/get-pip.py"
 VIRTUAL_ENVS:
-  - version: "{{ PYTHON2_VERSION }}"
   - version: "{{ PYTHON3_VERSION }}"
