@@ -98,15 +98,25 @@
     - configure
   when: is_mac_os
 
+- name: add apt key on Ubuntu
+  shell: "curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor"
+  become: true
+  become_method: sudo
+  tags:
+    - configure
+  when: is_ubuntu_os
 
 - name: copy apt source list on Ubuntu
   copy:
-    src: "sources.list"
+    src: "{{ item }}"
     dest: "/etc/apt/"
     mode: 0644
     force: true
   become: true
   become_method: sudo
+  with_items:
+    - "sources.list"
+    - "mongodb-org.list"
   tags:
     - configure
   when: is_ubuntu_os

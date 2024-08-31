@@ -130,6 +130,7 @@
     - tk-dev
     - libpcre3-dev
     - ripgrep
+    - mongodb-mongosh
   tags:
     - initialize
   ignore_errors: True

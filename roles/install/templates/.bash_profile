@@ -91,7 +91,12 @@ alias mystart="${PYTHON_VIRTUEL_ROOT}/bin/supervisord -c ${HOME}/packages/superv
 alias mysuper="sudo ${PYTHON_VIRTUEL_ROOT}/bin/supervisorctl -c ${HOME}/packages/supervisor/supervisord.conf"
 alias mymysql='${HOME}/packages/mysql/bin/mysql -uroot -proot -S ${HOME}/packages/mysql/data/sock/mysql.sock'
 alias mysqlserver='${HOME}/packages/mysql/support-files/mysql.server'
-alias myredis='${HOME}/packages/redis/src/redis-cli'
+alias myredis='redis-cli -h 127.0.0.1 -a xxxx --no-auth-warning'
+alias mymongoro='mongosh --authenticationDatabase admin -u da_ro -p xxxx'
+alias mymongorw='mongosh --authenticationDatabase admin -u da_rw -p xxxx'
+alias mymongouseradmin='mongosh --authenticationDatabase admin -u user_admin -p xxxx'
+alias mymongoadmin='mongosh --authenticationDatabase admin -u mongo_admin -p xxxx'
+alias mymongoroot='mongosh --authenticationDatabase admin -u root -p xxxx'
 
 alias ll='ls -l'
 alias cp='cp -i'
