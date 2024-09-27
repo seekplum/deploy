@@ -70,6 +70,7 @@
     - patch
     - pcre-devel
     - ripgrep
+    - knot
   tags:
     - initialize
   when: is_centos_os
@@ -131,6 +132,7 @@
     - libpcre3-dev
     - ripgrep
     - mongodb-mongosh
+    - knot-dnsutils
   tags:
     - initialize
   ignore_errors: True
@@ -159,6 +161,7 @@
     - gnupg
     - pinentry-mac
     - ripgrep
+    - knot-dnsutils
   changed_when: False
   ignore_errors: True
   tags:
