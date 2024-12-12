@@ -98,6 +98,18 @@
     - configure
   when: is_mac_os
 
+- name: replace brew source On macOS
+  shell: "{{ item }}"
+  with_items:
+    - cd "$(brew --repo)" && git remote set-url origin https://mirrors.aliyun.com/homebrew/brew.git && git clean --quiet -fdxq && git pull --rebase && cd -
+    - git clone https://mirrors.aliyun.com/homebrew/homebrew-core.git $(brew --repo homebrew/core)
+    - git clone https://mirrors.aliyun.com/homebrew/homebrew-cask.git $(brew --repo homebrew/cask)
+    - brew update
+  tags:
+    - configue
+  ignore_errors: True
+  when: is_mac_os
+
 - name: add apt key on Ubuntu
   shell: "curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor"
   become: true

@@ -5,7 +5,7 @@
     - virtualenv
 
 - name: install packages
-  shell: "{{ PYENV_ROOT }}/versions/{{ item.version }}/bin/trash --version || {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/pip install -r {{lookup('pipe', 'pwd')}}/roles/install/files/requirements.txt"
+  shell: "{{ PYENV_ROOT }}/versions/{{ item.version }}/bin/trash --version || {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/pip install -r {{lookup('pipe', 'pwd')}}/roles/install/files/requirements.in"
   with_items: "{{ VIRTUAL_ENVS }}"
   tags:
     - virtualenv
