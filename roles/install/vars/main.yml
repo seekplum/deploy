@@ -11,8 +11,8 @@ JAVA_PACKAGE_PATH_ON_LINUX: "{{ HOME_ROOT }}/jdk-8u351-linux-x64.tar.gz"
 MVN_PACKAGE_PATH_ON_LINUX: "{{ HOME_ROOT }}/apache-maven-3.8.8-bin.tar.gz"
 HELM_VERSION: "v3.7.1"
 HELM_PACKAGE_PATH_ON_LINUX: "{{ HOME_ROOT }}/helm-{{ HELM_VERSION }}-linux-amd64.tar.gz"
-GO_DOWNLOAD_URL_ON_MAC: "https://golang.org/dl/go{{ GO_VERSION }}.darwin-amd64.tar.gz"
-GO_DOWNLOAD_URL_ON_LINUX: "https://golang.org/dl/go{{ GO_VERSION }}.linux-amd64.tar.gz"
+GO_DOWNLOAD_URL_ON_MAC: "https://go.dev/dl/go{{ GO_VERSION }}.darwin-amd64.tar.gz"
+GO_DOWNLOAD_URL_ON_LINUX: "https://go.dev/dl/go{{ GO_VERSION }}.linux-amd64.tar.gz"
 # https://www.oracle.com/java/technologies/downloads/#java8
 # 需要登录Oracle才能下载
 JAVA_DOWNLOAD_URL_ON_LINUX: "https://download.oracle.com/otn/java/jdk/8u351-b10/10e8cce67c7843478f41411b7003171c/jdk-8u351-linux-x64.tar.gz"

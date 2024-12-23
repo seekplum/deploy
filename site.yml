@@ -1,7 +1,7 @@
 ---
 # This playbook deploys the whole application stack in this site.
 
-- name: uninstall
+- name: uninstall_task
   hosts: common
   gather_facts: False
   roles:
@@ -13,7 +13,7 @@
   environment:
     PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
 
-- name: install
+- name: install_task
   hosts: common
   gather_facts: False
   roles:
@@ -27,7 +27,7 @@
     PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
     PASSPHRASE: test
 
-- name: k3s
+- name: k3s_task
   hosts: masters,slaves
   gather_facts: False
   roles:
@@ -36,7 +36,7 @@
   tags:
     - k3s
 
-- name: kubernetes
+- name: kubernetes_task
   hosts: masters,slaves
   gather_facts: False
   roles:
