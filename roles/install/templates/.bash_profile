@@ -84,6 +84,7 @@ export PATH="${PATH}:${RBENV_ROOT}/bin"
 export PATH="${PATH}:{{ RUBY_BUILD_ROOT }}/bin"
 export PATH="${PATH}:${NODE_HOME}/bin"
 export PATH="${PATH}:/usr/local/opt/sqlite/bin"
+export PATH="${PATH}:${HOME}/.yarn/bin:${HOME}/.config/yarn/global/node_modules/.bin"
 
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
 alias senv="senv3"
@@ -128,6 +129,14 @@ fi
 if which rbenv > /dev/null 2>&1;
   then eval "$(rbenv init -)";
 fi
+
+# pnpm
+export PNPM_HOME="${HOME}/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
 
 function proxy_on() {
   export ALL_PROXY=socks5://127.0.0.1:7890
