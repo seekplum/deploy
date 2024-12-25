@@ -110,13 +110,22 @@
   ignore_errors: True
   when: is_mac_os
 
+
+- name: check existing apt key on Ubuntu
+  shell: "test -f /usr/share/keyrings/mongodb-server-6.0.gpg && echo 0 || echo 1"
+  register: existing_of_apt_key_on_ubuntu
+  changed_when: False
+  tags:
+    - configure
+  when: is_ubuntu_os
+
 - name: add apt key on Ubuntu
   shell: "curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor"
   become: true
   become_method: sudo
   tags:
     - configure
-  when: is_ubuntu_os
+  when: is_ubuntu_os and existing_of_apt_key_on_ubuntu.stdout == "1"
 
 - name: copy apt source list on Ubuntu
   copy:
