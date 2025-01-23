@@ -1,0 +1,10 @@
+kubelet-arg:
+  - "config=/etc/rancher/k3s/kube-config.yaml"
+  - "eviction-hard=imagefs.available<6%,memory.available<6%,nodefs.available<6%"
+  - "eviction-minimum-reclaim=imagefs.available=4%,memory.available=4%,nodefs.available=4%"
+write-kubeconfig-mode: 644
+disable:
+  - traefik
+prefer-bundled-bin: true
+node-label:
+  - "worker.node=true"

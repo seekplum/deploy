@@ -1,4 +1,17 @@
 ---
+
+- name: copy k3s agent config file
+  copy:
+    src: "agent-config.yaml"
+    dest: "/etc/rancher/k3s/config.yaml"
+    mode: 0644
+    force: true
+  tags:
+    - k3s_agent
+  become: true
+  become_method: sudo
+  when: is_linux_os
+
 - name: "获取 k3s server token"
   shell: "cat /var/lib/rancher/k3s/server/node-token | awk -F ':' '{print $4}'"
   register: k3s_server_token

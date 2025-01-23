@@ -168,7 +168,6 @@
     force: true
   with_items:
     - kube-config.yaml
-    - config.yaml
   tags:
     - k3s_common
   become: true
@@ -193,6 +192,18 @@
   tags:
     - k3s_common
   when: is_centos_os
+
+- name: copy k3s server config file
+  copy:
+    src: "server-config.yaml"
+    dest: "/etc/rancher/k3s/config.yaml"
+    mode: 0644
+    force: true
+  tags:
+    - k3s_server
+  become: true
+  become_method: sudo
+  when: is_linux_os
 
 - name: "设置安装k3s-server命令"
   set_fact:
