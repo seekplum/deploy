@@ -2,9 +2,10 @@
 
 set -e
 
-SUPERVISORD="${HOME}/packages/pythonenv/{{PYTHON3_VERSION}}/bin/supervisord"
-SUPERVISORCTL="${HOME}/packages/pythonenv/{{PYTHON3_VERSION}}/bin/supervisorctl"
-SUPERVISOR_CONF="${HOME}/packages/supervisor/supervisord.conf"
+PACKAGES_ROOT="{{ HOME_ROOT }}/packages"
+SUPERVISORD="${PACKAGES_ROOT}/pythonenv/{{ PYTHON3_VERSION }}/bin/supervisord"
+SUPERVISORCTL="${PACKAGES_ROOT}/pythonenv/{{ PYTHON3_VERSION }}/bin/supervisorctl"
+SUPERVISOR_CONF="${PACKAGES_ROOT}/supervisor/supervisord.conf"
 
 function start() {
     # 增加 ssh key 到可信列表

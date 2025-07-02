@@ -187,12 +187,14 @@
         dest: "/etc/systemd/system/my-rc-local.service"
         mode: 755
         force: true
+        backup: false
     - name: copy /etc/my-rc.local
-      copy:
+      template:
         src: "rc.local"
         dest: "/etc/my-rc.local"
         mode: 755
         force: true
+        backup: false
     - name: start my-rc-local service
       service:
         name: "my-rc-local"

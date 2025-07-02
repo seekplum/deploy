@@ -85,12 +85,14 @@ export PATH="${PATH}:{{ RUBY_BUILD_ROOT }}/bin"
 export PATH="${PATH}:${NODE_HOME}/bin"
 export PATH="${PATH}:/usr/local/opt/sqlite/bin"
 export PATH="${PATH}:${HOME}/.yarn/bin:${HOME}/.config/yarn/global/node_modules/.bin"
+export PATH="${PATH}:/snap/bin"
+export PATH="${PATH}:/mnt/d/Microsoft VS Code/bin"
 
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
 alias senv="senv3"
 
 alias mystart="${PYTHON_VIRTUEL_ROOT}/bin/supervisord -c ${HOME}/packages/supervisor/supervisord.conf"
-alias mysuper="sudo ${PYTHON_VIRTUEL_ROOT}/bin/supervisorctl -c ${HOME}/packages/supervisor/supervisord.conf"
+alias mysuper="${PYTHON_VIRTUEL_ROOT}/bin/supervisorctl -c ${HOME}/packages/supervisor/supervisord.conf"
 alias mymysql='${HOME}/packages/mysql/bin/mysql -uroot -proot -S ${HOME}/packages/mysql/data/sock/mysql.sock'
 alias mysqlserver='${HOME}/packages/mysql/support-files/mysql.server'
 alias myredis='redis-cli -h 127.0.0.1 -a xxxx --no-auth-warning'
@@ -149,3 +151,5 @@ function proxy_off(){
   unset http_proxy https_proxy
   echo -e "终端代理已关闭。"
 }
+
+. "${HOME}/.local/bin/env"

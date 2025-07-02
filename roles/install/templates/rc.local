@@ -1,15 +1,18 @@
 #!/bin/bash
 
 set -e
+LOG_FILE="{{ HOME_ROOT }}/mystart.log"
+SCRIPTS_FILES="{{ HOME_ROOT }}/packages/mystart.sh"
+USER="{{ LOGIN_USER }}"
 
 function start() {
-    echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local start" >> ~/mystart.log
-    bash ~/packages/mystart.sh start | tee -a ~/mystart.log
+    echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local start" >> ${LOG_FILE}
+    sudo -u ${USER} bash ${SCRIPTS_FILES} start | tee -a ${LOG_FILE}
 }
 
 function stop() {
-    echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local stop" >> ~/mystart.log
-    bash ~/packages/mystart.sh stop | tee -a ~/mystart.log
+    echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local stop" >> ${LOG_FILE}
+    sudo -u ${USER} bash ${SCRIPTS_FILES} stop | tee -a ${LOG_FILE}
 }
 
 function print_help() {

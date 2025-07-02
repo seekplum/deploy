@@ -52,6 +52,16 @@ EOF
 ssh-copy-id -i ~/.ssh/mykey.pub root@x.x.x.x
 ```
 
+## 执行命令
+
+```bash
+# 获取ansible内置变量
+ansible all -i hosts -l common -m setup
+
+# ping主机
+ansible all -i hosts -l common -m ping -vvv
+```
+
 ## 运行playbook
 
 * 执行卸载操作

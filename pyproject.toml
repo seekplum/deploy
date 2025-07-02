@@ -1,0 +1,185 @@
+[project]
+name = "deploy"
+version = "0.1.0"
+description = "快速搭建开发环境"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ansible>=11.7.0",
+    "ansible-lint>=25.6.1",
+    "ansible-runner>=2.4.1",
+]
+
+[[tool.uv.index]]
+url = "https://mirrors.aliyun.com/pypi/simple"
+default=true
+
+[tool.pylint]
+ignore-patterns = ["tests"]
+disable = [
+  "redefined-outer-name",
+  "unused-argument",
+  "redefined-builtin",
+]
+
+[tool.pylint.master]
+ignore = ["clibs", "tests"]
+job = 0
+suggestion-mode = "yes"
+extension-pkg-whitelist = "pydantic,dateutil"
+prefer-stubs = "yes"
+
+[tool.pylint.format]
+max-line-length = 150
+
+[tool.pylint.logging]
+logging-format-style = "new"
+
+[tool.pylint.similarities]
+ignore-imports = "yes"
+min-similarity-lines=8
+
+[tool.pylint.basic]
+argument-naming-style = "any"
+attr-naming-style = "any"
+function-naming-style = "any"
+method-naming-style = "any"
+variable-naming-style = "any"
+
+[tool.pylint.message_control]
+disable = [
+  "missing-docstring",
+]
+enable = ["redefined-outer-name", "deprecated-method"]
+
+[tool.pylint.design]
+max-args = 12
+max-attributes = 15
+max-bool-expr = 5
+max-branches = 15
+max-positional-arguments = 12
+max-locals = 25
+max-parents = 10
+max-public-methods= 25
+min-public-methods = 0
+max-returns = 10
+max-statements = 50
+
+[tool.mypy]
+plugins = "pydantic.mypy"
+ignore_missing_imports = true
+disallow_untyped_defs = false
+mypy_path = "mystubs"
+exclude = []
+enable_error_code = [
+  "deprecated"
+]
+disable_error_code = [
+  "var-annotated",
+  "assignment",
+  "return-value",
+  "dict-item",
+  "list-item",
+  "no-redef",
+  "annotation-unchecked",
+  "call-overload",
+  "attr-defined",
+  "operator",
+  "arg-type",
+]
+
+[[tool.mypy.overrides]]
+module = [
+  "tests.*",
+]
+disable_error_code = [
+  "call-arg",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = " -svv --cov=app"
+minversion = "6.0"
+testpaths = [
+  "tests",
+]
+norecursedirs = [".git", ".tox", "venv*", "requirements*", "static"]
+python_files = ["test*.py"]
+filterwarnings = []
+
+[tool.coverage.report]
+omit = [".venv"]
+precision = 2
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+]
+fail_under = 77.0
+show_missing = true
+skip_covered = true
+skip_empty = true
+sort = "miss"
+
+[tool.coverage.path]
+source = "app"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+line_length = 120
+force_grid_wrap = 0
+profile = "black"
+src_paths = ["app", "tests"]
+use_parentheses = true
+known_first_party = []
+
+[tool.flake8]
+ignore = ['D203', 'E128', 'E722', 'B001', 'B017', 'B036']
+max-line-length = 150
+max-complexity = 10
+exclude = [
+  '.git',
+  '.venv',
+  'docs',
+  '__pycache__',
+  '.mypy_cache',
+  '.pytest_cache',
+  'test.py'
+]
+extend-immutable-calls = []
+
+[tool.ruff]
+line-length = 150
+exclude = [".git", ".venv"]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "R"]
+ignore = ["E501"]
+fixable = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"**/{tests,docs,tools}/*" = ["E402"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = []
+
+[tool.bandit]
+exclude_dirs = [
+  '.git',
+  '__pycache__',
+  '.mypy_cache',
+  '.pytest_cache',
+  'test.py'
+]
+skips = ['B101', 'B104', 'B110', 'B311', 'B105', 'B106', 'B403', 'B413', 'B301', 'B303', 'B306', 'B310', 'B324']
+
+[tool.bandit.assert_used]
+skips = ['./tests/*', 'tests/*', '*_test.py', '*test_*.py']
