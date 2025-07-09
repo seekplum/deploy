@@ -163,7 +163,10 @@
     backup: true
   with_items:
     - "CentOS-Base.repo"
+    - "CentOS-SCLo-sclo.repo"
+    - "CentOS-SCLo-scl-rh.repo"
     - "wandisco-git.repo"
+    - "mongodb-4.4.repo"
   become: true
   become_method: sudo
   tags:

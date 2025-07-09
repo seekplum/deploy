@@ -1,6 +1,6 @@
 ---
 - name: check pyenv installed
-  shell: "command -v pyenv >/dev/null 2>&1 && echo 0 || echo 1"
+  shell: ". {{ HOME_ROOT }}/.bash_profile && command -v pyenv >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_pyenv
   changed_when: False
   tags:

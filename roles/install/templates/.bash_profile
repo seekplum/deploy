@@ -41,6 +41,9 @@ export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/sqlite/include"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/mysql-client/include"
 export CFLAGS="${CFLAGS} -I/usr/local/opt/openssl/include"
+# pkg-config --cflags openssl11、pkg-config --libs openssl11
+export CFLAGS="${CFLAGS} -I/usr/include/openssl11"
+export LDFLAGS="${LDFLAGS} -L/usr/lib64/openssl11 -lssl -lcrypto"
 {% if is_mac_os %}
 CFLAGS="${CFLAGS} -I$(brew --prefix openssl)/include"
 {% endif %}
@@ -49,6 +52,7 @@ export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/sqlite/lib/pkgconfig"
 export NODE_HOME=/usr/local
 export N_PREFIX=/usr/local
 export NODE_PATH="${PATH}:${NODE_HOME}/lib/node_modules"
+export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node # 配置 nvm 源
 
 {% if is_mac_os %}
 export PS1="\h@\u: \W \$ " # 终端提示符

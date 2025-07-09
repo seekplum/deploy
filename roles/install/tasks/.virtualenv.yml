@@ -4,8 +4,18 @@
   tags:
     - virtualenv
 
+- name: copy requirements.in
+  copy:
+    src: "requirements.in"
+    dest: "/tmp/requirements.in"
+    mode: 644
+    force: true
+    backup: false
+  tags:
+    - virtualenv
+
 - name: install packages
-  shell: "{{ PYENV_ROOT }}/versions/{{ item.version }}/bin/trash --version || {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/pip install -r {{lookup('pipe', 'pwd')}}/roles/install/files/requirements.in"
+  shell: "[[ ! -f {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/trash ]] && {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/pip install -r /tmp/requirements.in"
   with_items: "{{ VIRTUAL_ENVS }}"
   tags:
     - virtualenv

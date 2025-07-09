@@ -36,13 +36,13 @@
     name: "{{ item }}"
     state: present
     update_cache: true
-    nobest: true
+    # nobest: true
   with_items:
     # - python2-pip
     - python3-pip
     - zip
     - unzip
-    - util-linux-user
+    # - util-linux-user
     - epel-release
     - gcc
     - gcc-c++
@@ -50,9 +50,11 @@
     - zlib-devel
     - libffi-devel
     - sqlite-devel
+    - readline-devel
     - rsync
     - git
     - bzip2
+    - bzip2-devel
     #    - python-setuptools
     #    - python-devel
     - wget
@@ -62,6 +64,8 @@
     - tree
     - sshpass
     - openssl-devel
+    - openssl11
+    - openssl11-devel
     - yum-utils
     - device-mapper-persistent-data
     - lvm2

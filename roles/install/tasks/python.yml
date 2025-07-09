@@ -1,6 +1,6 @@
 ---
 - name: install python
-  shell: 'if [ -d {{ PYENV_ROOT }}/versions/{{ item.version }} ]; then echo {{ item.version }} is installed; else pyenv install {{ item.version }}; fi'
+  shell: 'if [ -d {{ PYENV_ROOT }}/versions/{{ item.version }} ]; then echo {{ item.version }} is installed; else . {{ HOME_ROOT }}/.bash_profile && pyenv install {{ item.version }}; fi'
   with_items: "{{ VIRTUAL_ENVS }}"
   register: python_install_info
   tags:
