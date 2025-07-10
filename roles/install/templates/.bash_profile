@@ -156,4 +156,4 @@ function proxy_off(){
   echo -e "终端代理已关闭。"
 }
 
-. "${HOME}/.local/bin/env"
+# . "${HOME}/.local/bin/env"

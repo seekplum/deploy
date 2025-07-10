@@ -110,22 +110,13 @@
   ignore_errors: True
   when: is_mac_os
 
-
-- name: check existing apt key on Ubuntu
-  shell: "test -f /usr/share/keyrings/mongodb-server-6.0.gpg && echo 0 || echo 1"
-  register: existing_of_apt_key_on_ubuntu
-  changed_when: False
-  tags:
-    - configure
-  when: is_ubuntu_os
-
-- name: add apt key on Ubuntu
-  shell: "curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor"
+- name: import gpg key on Ubuntu
+  shell: "wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -"
   become: true
   become_method: sudo
   tags:
     - configure
-  when: is_ubuntu_os and existing_of_apt_key_on_ubuntu.stdout == "1"
+  when: is_ubuntu_os
 
 - name: copy apt source list on Ubuntu
   copy:
@@ -137,19 +128,21 @@
   become_method: sudo
   with_items:
     - "sources.list"
-    - "mongodb-org.list"
   tags:
     - configure
   when: is_ubuntu_os
 
 - name: copy git ppa list on Ubuntu
   copy:
-    src: "git-core-ubuntu-ppa-focal.list"
+    src: "{{ item }}"
     dest: "/etc/apt/sources.list.d/"
     mode: 0644
     force: true
   become: true
   become_method: sudo
+  with_items:
+    - "mongodb-org.list"
+    - "git-core-ubuntu-ppa-focal.list"
   tags:
     - configure
   when: is_ubuntu_os

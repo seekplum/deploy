@@ -15,8 +15,9 @@
     - virtualenv
 
 - name: install packages
-  shell: "[[ ! -f {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/trash ]] && {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/pip install -r /tmp/requirements.in"
+  shell: "[[ ! -f {{ VIRTUEL_ROOT }}/{{ item.version }}/bin/trash ]] && {{ VIRTUEL_ROOT }}/{{ item.version }}/bin/pip install -r /tmp/requirements.in"
   with_items: "{{ VIRTUAL_ENVS }}"
+  ignore_errors: True
   tags:
     - virtualenv
   when: item.version.startswith("3.")

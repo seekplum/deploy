@@ -17,7 +17,7 @@
 - name: install nodejs
   block:
     - name: install n
-      shell: "export N_PREFIX=/usr/local/n && curl -L https://bit.ly/n-install | bash -s -- -y"
+      shell: "export N_PREFIX=/usr/local/n && curl -L https://bit.ly/n-install | bash -s -- -y {{ NODE_VERSION }}"
       when: installed_of_n.stdout == "1"
       tags:
         - nodejs
@@ -32,6 +32,14 @@
 
     - name: install node
       shell: "/usr/local/n/bin/n {{ NODE_VERSION }}"
+      when: installed_of_node.stdout == "1"
+      tags:
+        - nodejs
+      become: true
+      become_method: sudo
+
+    - name: install yarn
+      shell: "npm install -g yarn"
       when: installed_of_node.stdout == "1"
       tags:
         - nodejs

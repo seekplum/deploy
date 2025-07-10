@@ -90,7 +90,7 @@
   apt:
     pkg: "{{ item }}"
     state: present
-    # update_cache: true
+    update_cache: true
   # https://stackoverflow.com/questions/51622712/ansible-requires-python-apt-but-its-already-installed
   # ansible -i hosts common -m "apt name=python-apt state=latest" --become-user root
   # shell: "sudo apt-get install -y {{ item }}"
@@ -137,6 +137,7 @@
     - ripgrep
     - mongodb-mongosh
     - knot-dnsutils
+    - keychain
   tags:
     - initialize
   ignore_errors: True
