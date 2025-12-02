@@ -106,7 +106,7 @@
     - git clone https://mirrors.aliyun.com/homebrew/homebrew-cask.git $(brew --repo homebrew/cask)
     - brew update
   tags:
-    - configue
+    - configure
   ignore_errors: True
   when: is_mac_os
 
