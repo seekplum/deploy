@@ -56,7 +56,8 @@ export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node # 配置 nvm �
 
 {% if is_mac_os %}
 export PS1="\h@\u: \W \$ " # 终端提示符
-export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.aliyun.com/homebrew/homebrew-bottles
+# export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.aliyun.com/homebrew/homebrew-bottles
+export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.ustc.edu.cn/homebrew-bottles
 {% else %}
 export PS1="\[\e[0;33m\]\u\[\e[0m\]@\[\e[0;37m\]\h\[\e[0m\]:\[\e[0;31m\] \w \[\e[0m\]\$ " # 终端提示符
 {% endif %}
@@ -91,6 +92,7 @@ export PATH="${PATH}:/usr/local/opt/sqlite/bin"
 export PATH="${PATH}:${HOME}/.yarn/bin:${HOME}/.config/yarn/global/node_modules/.bin"
 export PATH="${PATH}:/snap/bin"
 export PATH="${PATH}:/mnt/d/Microsoft VS Code/bin"
+export PATH="${PATH}:${HOME}/.bun/bin"
 
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
 alias senv="senv3"

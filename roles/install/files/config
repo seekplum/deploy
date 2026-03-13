@@ -11,24 +11,82 @@ Host *
     Compression yes
     StrictHostKeyChecking no
 
+# 开发机
 Host ubuntu1
     HostName 192.168.1.4
     User root
     Port 22
     PreferredAuthentications publickey
-    IdentityFile ~/.ssh/id_rsa
+    IdentityFile ~/.ssh/seekplum
 
 Host centos1
     HostName 192.168.1.7
     User root
     Port 22
     PreferredAuthentications publickey
-    IdentityFile ~/.ssh/id_rsa
+    IdentityFile ~/.ssh/seekplum
+
+Host jump
+    HostName console.i.jump.net
+    User jump
+
+Host master1
+    HostName master1
+    User root
+    Port 22
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/seekplum
+    ProxyJump jump
+
+Host worker1
+    HostName 192.168.1.8
+    User root
+    Port 22
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/seekplum
+    ProxyJump master1
+
+
+# Windows机器
+Host windows
+    HostName 192.168.1.9
+    User seekplum
+    Port 22
+    # PreferredAuthentications publickey
+    IdentityFile ~/.ssh/seekplum
 
 # git remote set-url origin git@seekplum.github.com:seekplum/deploy.git
+Host dlmdlm.github.com
+    HostName github.com
+    User dlmdlm
+    Port 22
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/dlm
+
 Host seekplum.github.com
     HostName github.com
     User seekplum
     Port 22
     PreferredAuthentications publickey
-    IdentityFile ~/.ssh/id_rsa
+    IdentityFile ~/.ssh/seekplum
+
+Host code.aliyun.com
+    HostName code.aliyun.com
+    User 1131909224
+    Port 22
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/seekplum
+
+Host gitee.com
+    HostName gitee.com
+    User seekplum
+    Port 22
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/seekplum
+
+Host huangjiandong.github.com
+    HostName github.com
+    User huangjiandong
+    Port 22
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/huangjiandong
