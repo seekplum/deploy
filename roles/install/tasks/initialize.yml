@@ -202,6 +202,32 @@
   tags:
     - initialize
 
+- name: check cargo installed
+  shell: "command -v cargo >/dev/null 2>&1 && echo 0 || echo 1"
+  register: existing_of_cargo
+  changed_when: False
+  tags:
+    - initialize
+
+- name: install cargo
+  shell: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+  register: result_of_install_pcargo
+  changed_when: False
+  ignore_errors: True
+  tags:
+    - initialize
+  when: existing_of_cargo.stdout == "1"
+
+- name: cargo install packages
+  shell: "cargo install {{ item }}"
+  with_items:
+    - fd-find
+    - du-dust
+  changed_when: False
+  ignore_errors: True
+  tags:
+    - initialize
+
 # - name: install pip
 #   shell: "easy_install pip"
 #   register: result_of_install_pip
