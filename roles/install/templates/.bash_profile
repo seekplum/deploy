@@ -53,6 +53,9 @@ export NODE_HOME=/usr/local
 export N_PREFIX=/usr/local
 export NODE_PATH="${PATH}:${NODE_HOME}/lib/node_modules"
 export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node # 配置 nvm 源
+# Cargo 镜像源
+export RUSTUP_DIST_SERVER="https://rsproxy.cn"
+export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup"
 
 {% if is_mac_os %}
 export PS1="\h@\u: \W \$ " # 终端提示符
@@ -93,6 +96,7 @@ export PATH="${PATH}:${HOME}/.yarn/bin:${HOME}/.config/yarn/global/node_modules/
 export PATH="${PATH}:/snap/bin"
 export PATH="${PATH}:/mnt/d/Microsoft VS Code/bin"
 export PATH="${PATH}:${HOME}/.bun/bin"
+export PATH="${PATH}:${HOME}/claude-model/bin"
 
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
 alias senv="senv3"
@@ -101,7 +105,7 @@ alias mystart="${PYTHON_VIRTUEL_ROOT}/bin/supervisord -c ${HOME}/packages/superv
 alias mysuper="${PYTHON_VIRTUEL_ROOT}/bin/supervisorctl -c ${HOME}/packages/supervisor/supervisord.conf"
 alias mymysql='${HOME}/packages/mysql/bin/mysql -uroot -proot -S ${HOME}/packages/mysql/data/sock/mysql.sock'
 alias mysqlserver='${HOME}/packages/mysql/support-files/mysql.server'
-alias myredis='redis-cli -h 127.0.0.1 -a xxxx --no-auth-warning'
+alias myredis='redis-cli -a xxxx --no-auth-warning'
 alias mymongoro='mongosh --authenticationDatabase admin -u da_ro -p xxxx'
 alias mymongorw='mongosh --authenticationDatabase admin -u da_rw -p xxxx'
 alias mymongouseradmin='mongosh --authenticationDatabase admin -u user_admin -p xxxx'
@@ -128,7 +132,7 @@ export WORKON_HOME=${HOME}/.virtualenvs
 export VIRTUALENVWRAPPER_PYTHON={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/python
 export VIRTUALENVWRAPPER_VIRTUALENV={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenv
 # export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
-# source ${VIRTUALENVWRAPPER_SCRIPT}
+# source {{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenvwrapper_lazy.sh
 # export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
 if which pyenv > /dev/null 2>&1;
@@ -159,3 +163,22 @@ function proxy_off(){
 }
 
 # . "${HOME}/.local/bin/env"
+
+
+# . "${HOME}/.cargo/env"
+export NOTIFY_ACCESS_TOKEN="xxx"
+export NODE_USE_ENV_PROXY=1
+alias powershell="/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe"
+wsl_notify() {
+    local title="${1:-WSL 通知}"
+    local msg="${2:-命令已运行完成}"
+    powershell -Command "
+        [Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms');
+        \$toast = New-Object System.Windows.Forms.NotifyIcon;
+        \$toast.Icon = [System.Drawing.SystemIcons]::Information;
+        \$toast.BalloonTipTitle = '$title';
+        \$toast.BalloonTipText = '$msg';
+        \$toast.Visible = \$true;
+        \$toast.ShowBalloonTip(5000);
+    "
+}

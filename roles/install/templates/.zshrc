@@ -135,8 +135,8 @@ unsetopt nomatch
 
 export GPG_TTY=$(tty)
 {% if is_linux_os %}
-# eval `keychain --eval --agents ssh seekplum`
-/usr/bin/keychain $HOME/.ssh/seekplum
+# eval `keychain --eval --agents ssh huangliuliang`
+/usr/bin/keychain $HOME/.ssh/huangliuliang
 source $HOME/.keychain/$HOST-sh
 {% endif %}
 
@@ -144,3 +144,33 @@ keep_current_path() {
   printf "\e]9;9;%s\e\\" "$(wslpath -w "$PWD")"
 }
 precmd_functions+=(keep_current_path)
+
+# Claude Code
+. "${HOME}/.claude/env"
+
+# bun completions
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+eval "$(atuin init zsh)"
+
+# 立即将命令写入历史文件，而不是等待 shell 退出
+setopt INC_APPEND_HISTORY
+
+# 允许在不同的 zsh 会话之间共享历史（即时读取其他窗口执行的命令）
+setopt SHARE_HISTORY
+
+# 记录命令执行的时间戳，方便回溯
+setopt EXTENDED_HISTORY
+
+# 忽略重复命令
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS
+
+# 减少多余空格
+setopt HIST_REDUCE_BLANKS
+

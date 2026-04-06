@@ -223,8 +223,29 @@
   with_items:
     - fd-find
     - du-dust
+    - sd
+    - tokei
+    - atuin
   changed_when: False
   ignore_errors: True
+  tags:
+    - initialize
+
+- name: copy cargo config.toml
+  copy:
+    src: "cargo_config.toml"
+    dest: "~/.cargo/config.toml"
+    mode: 0644
+    force: false
+  tags:
+    - initialize
+
+- name: copy atuin config.toml
+  copy:
+    src: "atuin_config.toml"
+    dest: "~/.config/atuin/config.toml"
+    mode: 0644
+    force: false
   tags:
     - initialize
 

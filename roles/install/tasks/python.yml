@@ -25,3 +25,11 @@
     replace: '\1'
   tags:
     - python
+
+- name: 取消virtualenvwrapper_lazy注释
+  replace:
+    path: '{{ HOME_ROOT }}/.bash_profile'
+    regexp: '^#\s*(.*virtualenvwrapper_lazy\.sh)'
+    replace: '\1'
+  tags:
+    - python

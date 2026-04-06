@@ -1,0 +1,67 @@
+## which search mode to use
+## possible values: prefix, fulltext, fuzzy, skim
+# search_mode = "fuzzy"
+search_mode = "prefix"
+
+## which filter mode to use by default
+## possible values: "global", "host", "session", "session-preload", "directory", "workspace"
+## consider using search.filters to customize the enablement and order of filter modes
+filter_mode = "global"
+
+## enable or disable showing a preview of the selected command
+## useful when the command is longer than the terminal width and is cut off
+show_preview = true
+
+
+## prevent commands matching any of these regexes from being written to history.
+## Note that these regular expressions are unanchored, i.e. if they don't start
+## with ^ or end with $, they'll match anywhere in the command.
+## For details on the supported regular expression syntax, see
+## https://docs.rs/regex/latest/regex/#syntax
+# history_filter = [
+#   "^secret-cmd",
+#   "^innocuous-cmd .*--secret=.+",
+# ]
+history_filter = ["^exit", "^clear"]
+
+[stats]
+## Set commands where we should consider the subcommand for statistics. Eg, kubectl get vs just kubectl
+# common_subcommands = [
+#   "apt",
+#   "cargo",
+#   "composer",
+#   "dnf",
+#   "docker",
+#   "dotnet",
+#   "git",
+#   "go",
+#   "ip",
+#   "jj",
+#   "kubectl",
+#   "nix",
+#   "nmcli",
+#   "npm",
+#   "pecl",
+#   "pnpm",
+#   "podman",
+#   "port",
+#   "systemctl",
+#   "tmux",
+#   "yarn",
+# ]
+
+[sync]
+# Enable sync v2 by default
+# This ensures that sync v2 is enabled for new installs only
+# In a later release it will become the default across the board
+records = true
+
+[daemon]
+## Enables using the daemon to sync.
+# enabled = false
+
+[search]
+## The list of enabled filter modes, in order of priority.
+## The "workspace" mode is skipped when not in a workspace or workspaces = false.
+## Default filter mode can be overridden with the filter_mode setting.
+# filters = [ "global", "host", "session", "session-preload", "workspace", "directory" ]
