@@ -2,21 +2,21 @@
 - name: check zsh installed
   shell: "zsh --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_zsh
-  changed_when: False
+  changed_when: false
   tags:
     - zsh
 
 - name: check oh-my-zsh installed
   shell: "test -d {{ HOME_ROOT }}/.oh-my-zsh/ && echo 0 || echo 1"
   register: installed_of_oh_my_zsh
-  changed_when: False
+  changed_when: false
   tags:
     - zsh
 
 - name: check zsh-autosuggestions installed
   shell: "test -d {{ HOME_ROOT }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions && echo 0 || echo 1"
   register: installed_of_oh_my_zsh_autosuggestions
-  changed_when: False
+  changed_when: false
   tags:
     - zsh
 
@@ -80,13 +80,23 @@
   tags:
     - zsh
 
+- name: backup zshrc
+  copy:
+    src: "{{ HOME_ROOT }}/.zshrc"
+    dest: "{{ HOME_ROOT }}/.zshrc.{{ backup_date }}.{{ backup_epoch }}"
+    remote_src: true
+    mode: preserve
+  ignore_errors: true
+  changed_when: false
+  tags:
+    - zsh
+
 - name: copy zshrc template into home
   template:
     src: .zshrc
     dest: "{{ HOME_ROOT }}"
-    mode: 0644
+    mode: "0644"
     force: true
-    backup: true # 进行备份
   tags:
     - zsh
 
@@ -95,8 +105,8 @@
     dest: "{{ HOME_ROOT }}/.bash_profile"
     state: absent
     regexp: "{{ item }}"
+    backup: false
   with_items:
     - 'export PS1="'
-  changed_when: True
   tags:
     - zsh

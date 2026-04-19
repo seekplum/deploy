@@ -2,5 +2,7 @@
 - name: make env
   include_tasks: .virtualenv.yml
   with_items: "{{ VIRTUAL_ENVS }}"
+  loop_control:
+    loop_var: env_item
   tags:
     - virtualenv

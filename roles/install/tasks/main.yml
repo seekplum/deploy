@@ -1,25 +1,116 @@
 ---
-- include_tasks: configure.yml
-- include_tasks: initialize.yml
-- include_tasks: zsh.yml
-- include_tasks: pyenv.yml
-- include_tasks: python.yml
-- include_tasks: virtualenv.yml
-- include_tasks: docker.yml
-- include_tasks: golang.yml
-- include_tasks: java.yml
-- include_tasks: nodejs.yml
-- include_tasks: rbenv.yml
+- name: set backup timestamp fact
+  set_fact:
+    backup_date: "{{ lookup('pipe', 'date +%Y%m%d') }}"
+    backup_epoch: "{{ lookup('pipe', 'date +%s') }}"
 
-- name: check existing ansible
-  shell: "ansible --version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: existing_of_ansible
-  changed_when: False
-  tags:
-    - ansible
+- name: install shell wrapper for install role
+  copy:
+    dest: /tmp/ansible-shell-wrapper
+    mode: '0755'
+    content: |
+      #!/bin/sh
+      if [ "$1" = "-c" ]; then
+        shift
+        if command -v zsh >/dev/null 2>&1; then
+          exec "$(command -v zsh)" -i -c "$1"
+        fi
+        exec /bin/sh -c "$1"
+      fi
+      exec /bin/sh "$@"
 
-- name: install ansible
-  shell: "pip install ansible"
-  tags:
-    - ansible
-  when: existing_of_ansible.stdout == "1"
+- name: run install role tasks with zsh wrapper when available
+  block:
+    - include_tasks:
+        file: configure.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - include_tasks:
+        file: initialize.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - include_tasks:
+        file: zsh.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - include_tasks:
+        file: pyenv.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - include_tasks:
+        file: python.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - include_tasks:
+        file: virtualenv.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - include_tasks:
+        file: docker.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - include_tasks:
+        file: golang.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - include_tasks:
+        file: java.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - include_tasks:
+        file: nodejs.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - include_tasks:
+        file: rbenv.yml
+        apply:
+          module_defaults:
+            ansible.builtin.shell:
+              executable: /tmp/ansible-shell-wrapper
+
+    - name: check existing ansible
+      shell: "ansible --version >/dev/null 2>&1 && echo 0 || echo 1"
+      args:
+        executable: /tmp/ansible-shell-wrapper
+      register: existing_of_ansible
+      changed_when: false
+      tags:
+        - ansible
+
+    - name: install ansible
+      shell: "pip install ansible"
+      args:
+        executable: /tmp/ansible-shell-wrapper
+      tags:
+        - ansible
+      when: existing_of_ansible.stdout == "1"

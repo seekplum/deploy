@@ -1,6 +1,6 @@
 ---
 - name: make virtualenv
-  shell: "{{ PYENV_ROOT }}/versions/{{ item.version }}/bin/virtualenv --python={{ PYENV_ROOT }}/versions/{{ item.version }}/bin/python {{ VIRTUEL_ROOT }}/{{ item.version }}"
+  shell: "[[ ! -d {{ VIRTUEL_ROOT }}/{{ env_item.version }} ]] && uv venv {{ VIRTUEL_ROOT }}/{{ env_item.version }} --prompt {{ env_item.version }} --python {{ env_item.version }} || echo {{ env_item.version }} virtualenv is exist"
   tags:
     - virtualenv
 
@@ -8,16 +8,16 @@
   copy:
     src: "requirements.in"
     dest: "/tmp/requirements.in"
-    mode: 644
+    mode: "0644"
     force: true
     backup: false
   tags:
     - virtualenv
 
 - name: install packages
-  shell: "[[ ! -f {{ VIRTUEL_ROOT }}/{{ item.version }}/bin/trash ]] && {{ VIRTUEL_ROOT }}/{{ item.version }}/bin/pip install -r /tmp/requirements.in"
+  shell: "[[ ! -f {{ VIRTUEL_ROOT }}/{{ env_item.version }}/bin/trash ]] && uv pip install --python {{ VIRTUEL_ROOT }}/{{ env_item.version }}/bin/python -r /tmp/requirements.in || echo {{ env_item.version }} virtualenv packages is exist"
   with_items: "{{ VIRTUAL_ENVS }}"
-  ignore_errors: True
+  ignore_errors: true
   tags:
     - virtualenv
-  when: item.version.startswith("3.")
+  when: env_item.version.startswith("3.")

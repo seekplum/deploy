@@ -3,7 +3,7 @@
   file:
     dest: "{{ JAVA_HOME }}"
     state: directory
-    mode: 0755
+    mode: "0755"
   become: true
   become_method: sudo
   tags:
@@ -13,7 +13,7 @@
 - name: check existing java packages on Linux
   shell: "test -f {{ JAVA_PACKAGE_PATH_ON_LINUX }} && echo 0 || echo 1"
   register: existing_of_java_on_linux
-  changed_when: False
+  changed_when: false
   tags:
     - java
   when: is_linux_os
@@ -21,7 +21,7 @@
 - name: check java installed
   shell: "java --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_java
-  changed_when: False
+  changed_when: false
   tags:
     - java
   when: is_linux_os
@@ -50,7 +50,7 @@
 - name: check existing mvn packages on Linux
   shell: "test -f {{ MVN_PACKAGE_PATH_ON_LINUX }} && echo 0 || echo 1"
   register: existing_of_mvn_on_linux
-  changed_when: False
+  changed_when: false
   tags:
     - java
   when: is_linux_os
@@ -58,7 +58,7 @@
 - name: check mvn installed
   shell: "mvn --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_mvn
-  changed_when: False
+  changed_when: false
   tags:
     - java
   when: is_linux_os

@@ -4,6 +4,7 @@
 #     . /etc/bashrc
 # fi
 
+export GPG_TTY=$(tty)
 export MYSQL_HOME="${HOME}/packages/mysql"
 export ORACLE_HOME="${HOME}/packages/oracle"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${ORACLE_HOME}"
@@ -56,17 +57,26 @@ export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node # 配置 nvm �
 # Cargo 镜像源
 export RUSTUP_DIST_SERVER="https://rsproxy.cn"
 export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup"
+export UV_PYTHON_INSTALL_MIRROR="https://gh-proxy.com/github.com/indygreg/python-build-standalone/releases/download"
+export NOTIFY_ACCESS_TOKEN="{{ NOTIFY_ACCESS_TOKEN }}"
+export NODE_USE_ENV_PROXY=1
+# bun
+export BUN_INSTALL="${HOME}/.bun"
+export PATH="${BUN_INSTALL}/bin:${PATH}"
+# direnv 配置
+export DIRENV_LOG_FORMAT=""
 
 {% if is_mac_os %}
-export PS1="\h@\u: \W \$ " # 终端提示符
+export PS1="\h@\u: \W \$ "              # 终端提示符
 # export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.aliyun.com/homebrew/homebrew-bottles
 export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.ustc.edu.cn/homebrew-bottles
 {% else %}
 export PS1="\[\e[0;33m\]\u\[\e[0m\]@\[\e[0;37m\]\h\[\e[0m\]:\[\e[0;31m\] \w \[\e[0m\]\$ " # 终端提示符
 {% endif %}
-export LS_OPTIONS='--color=auto' # 如果没有指定，则自动选择颜色
-export CLICOLOR='Yes' # 是否输出颜色
+export LS_OPTIONS='--color=auto'         # 如果没有指定，则自动选择颜色
+export CLICOLOR='Yes'                    # 是否输出颜色
 export LSCOLORS='Gxfxcxdxbxegedabagacad' # 指定颜色
+
 # 自定义使用Python版本
 export PYENV_ROOT="{{PYENV_ROOT}}"
 export RBENV_ROOT="{{RBENV_ROOT}}"
@@ -95,7 +105,7 @@ export PATH="${PATH}:/usr/local/opt/sqlite/bin"
 export PATH="${PATH}:${HOME}/.yarn/bin:${HOME}/.config/yarn/global/node_modules/.bin"
 export PATH="${PATH}:/snap/bin"
 export PATH="${PATH}:/mnt/d/Microsoft VS Code/bin"
-export PATH="${PATH}:${HOME}/.bun/bin"
+export PATH="${PATH}:${BUN_INSTALL}/bin"
 export PATH="${PATH}:${HOME}/claude-model/bin"
 
 alias senv3="source ${PYTHON_VIRTUEL_ROOT}/bin/activate"
@@ -105,12 +115,12 @@ alias mystart="${PYTHON_VIRTUEL_ROOT}/bin/supervisord -c ${HOME}/packages/superv
 alias mysuper="${PYTHON_VIRTUEL_ROOT}/bin/supervisorctl -c ${HOME}/packages/supervisor/supervisord.conf"
 alias mymysql='${HOME}/packages/mysql/bin/mysql -uroot -proot -S ${HOME}/packages/mysql/data/sock/mysql.sock'
 alias mysqlserver='${HOME}/packages/mysql/support-files/mysql.server'
-alias myredis='redis-cli -a xxxx --no-auth-warning'
-alias mymongoro='mongosh --authenticationDatabase admin -u da_ro -p xxxx'
-alias mymongorw='mongosh --authenticationDatabase admin -u da_rw -p xxxx'
-alias mymongouseradmin='mongosh --authenticationDatabase admin -u user_admin -p xxxx'
-alias mymongoadmin='mongosh --authenticationDatabase admin -u mongo_admin -p xxxx'
-alias mymongoroot='mongosh --authenticationDatabase admin -u root -p xxxx'
+alias myredis='redis-cli -a {{ REDIS_PASSWORD }} --no-auth-warning'
+alias mymongoro='mongosh --authenticationDatabase admin -u da_ro -p {{ MONGO_RO_PASSWORD }}'
+alias mymongorw='mongosh --authenticationDatabase admin -u da_rw -p {{ MONGO_RW_PASSWORD }}'
+alias mymongouseradmin='mongosh --authenticationDatabase admin -u user_admin -p {{ MONGO_USER_ADMIN_PASSWORD }}'
+alias mymongoadmin='mongosh --authenticationDatabase admin -u mongo_admin -p {{ MONGO_ADMIN_PASSWORD }}'
+alias mymongoroot='mongosh --authenticationDatabase admin -u root -p {{ MONGO_ROOT_PASSWORD }}'
 
 alias ll='ls -l'
 alias cp='cp -i'
@@ -125,51 +135,39 @@ alias cdj="cd ${JAVAPROJECTSPATH}"
 alias cds="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum"
 alias cdi="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/seekplum.github.io"
 alias cdd="cd ${PYTHONPROJECTSPATH}/github.com/seekplum/deploy"
+alias powershell="/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe"
 
 # virtualenvwrappe 配置
 export WORKON_HOME=${HOME}/.virtualenvs
-# export VIRTUALENVWRAPPER_SCRIPT={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenvwrapper.sh
+[ -f "{{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenvwrapper.sh" ] && export VIRTUALENVWRAPPER_SCRIPT={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenvwrapper.sh
 export VIRTUALENVWRAPPER_PYTHON={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/python
 export VIRTUALENVWRAPPER_VIRTUALENV={{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenv
 # export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
-# source {{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenvwrapper_lazy.sh
+[ -f "{{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenvwrapper_lazy.sh" ] && . {{PYENV_ROOT}}/versions/${PYTHON_VERSION}/bin/virtualenvwrapper_lazy.sh
 # export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-
-if which pyenv > /dev/null 2>&1;
-  then eval "$(pyenv init -)";
-fi
-if which rbenv > /dev/null 2>&1;
-  then eval "$(rbenv init -)";
-fi
 
 # pnpm
 export PNPM_HOME="${HOME}/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
+case ":${PATH}:" in
+*":${PNPM_HOME}:"*) ;;
+*) export PATH="${PNPM_HOME}:${PATH}" ;;
 esac
 # pnpm end
 
 function proxy_on() {
-  export ALL_PROXY=socks5://127.0.0.1:7890
-  export http_proxy=http://127.0.0.1:7890
-  export https_proxy=${http_proxy}
-  echo -e "终端代理已开启。"
+    host_ip=${1:-127.0.0.1}
+    export ALL_PROXY=socks5://$host_ip:7890
+    export http_proxy=http://$host_ip:7890
+    export https_proxy=${http_proxy}
+    echo -e "终端代理已开启。ALL_PROXY=${ALL_PROXY}, http_proxy=${http_proxy}, https_proxy=${https_proxy}"
 }
 
-function proxy_off(){
-  unset http_proxy https_proxy
-  echo -e "终端代理已关闭。"
+function proxy_off() {
+    unset ALL_PROXY http_proxy https_proxy
+    echo -e "终端代理已关闭。ALL_PROXY=${ALL_PROXY}, http_proxy=${http_proxy}, https_proxy=${https_proxy}"
 }
 
-# . "${HOME}/.local/bin/env"
-
-
-# . "${HOME}/.cargo/env"
-export NOTIFY_ACCESS_TOKEN="xxx"
-export NODE_USE_ENV_PROXY=1
-alias powershell="/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe"
-wsl_notify() {
+function wsl_notify() {
     local title="${1:-WSL 通知}"
     local msg="${2:-命令已运行完成}"
     powershell -Command "
@@ -182,3 +180,20 @@ wsl_notify() {
         \$toast.ShowBalloonTip(5000);
     "
 }
+
+function addkernel() {
+    [[ -n "${VIRTUAL_ENV_PROMPT}" ]] && name="${VIRTUAL_ENV_PROMPT//[() ]/}" && python -m ipykernel install --user --name="$name" --display-name="Python ($name)" || echo "❌ 未激活虚拟环境或未安装 ipykernel"
+}
+
+if [ -e ${HOME}/.nix-profile/etc/profile.d/nix.sh ]; then . ${HOME}/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+
+[ -f "${HOME}/.local/bin/env" ] && . "${HOME}/.local/bin/env" || true
+
+# Cargo 环境变量
+[ -f "${HOME}/.cargo/env" ] && . "${HOME}/.cargo/env" || true
+
+# Claude Code
+[ -f "${HOME}/.claude/env" ] && . "${HOME}/.claude/env" || true
+
+# bun completions
+[ -s "${BUN_INSTALL}/_bun" ] && source "${BUN_INSTALL}/_bun" || true

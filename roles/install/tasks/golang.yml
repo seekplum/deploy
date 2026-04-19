@@ -3,7 +3,7 @@
   file:
     dest: "{{ GOPATH }}/{{ item }}"
     state: directory
-    mode: 0755
+    mode: "0755"
   with_items:
     - bin
     - src
@@ -14,7 +14,7 @@
 - name: check existing golang packages on Linux
   shell: "test -f {{ GO_PACKAGE_PATH_ON_LINUX }} && echo 0 || echo 1"
   register: existing_of_go_on_linux
-  changed_when: False
+  changed_when: false
   tags:
     - golang
   when: is_linux_os
@@ -22,7 +22,7 @@
 - name: check existing golang packages on macOS
   shell: "test -f {{ GO_PACKAGE_PATH_ON_MAC }} && echo 0 || echo 1"
   register: existing_of_go_on_mac
-  changed_when: False
+  changed_when: false
   tags:
     - golang
   when: is_mac_os
@@ -30,7 +30,7 @@
 - name: check golong installed
   shell: "test -d {{ GOROOT }} && echo 0 || echo 1"
   register: installed_of_go
-  changed_when: False
+  changed_when: false
   tags:
     - golang
 

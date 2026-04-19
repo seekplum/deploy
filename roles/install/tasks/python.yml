@@ -1,35 +1,6 @@
 ---
 - name: install python
-  shell: 'if [ -d {{ PYENV_ROOT }}/versions/{{ item.version }} ]; then echo {{ item.version }} is installed; else . {{ HOME_ROOT }}/.bash_profile && pyenv install {{ item.version }}; fi'
+  shell: 'if [ $(uv python list --only-installed {{ item.version }} | grep -v "<download" | wc -l) -gt 0 ]; then echo {{ item.version }} is installed; else uv python install {{ item.version }}; fi'
   with_items: "{{ VIRTUAL_ENVS }}"
-  register: python_install_info
-  tags:
-    - python
-
-- name: install virtuelenv
-  shell: "{{ PYENV_ROOT }}/versions/{{ item.version }}/bin/virtualenv --version || {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/pip install virtualenv"
-  with_items: "{{ VIRTUAL_ENVS }}"
-  tags:
-    - python
-
-- name: install virtualenvwrapper
-  shell: "test -f {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/virtualenvwrapper.sh || {{ PYENV_ROOT }}/versions/{{ item.version }}/bin/pip install virtualenvwrapper"
-  with_items: "{{ VIRTUAL_ENVS }}"
-  tags:
-    - python
-
-- name: 取消virtualenvwrapper注释
-  replace:
-    path: '{{ HOME_ROOT }}/.bash_profile'
-    regexp: '^#\s*(.*VIRTUALENVWRAPPER_SCRIPT.*)'
-    replace: '\1'
-  tags:
-    - python
-
-- name: 取消virtualenvwrapper_lazy注释
-  replace:
-    path: '{{ HOME_ROOT }}/.bash_profile'
-    regexp: '^#\s*(.*virtualenvwrapper_lazy\.sh)'
-    replace: '\1'
   tags:
     - python

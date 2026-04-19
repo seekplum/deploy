@@ -30,24 +30,23 @@ function print_help() {
     echo "e.g: $0 start"
 }
 
-
 case "$1" in
-  start)
-        start
-        ;;
-  stop)
-        stop
-        ;;
-  restart)
-        stop
-        sleep 3
-        start
-        ;;
-  ""|-h|--help)
-        print_help  # 参数为空时执行
-        ;;
-  *)  # 匹配都失败执行
-        print_help
+start)
+    start
+    ;;
+stop)
+    stop
+    ;;
+restart)
+    stop
+    sleep 3
+    start
+    ;;
+"" | -h | --help)
+    print_help # 参数为空时执行
+    ;;
+*) # 匹配都失败执行
+    print_help ;;
 esac
 
 exit 0

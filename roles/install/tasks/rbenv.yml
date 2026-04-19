@@ -2,7 +2,7 @@
 - name: check rbenv installed
   shell: "test -d {{ RBENV_ROOT }} && echo 0 || echo 1"
   register: installed_of_rbenv
-  changed_when: False
+  changed_when: false
   tags:
     - rbenv
 
@@ -27,7 +27,7 @@
       git:
         repo: "{{ RBENV_REPOSITORY }}"
         dest: "{{ RBENV_ROOT }}"
-        update: yes
+        update: true
         version: master
   when: installed_of_rbenv.stdout == "0"
   tags:
@@ -36,7 +36,7 @@
 - name: check rbenv plugins installed
   shell: "test -d {{ RBENV_ROOT }}/plugins/ruby-build && echo 0 || echo 1"
   register: installed_of_rbenv_plugins
-  changed_when: False
+  changed_when: false
   tags:
     - rbenv
 
@@ -61,7 +61,7 @@
       git:
         repo: "{{ RUBY_BUILD_REPOSITORY }}"
         dest: "{{ RUBY_BUILD_ROOT }}"
-        update: yes
+        update: true
         version: master
   when: installed_of_rbenv.stdout == "0"
   tags:
@@ -70,7 +70,7 @@
 - name: check ruby installed
   shell: "ruby --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_ruby
-  changed_when: False
+  changed_when: false
   tags:
     - rbenv
 

@@ -3,14 +3,14 @@
 - name: check n installed
   shell: "n --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_n
-  changed_when: False
+  changed_when: false
   tags:
     - nodejs
 
 - name: check node installed
   shell: "node -v >/dev/null 2>&1 && echo 0 || echo 1"
   register: installed_of_node
-  changed_when: False
+  changed_when: false
   tags:
     - nodejs
 
@@ -37,13 +37,19 @@
         - nodejs
       become: true
       become_method: sudo
-
-    - name: install yarn
-      shell: "npm install -g yarn"
-      when: installed_of_node.stdout == "1"
-      tags:
-        - nodejs
-      become: true
-      become_method: sudo
   tags:
     - nodejs
+
+- name: install node packages
+  shell: 'if [ $(npm list -g --depth=0 {{ item }} | grep {{ item }} | wc -l) -eq 0 ]; then npm install -g {{ item }}; else echo {{ item }} is installed; fi'
+  with_items:
+    - "yarn"
+    - "copilot-api"
+    - "git-format-staged"
+    - "pnpm"
+    - "ts-node"
+  ignore_errors: true
+  tags:
+    - nodejs
+  become: true
+  become_method: sudo

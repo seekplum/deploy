@@ -5,104 +5,33 @@
 # 目前使用的版本commit id为 1343ab67edd8a81b75aceca77ddb526be87a20c1
 export ZSH="{{HOME_ROOT}}/.oh-my-zsh"
 
+# 立即将命令写入历史文件，而不是等待 shell 退出
+setopt INC_APPEND_HISTORY
+# 允许在不同的 zsh 会话之间共享历史（即时读取其他窗口执行的命令）
+setopt SHARE_HISTORY
+# 记录命令执行的时间戳，方便回溯
+setopt EXTENDED_HISTORY
+# 忽略重复命令
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS
+# 减少多余空格
+setopt HIST_REDUCE_BLANKS
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 ZSH_THEME="robbyrussell"
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to automatically update without prompting.
-# DISABLE_UPDATE_PROMPT="true"
-
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS=true
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in ~/.oh-my-zsh/plugins/*
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  zsh-autosuggestions
-  git
+    zsh-autosuggestions
+    git
 )
 
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
-bindkey \^U backward-kill-line  # 取消zsh中 `ctrl + u` 清除整行
+bindkey \^U backward-kill-line # 取消zsh中 `ctrl + u` 清除整行
 
 # 安装docker后可以配置 $(__docker_machine_ps1),同时soure docker-machine-prompt.bash
 # source '/usr/local/etc/bash_completion.d/docker-machine-prompt.bash'
@@ -115,7 +44,7 @@ bindkey \^U backward-kill-line  # 取消zsh中 `ctrl + u` 清除整行
 # source <(helm completion zsh)
 
 if [[ -f ~/.bash_profile ]]; then
-	. ~/.bash_profile
+    . ~/.bash_profile
 fi
 
 # if [[ -f ~/.bashrc ]]; then
@@ -123,54 +52,29 @@ fi
 # fi
 
 # 可以查看当前Shell配置 cat ~/.oh-my-zsh/themes/${ZSH_THEME}.zsh-theme
-# export PS1='%n %{$fg[cyan]%}%c%{$reset_color%}$(__docker_machine_ps1) $(git_prompt_info)%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )%{$reset_color%}'
-{% if is_mac_os %}
+# export PS1='[%M] %n %{$fg[cyan]%}%c%{$reset_color%}$(__docker_machine_ps1) $(git_prompt_info)%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )%{$reset_color%}'
 export PS1='%n %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )%{$reset_color%}'
-{% else %}
-export PS1='[%M] %n %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )%{$reset_color%}'
-{% endif %}
 
 # zsh支持 :* 等匹配
 unsetopt nomatch
 
-export GPG_TTY=$(tty)
-{% if is_linux_os %}
-# eval `keychain --eval --agents ssh huangliuliang`
-/usr/bin/keychain $HOME/.ssh/huangliuliang
-source $HOME/.keychain/$HOST-sh
-{% endif %}
-
 keep_current_path() {
-  printf "\e]9;9;%s\e\\" "$(wslpath -w "$PWD")"
+    printf "\e]9;9;%s\e\\" "$(wslpath -w "${PWD}")"
 }
 precmd_functions+=(keep_current_path)
 
-# Claude Code
-. "${HOME}/.claude/env"
+if which pyenv >/dev/null 2>&1; then
+    eval "$(pyenv init -)"
+fi
+if which rbenv >/dev/null 2>&1; then
+    eval "$(rbenv init -)"
+fi
 
-# bun completions
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+{% if is_linux_os %}
+eval $(keychain --eval --agents ssh huangliuliang)
+# /usr/bin/keychain ${HOME}/.ssh/huangliuliang
+[ -f ${HOME}/.keychain/${HOST}-sh ] && source ${HOME}/.keychain/${HOST}-sh || true
+{% endif %}
 
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-eval "$(atuin init zsh)"
-
-# 立即将命令写入历史文件，而不是等待 shell 退出
-setopt INC_APPEND_HISTORY
-
-# 允许在不同的 zsh 会话之间共享历史（即时读取其他窗口执行的命令）
-setopt SHARE_HISTORY
-
-# 记录命令执行的时间戳，方便回溯
-setopt EXTENDED_HISTORY
-
-# 忽略重复命令
-setopt HIST_IGNORE_DUPS
-setopt HIST_IGNORE_ALL_DUPS
-setopt HIST_SAVE_NO_DUPS
-
-# 减少多余空格
-setopt HIST_REDUCE_BLANKS
-
+command -v atuin >/dev/null 2>&1 && eval "$(atuin init zsh --disable-up-arrow)" || true
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)" || true

@@ -5,7 +5,7 @@
   file:
     dest: "{{ item }}"
     state: directory
-    mode: 0755
+    mode: "0755"
   with_items:
     - "{{ HOME_ROOT }}/.ssh"
     - "{{ HOME_ROOT }}/.pip"
@@ -17,13 +17,23 @@
   tags:
     - configure
 
+- name: backup bash_profile
+  copy:
+    src: "{{ HOME_ROOT }}/.bash_profile"
+    dest: "{{ HOME_ROOT }}/.bash_profile.{{ backup_date }}.{{ backup_epoch }}"
+    remote_src: true
+    mode: preserve
+  ignore_errors: true
+  changed_when: false
+  tags:
+    - configure
+
 - name: copy bash_profile script template
   template:
     src: .bash_profile
     dest: "{{ HOME_ROOT }}"
-    mode: 0644
+    mode: "0644"
     force: true
-    backup: true # 进行备份
   tags:
     - configure
 
@@ -31,7 +41,7 @@
   template:
     src: mystart.sh
     dest: "{{ PACKAGES_ROOT }}"
-    mode: 0755
+    mode: "0755"
     force: true
   tags:
     - configure
@@ -40,7 +50,7 @@
   template:
     src: pip.conf
     dest: "{{ HOME_ROOT }}/.pip"
-    mode: 0644
+    mode: "0644"
   tags:
     - configure
 
@@ -48,7 +58,7 @@
   copy:
     src: "{{ role_path }}/files/{{ item }}"
     dest: "{{ HOME_ROOT }}"
-    mode: 0644
+    mode: "0644"
     force: false # 避免原主机文件被覆盖
   with_items:
     - .vimrc
@@ -62,7 +72,7 @@
   copy:
     src: "{{ role_path }}/files/{{ item }}"
     dest: "{{ HOME_ROOT }}/.ssh"
-    mode: 0644
+    mode: "0644"
     force: false # 避免原主机文件被覆盖
   with_items:
     - config
@@ -74,7 +84,7 @@
   copy:
     src: "{{ role_path }}/files/{{ item }}"
     dest: "{{ PACKAGES_ROOT }}"
-    mode: 0755
+    mode: "0755"
     force: false # 避免原主机文件被覆盖
   with_items:
     - "start_vm.sh"
@@ -107,7 +117,7 @@
     - brew update
   tags:
     - configure
-  ignore_errors: True
+  ignore_errors: true
   when: is_mac_os
 
 - name: import gpg key on Ubuntu
@@ -122,7 +132,7 @@
   copy:
     src: "{{ item }}"
     dest: "/etc/apt/"
-    mode: 0644
+    mode: "0644"
     force: true
   become: true
   become_method: sudo
@@ -136,7 +146,7 @@
   copy:
     src: "{{ item }}"
     dest: "/etc/apt/sources.list.d/"
-    mode: 0644
+    mode: "0644"
     force: true
   become: true
   become_method: sudo
@@ -147,13 +157,32 @@
     - configure
   when: is_ubuntu_os
 
+- name: backup repo on Redhat
+  copy:
+    src: "/etc/yum.repos.d/{{ item }}"
+    dest: "/etc/yum.repos.d/{{ item }}.{{ backup_date }}.{{ backup_epoch }}"
+    remote_src: true
+    mode: preserve
+  with_items:
+    - "CentOS-Base.repo"
+    - "CentOS-SCLo-sclo.repo"
+    - "CentOS-SCLo-scl-rh.repo"
+    - "wandisco-git.repo"
+    - "mongodb-4.4.repo"
+  ignore_errors: true
+  changed_when: false
+  become: true
+  become_method: sudo
+  tags:
+    - configure
+  when: is_centos_os
+
 - name: copy repo on Redhat
   copy:
     src: "{{ item }}"
     dest: "/etc/yum.repos.d/"
-    mode: 0644
+    mode: "0644"
     force: true
-    backup: true
   with_items:
     - "CentOS-Base.repo"
     - "CentOS-SCLo-sclo.repo"
@@ -170,7 +199,7 @@
   shell: "rpm --import http://opensource.wandisco.com/RPM-GPG-KEY-WANdisco"
   become: true
   become_method: sudo
-  ignore_errors: True
+  ignore_errors: true
   tags:
     - configure
   when: is_centos_os
@@ -195,10 +224,10 @@
       service:
         name: "my-rc-local"
         state: "started"
-        enabled: "yes"
+        enabled: true
   become: true
   become_method: sudo
-  ignore_errors: True
+  ignore_errors: true
   tags:
     - configure
   when: is_linux_os
@@ -214,8 +243,8 @@
       systemd:
         name: "systemd-resolved"
         state: "restarted"
-        enabled: "yes"
-        daemon_reload: yes
+        enabled: true
+        daemon_reload: true
   become: true
   become_method: sudo
   tags:

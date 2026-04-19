@@ -1,2 +1,10 @@
 ---
 # defaults file for install
+
+NOTIFY_ACCESS_TOKEN: "xxxx"
+REDIS_PASSWORD: "xxxx"
+MONGO_RO_PASSWORD: "xxxx"
+MONGO_RW_PASSWORD: "xxxx"
+MONGO_USER_ADMIN_PASSWORD: "xxxx"
+MONGO_ADMIN_PASSWORD: "xxxx"
+MONGO_ROOT_PASSWORD: "xxxx"

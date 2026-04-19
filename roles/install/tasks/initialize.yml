@@ -4,7 +4,7 @@
 - name: check existing brew on macOS
   shell: "brew --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_brew
-  changed_when: False
+  changed_when: false
   tags:
     - initialize
   when: is_mac_os and ansible_user_id != "root"
@@ -19,16 +19,16 @@
 #   shell: sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
 #   tags:
 #     - initialize
-#   changed_when: False
-#   ignore_errors: True
+#   changed_when: false
+#   ignore_errors: true
 #   when: is_centos_os
 
 - name: add RPM-GPG-KEY-EPEL on Redhat
   shell: sudo curl -fSL --connect-timeout 5 --retry 100 --retry-connrefused --retry-delay 1 --retry-max-time 100 https://archive.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }} -o /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}
   tags:
     - initialize
-  changed_when: False
-  ignore_errors: True
+  changed_when: false
+  ignore_errors: true
   when: is_centos_os
 
 - name: install packages on Redhat
@@ -86,69 +86,71 @@
 #   when: is_centos_os
 
 # sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys <Key>
+# https://stackoverflow.com/questions/51622712/ansible-requires-python-apt-but-its-already-installed
+# ansible -i hosts common -m "apt name=python-apt state=latest" --become-user root
+# shell: "sudo apt-get install -y {{ item }}"
 - name: install packages on Ubuntu
   apt:
-    pkg: "{{ item }}"
+    pkg:
+      - curl
+      - jq
+      - gcc
+      - rsync
+      - git
+      - bzip2
+      - python3-setuptools
+      - python3-dev
+      - wget
+      - screen
+      - make
+      - cmake
+      - tree
+      - sshpass
+      - build-essential
+      - libssl-dev
+      - zlib1g-dev
+      - libbz2-dev
+      - libreadline-dev
+      - libsqlite3-dev
+      - llvm
+      - libncurses5-dev
+      - software-properties-common
+      - haveged
+      - silversearcher-ag
+      - apt-transport-https
+      # - ca-certificates
+      - gnupg-agent
+      - gnupg2
+      - python3-apt
+      - libffi-dev
+      - python3
+      - python3-pip
+      - pinentry-gtk2
+      - python3-tk
+      - tk-dev
+      - libpcre3-dev
+      - ripgrep
+      - mongodb-mongosh
+      - knot-dnsutils
+      - keychain
+      - sqlite3
+      - groovy
+      - shfmt
+      - unzip
     state: present
     update_cache: true
-  # https://stackoverflow.com/questions/51622712/ansible-requires-python-apt-but-its-already-installed
-  # ansible -i hosts common -m "apt name=python-apt state=latest" --become-user root
-  # shell: "sudo apt-get install -y {{ item }}"
-  with_items:
-    - curl
-    - jq
-    - gcc
-    - rsync
-    - git
-    - bzip2
-    - python-setuptools
-    - python3-dev
-    - wget
-    - screen
-    - make
-    - cmake
-    - tree
-    - sshpass
-    - zlibc
-    - build-essential
-    - libssl-dev
-    - zlib1g-dev
-    - libbz2-dev
-    - libreadline-dev
-    - libsqlite3-dev
-    - llvm
-    - libncurses5-dev
-    - software-properties-common
-    - haveged
-    - silversearcher-ag
-    - apt-transport-https
-    # - ca-certificates
-    - gnupg-agent
-    - gnupg2
-    - python-apt
-    - libffi-dev
-    - python3
-    - python3-pip
-    - pinentry-gtk2
-    - python-tk
-    - python3-tk
-    - tk-dev
-    - libpcre3-dev
-    - ripgrep
-    - mongodb-mongosh
-    - knot-dnsutils
-    - keychain
+    cache_valid_time: 86400
   tags:
     - initialize
-  ignore_errors: True
+  ignore_errors: true
   become: true
   become_method: sudo
   when: is_ubuntu_os
 
 - name: install xcode-select on macOS
   shell: "xcode-select -v >/dev/null 2>&1 ||xcode-select --install"
-  changed_when: False
-  ignore_errors: True
+  changed_when: false
+  ignore_errors: true
   tags:
     - initialize
   when: is_mac_os
@@ -167,8 +169,8 @@
     - pinentry-mac
     - ripgrep
     - knot-dnsutils
-  changed_when: False
-  ignore_errors: True
+  changed_when: false
+  ignore_errors: true
   tags:
     - initialize
   when: is_mac_os and ansible_user_id != "root"
@@ -176,66 +178,91 @@
 - name: check sshpass installed on macOS
   shell: "sshpass -V >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_sshpass_on_mac
-  changed_when: False
+  changed_when: false
   tags:
     - initialize
   when: is_mac_os
 
 - name: install sshpass on macOS
   shell: "brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb"
-  changed_when: False
-  ignore_errors: True
+  changed_when: false
+  ignore_errors: true
   tags:
     - initialize
   when: is_mac_os and ansible_user_id != "root" and existing_of_sshpass_on_mac.stdout == "1"
 
-- name: check pip installed
-  shell: "command -v pip >/dev/null 2>&1 && echo 0 || echo 1"
-  register: existing_of_pip
-  changed_when: False
+- name: check drone installed
+  shell: "command -v drone >/dev/null 2>&1 && echo drone installed || (cd /tmp && curl -L https://github.com/drone/drone-cli/releases/latest/download/drone_linux_amd64.tar.gz | tar zx && sudo install -t /usr/local/bin drone && rm -f drone)"
+  changed_when: false
+  ignore_errors: true
   tags:
     - initialize
 
-- name: output check pip installed
-  debug:
-    msg: "{{ existing_of_pip }}"
+- name: check act installed
+  shell: "command -v act >/dev/null 2>&1 && echo act installed || (curl -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash)"
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+
+- name: check uv installed
+  shell: "command -v uv >/dev/null 2>&1 && echo uv installed || (curl -LsSf https://astral.sh/uv/install.sh | sh)"
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+
+- name: check devbox installed
+  shell: "command -v devbox >/dev/null 2>&1 && echo devbox installed || (curl -fsSL https://get.jetify.com/devbox | bash -s -- -f)"
+  changed_when: false
+  ignore_errors: true
+  become: true
+  become_method: sudo
+  tags:
+    - initialize
+
+- name: check nix installed
+  shell: "command -v nix >/dev/null 2>&1 && echo nix installed || (curl -L https://nixos.org/nix/install | sh)"
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+  when: ansible_user_id != "root"
+
+- name: check direnv installed
+  shell: "command -v direnv >/dev/null 2>&1 && echo direnv installed || (curl -sfL https://direnv.net/install.sh | bash)"
+  changed_when: false
+  ignore_errors: true
   tags:
     - initialize
 
 - name: check cargo installed
-  shell: "command -v cargo >/dev/null 2>&1 && echo 0 || echo 1"
-  register: existing_of_cargo
-  changed_when: False
+  shell: "command -v cargo >/dev/null 2>&1 && echo cargo installed || (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh)"
+  register: result_of_install_cargo
+  changed_when: false
+  ignore_errors: true
   tags:
     - initialize
-
-- name: install cargo
-  shell: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-  register: result_of_install_pcargo
-  changed_when: False
-  ignore_errors: True
-  tags:
-    - initialize
-  when: existing_of_cargo.stdout == "1"
 
 - name: cargo install packages
-  shell: "cargo install {{ item }}"
+  shell: 'if [ $(cargo install --list | grep {{ item }} | wc -l) == "0" ]; then cargo install {{ item }}; else echo {{ item }} is installed; fi'
   with_items:
     - fd-find
     - du-dust
     - sd
     - tokei
     - atuin
-  changed_when: False
-  ignore_errors: True
+  changed_when: false
+  ignore_errors: true
   tags:
     - initialize
+  when: result_of_install_cargo is defined
 
 - name: copy cargo config.toml
   copy:
     src: "cargo_config.toml"
     dest: "~/.cargo/config.toml"
-    mode: 0644
+    mode: "0644"
     force: false
   tags:
     - initialize
@@ -244,16 +271,30 @@
   copy:
     src: "atuin_config.toml"
     dest: "~/.config/atuin/config.toml"
-    mode: 0644
+    mode: "0644"
     force: false
   tags:
     - initialize
+  ignore_errors: true
+
+# - name: check pip installed
+#   shell: "command -v pip >/dev/null 2>&1 && echo 0 || echo 1"
+#   register: existing_of_pip
+#   changed_when: false
+#   tags:
+#     - initialize
+
+# - name: output check pip installed
+#   debug:
+#     msg: "{{ existing_of_pip }}"
+#   tags:
+#     - initialize
 
 # - name: install pip
 #   shell: "easy_install pip"
 #   register: result_of_install_pip
-#   changed_when: False
-#   ignore_errors: True
+#   changed_when: false
+#   ignore_errors: true
 #   tags:
 #     - initialize
 #   when: existing_of_pip.stdout == "1"
@@ -261,7 +302,7 @@
 # - name: check existing get-pip.py
 #   shell: "test -f {{ PY_PIP_PATH }} && echo 0 || echo 1"
 #   register: existing_of_py_pip
-#   changed_when: False
+#   changed_when: false
 #   tags:
 #     - initialize
 #   when: '"failed" in result_of_install_pip and result_of_install_pip.failed'
@@ -286,13 +327,13 @@
 # - name: check trash installed
 #   shell: "trash --version >/dev/null 2>&1 && echo 0 || echo 1"
 #   register: existing_of_trash
-#   changed_when: False
+#   changed_when: false
 #   tags:
 #     - initialize
 
 # - name: install trash-cli
 #   shell: "pip install trash-cli"
-#   changed_when: False
+#   changed_when: false
 #   tags:
 #     - initialize
 #   when: existing_of_trash.stdout == "1"
@@ -300,13 +341,13 @@
 #- name: check supervisor installed
 #  shell: "supervisord --version >/dev/null 2>&1 && echo 0 || echo 1"
 #  register: existing_of_supervisor
-#  changed_when: False
+#  changed_when: false
 #  tags:
 #    - initialize
 #
 #- name: install supervisor
 #  shell: "pip install supervisor"
-#  changed_when: False
+#  changed_when: false
 #  tags:
 #    - initialize
 #  when: existing_of_supervisor.stdout == "1"
