@@ -14,6 +14,11 @@ dependencies = [
 url = "https://mirrors.aliyun.com/pypi/simple"
 default=true
 
+[tool.uv.workspace]
+members = [
+    "roles/development/api-server",
+]
+
 [tool.pylint]
 ignore-patterns = ["tests"]
 disable = [

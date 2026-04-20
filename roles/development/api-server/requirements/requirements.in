@@ -1,9 +1,0 @@
--i https://mirrors.aliyun.com/pypi/simple
-
-Flask
-gevent
-gunicorn
-six
-requests
-simplejson
-gitpython

@@ -12,7 +12,7 @@ from app.settings import config
 
 logger = logging.getLogger(__name__)
 
-api_server = Blueprint("index", __name__, url_prefix='/api')
+api_server = Blueprint("index", __name__, url_prefix="/api")
 
 
 @api_server.route("/update/blog", methods=["POST"])

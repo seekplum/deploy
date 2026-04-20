@@ -3,8 +3,8 @@
 import os
 
 
-class FlaskConfig(object):
-    SECRET_KEY = "meizhe_proxy"
+class FlaskConfig:
+    SECRET_KEY = "xxx_proxy"
     SESSION_TYPE = "filesystem"
     DEBUG = True
 
