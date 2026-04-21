@@ -236,6 +236,13 @@
   tags:
     - initialize
 
+- name: check chezmoi installed
+  shell: "command -v chezmoi >/dev/null 2>&1 && echo chezmoi installed || (curl -fsLS get.chezmoi.io | sh -- -b $HOME/.local/bin)"
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+
 - name: check cargo installed
   shell: "command -v cargo >/dev/null 2>&1 && echo cargo installed || (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh)"
   register: result_of_install_cargo

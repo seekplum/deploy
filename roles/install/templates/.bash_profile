@@ -156,8 +156,9 @@ esac
 
 function proxy_on() {
     host_ip=${1:-127.0.0.1}
-    export ALL_PROXY=socks5://$host_ip:7890
-    export http_proxy=http://$host_ip:7890
+    host_port=${2:-7890}
+    export ALL_PROXY=socks5://${host_ip}:${host_port}
+    export http_proxy=http://${host_ip}:${host_port}
     export https_proxy=${http_proxy}
     echo -e "终端代理已开启。ALL_PROXY=${ALL_PROXY}, http_proxy=${http_proxy}, https_proxy=${https_proxy}"
 }
@@ -182,7 +183,7 @@ function wsl_notify() {
 }
 
 function addkernel() {
-    [[ -n "${VIRTUAL_ENV_PROMPT}" ]] && name="${VIRTUAL_ENV_PROMPT//[() ]/}" && python -m ipykernel install --user --name="$name" --display-name="Python ($name)" || echo "❌ 未激活虚拟环境或未安装 ipykernel"
+    [[ -n "${VIRTUAL_ENV_PROMPT}" ]] && name="${VIRTUAL_ENV_PROMPT//[() ]/}" && python -m ipykernel install --user --name="${name}" --display-name="Python (${name})" || echo "❌ 未激活虚拟环境或未安装 ipykernel"
 }
 
 if [ -e ${HOME}/.nix-profile/etc/profile.d/nix.sh ]; then . ${HOME}/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
