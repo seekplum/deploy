@@ -58,10 +58,16 @@ export PS1='%n %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)%(?:%{$fg_bold[
 # zsh支持 :* 等匹配
 unsetopt nomatch
 
-keep_current_path() {
-    printf "\e]9;9;%s\e\\" "$(wslpath -w "${PWD}")"
-}
-precmd_functions+=(keep_current_path)
+# 检查是否在 WSL 环境下
+if [[ -n "$WSL_DISTRO_NAME" ]]; then
+    keep_current_path() {
+        # 确保 wslpath 命令存在，防止最小化安装的 WSL 出错
+        if command -v wslpath >/dev/null 2>&1; then
+            printf "\e]9;9;%s\e\\" "$(wslpath -w "${PWD}")"
+        fi
+    }
+    precmd_functions+=(keep_current_path)
+fi
 
 if which pyenv >/dev/null 2>&1; then
     eval "$(pyenv init -)"
