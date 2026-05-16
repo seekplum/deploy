@@ -137,6 +137,7 @@
       - groovy
       - shfmt
       - unzip
+      - age
     state: present
     update_cache: true
     cache_valid_time: 86400
@@ -169,6 +170,7 @@
     - pinentry-mac
     - ripgrep
     - knot-dnsutils
+    - age
   changed_when: false
   ignore_errors: true
   tags:
