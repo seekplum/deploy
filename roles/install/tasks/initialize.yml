@@ -164,12 +164,10 @@
     - zlib
     - sqlite
     - the_silver_searcher
-    - pyenv
-    - mitmproxy
     - gnupg
     - pinentry-mac
     - ripgrep
-    - knot-dnsutils
+    - knot
     - age
   changed_when: false
   ignore_errors: true
@@ -247,7 +245,7 @@
     - initialize
 
 - name: check chezmoi installed
-  shell: "command -v chezmoi >/dev/null 2>&1 && echo chezmoi installed || (curl -fsLS get.chezmoi.io | sh -- -b $HOME/.local/bin)"
+  shell: "command -v chezmoi >/dev/null 2>&1 && echo chezmoi installed || (curl -fsLS get.chezmoi.io | sh -s -- -b $HOME/.local/bin)"
   changed_when: false
   ignore_errors: true
   tags:

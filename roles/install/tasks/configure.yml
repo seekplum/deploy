@@ -108,17 +108,22 @@
     - configure
   when: is_mac_os
 
-- name: replace brew source On macOS
-  shell: "{{ item }}"
-  with_items:
-    - cd "$(brew --repo)" && git remote set-url origin https://mirrors.aliyun.com/homebrew/brew.git && git clean --quiet -fdxq && git pull --rebase && cd -
-    - git clone https://mirrors.aliyun.com/homebrew/homebrew-core.git $(brew --repo homebrew/core)
-    - git clone https://mirrors.aliyun.com/homebrew/homebrew-cask.git $(brew --repo homebrew/cask)
-    - brew update
+- name: copy replace_brew_source script On macOS
+  copy:
+    src: replace_brew_source.sh
+    dest: "{{ PACKAGES_ROOT }}/replace_brew_source.sh"
+    mode: "0755"
+    force: true
   tags:
     - configure
-  ignore_errors: true
   when: is_mac_os
+
+# - name: replace brew source On macOS
+#   shell: "{{ PACKAGES_ROOT }}/replace_brew_source.sh"
+#   tags:
+#     - configure
+#   ignore_errors: true
+#   when: is_mac_os
 
 - name: import gpg key on Ubuntu
   shell: "wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -"
