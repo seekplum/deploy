@@ -193,6 +193,14 @@
     - initialize
   when: is_mac_os and ansible_user_id != "root" and existing_of_sshpass_on_mac.stdout == "1"
 
+- name: install cc-switch on macOS
+  shell: "command -v switch >/dev/null 2>&1 && echo cc-switch installed || (brew tap farion1231/ccswitch && brew install --cask cc-switch)"
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+  when: is_mac_os and ansible_user_id != "root" and existing_of_sshpass_on_mac.stdout == "1"
+
 - name: check drone installed
   shell: "command -v drone >/dev/null 2>&1 && echo drone installed || (cd /tmp && curl -L https://github.com/drone/drone-cli/releases/latest/download/drone_linux_amd64.tar.gz | tar zx && sudo install -t /usr/local/bin drone && rm -f drone)"
   changed_when: false
