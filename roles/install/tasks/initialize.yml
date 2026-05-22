@@ -200,14 +200,14 @@
   when: is_mac_os and ansible_user_id != "root" and existing_of_sshpass_on_mac.stdout == "1"
 
 - name: check drone installed
-  shell: "command -v drone >/dev/null 2>&1 && echo drone installed || (cd /tmp && curl -L https://github.com/drone/drone-cli/releases/latest/download/drone_linux_amd64.tar.gz | tar zx && sudo install -t /usr/local/bin drone && rm -f drone)"
+  shell: "command -v drone >/dev/null 2>&1 && echo drone installed || (cd /tmp && curl -L https://github.com/drone/drone-cli/releases/latest/download/drone_linux_amd64.tar.gz | tar zx && sudo install drone /usr/local/bin && rm -f drone)"
   changed_when: false
   ignore_errors: true
   tags:
     - initialize
 
 - name: check act installed
-  shell: "command -v act >/dev/null 2>&1 && echo act installed || (curl -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash)"
+  shell: "command -v act >/dev/null 2>&1 && echo act installed || (curl -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash -s -- -b $HOME/.local/bin)"
   changed_when: false
   ignore_errors: true
   tags:
