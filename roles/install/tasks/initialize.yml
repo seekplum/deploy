@@ -273,25 +273,6 @@
     - initialize
   when: result_of_install_cargo is defined
 
-- name: copy cargo config.toml
-  copy:
-    src: "cargo_config.toml"
-    dest: "~/.cargo/config.toml"
-    mode: "0644"
-    force: false
-  tags:
-    - initialize
-
-- name: copy atuin config.toml
-  copy:
-    src: "atuin_config.toml"
-    dest: "~/.config/atuin/config.toml"
-    mode: "0644"
-    force: false
-  tags:
-    - initialize
-  ignore_errors: true
-
 # - name: check pip installed
 #   shell: "command -v pip >/dev/null 2>&1 && echo 0 || echo 1"
 #   register: existing_of_pip

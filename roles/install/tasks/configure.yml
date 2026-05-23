@@ -17,20 +17,6 @@
   tags:
     - configure
 
-- name: copy virtualbox start/stop script On macOS
-  copy:
-    src: "{{ role_path }}/files/{{ item }}"
-    dest: "{{ PACKAGES_ROOT }}"
-    mode: "0755"
-    force: false # 避免原主机文件被覆盖
-  with_items:
-    - "start_vm.sh"
-    - "stop_vm.sh"
-    - "replace_config.sh"
-  tags:
-    - configure
-  when: is_mac_os
-
 - name: virtualbox script link to path On macOS
   file:
     src: "{{ PACKAGES_ROOT }}/{{ item }}"
@@ -41,16 +27,6 @@
     - "start_vm.sh"
     - "stop_vm.sh"
     - "replace_config.sh"
-  tags:
-    - configure
-  when: is_mac_os
-
-- name: copy replace_brew_source script On macOS
-  copy:
-    src: replace_brew_source.sh
-    dest: "{{ PACKAGES_ROOT }}/replace_brew_source.sh"
-    mode: "0755"
-    force: true
   tags:
     - configure
   when: is_mac_os
