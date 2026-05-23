@@ -80,26 +80,6 @@
   tags:
     - zsh
 
-- name: backup zshrc
-  copy:
-    src: "{{ HOME_ROOT }}/.zshrc"
-    dest: "{{ HOME_ROOT }}/.zshrc.{{ backup_date }}.{{ backup_epoch }}"
-    remote_src: true
-    mode: preserve
-  ignore_errors: true
-  changed_when: false
-  tags:
-    - zsh
-
-- name: copy zshrc template into home
-  template:
-    src: .zshrc
-    dest: "{{ HOME_ROOT }}"
-    mode: "0644"
-    force: true
-  tags:
-    - zsh
-
 - name: update bash_profile configuare
   lineinfile:
     dest: "{{ HOME_ROOT }}/.bash_profile"

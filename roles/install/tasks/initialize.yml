@@ -184,7 +184,7 @@
   when: is_mac_os
 
 - name: install sshpass on macOS
-  shell: "brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb"
+  shell: "brew install esolitos/ipa/sshpass && brew install sshpass"
   changed_when: false
   ignore_errors: true
   tags:
