@@ -43,13 +43,6 @@
               executable: /tmp/ansible-shell-wrapper
 
     - include_tasks:
-        file: pyenv.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
-
-    - include_tasks:
         file: python.yml
         apply:
           module_defaults:
