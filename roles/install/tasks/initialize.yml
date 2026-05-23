@@ -167,13 +167,38 @@
     - gnupg
     - pinentry-mac
     - ripgrep
-    - knot
     - age
   changed_when: false
   ignore_errors: true
   tags:
     - initialize
   when: is_mac_os and ansible_user_id != "root"
+
+# 1. 访问 https://www.macports.org/install.php 安装 MacPorts，安装完成后执行以下命令更换 MacPorts 镜像源
+# 2. /opt/local/etc/macports/sources.conf 注释掉 rsync://rsync. 开头部分，换成下方 https 链接
+# https://mirrors.tuna.tsinghua.edu.cn/macports/release/ports.tar.gz [default]
+# 3. /opt/local/etc/macports/macports.conf 更改如下配置
+# preferred_hosts         mirrors.ustc.edu.cn
+# rsync_server            mirrors.ustc.edu.cn
+# 4. 更新 MacPorts 镜像源
+# sudo -E port -d selfupdate
+- name: Check MacPorts installed
+  shell: "command -v port >/dev/null 2>&1 && echo 0 || echo 1"
+  register: macports_installed
+  changed_when: false
+  tags:
+    - initialize
+  when: is_mac_os and ansible_user_id != "root"
+
+- name: port install packages on macOS
+  shell: 'if [ $(port installed | grep {{ item }} | wc -l) == "0" ]; then sudo port -N install {{ item }} && sudo port load {{ item }}; else echo {{ item }} is installed; fi'
+  with_items:
+    - knot
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+  when: is_mac_os and ansible_user_id != "root" and macports_installed.stdout == "0"
 
 - name: check sshpass installed on macOS
   shell: "sshpass -V >/dev/null 2>&1 && echo 0 || echo 1"
