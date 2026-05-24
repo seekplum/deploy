@@ -262,6 +262,14 @@
     - initialize
   when: is_linux_os and ansible_user_id != "root"
 
+- name: check nix installed
+  shell: "command -v nix >/dev/null 2>&1 && echo nix installed || (curl -L https://releases.nixos.org/nix/nix-2.18.1/install | sh)"
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+  when: is_mac_os and ansible_user_id != "root"
+
 - name: check direnv installed
   shell: "command -v direnv >/dev/null 2>&1 && echo direnv installed || (curl -sfL https://direnv.net/install.sh | bash)"
   changed_when: false
