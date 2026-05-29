@@ -136,6 +136,7 @@
       - sqlite3
       - groovy
       - shfmt
+      - shellcheck
       - unzip
       - age
     state: present
@@ -168,6 +169,8 @@
     - pinentry-mac
     - ripgrep
     - age
+    - shfmt
+    - shellcheck
   changed_when: false
   ignore_errors: true
   tags:
