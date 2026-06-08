@@ -323,6 +323,20 @@
   tags:
     - initialize
 
+- name: check atuin installed
+  shell: "command -v atuin >/dev/null 2>&1 && echo atuin installed || (curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh -s -- --non-interactive)"
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+
+- name: check sing-box installed
+  shell: "command -v sing-box >/dev/null 2>&1 && echo sing-box installed || (curl -fsSL https://sing-box.app/install.sh | sh)"
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+
 - name: check cargo installed
   shell: "command -v cargo >/dev/null 2>&1 && echo cargo installed || (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y)"
   register: result_of_install_cargo
@@ -338,7 +352,6 @@
     - du-dust
     - sd
     - tokei
-    - atuin
   changed_when: false
   ignore_errors: true
   tags:
