@@ -89,6 +89,30 @@
 # https://stackoverflow.com/questions/51622712/ansible-requires-python-apt-but-its-already-installed
 # ansible -i hosts common -m "apt name=python-apt state=latest" --become-user root
 # shell: "sudo apt-get install -y {{ item }}"
+
+- name: install MongoDB 6.0 GPG key
+  shell: "test -f /usr/share/keyrings/mongodb-server-6.0.gpg && echo 'server-6.0.asc exists' || curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg"
+  tags:
+    - initialize
+  ignore_errors: true
+  become: true
+  become_method: sudo
+  when: is_ubuntu_os
+
+- name: install missing GPG public key
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: "{{ item }}"
+  loop:
+    - E363C90F8F1B6217
+    - A1715D88E1DF1F24
+  tags:
+    - initialize
+  ignore_errors: true
+  become: true
+  become_method: sudo
+  when: is_ubuntu_os
+
 - name: install packages on Ubuntu
   apt:
     pkg:
@@ -300,7 +324,7 @@
     - initialize
 
 - name: check cargo installed
-  shell: "command -v cargo >/dev/null 2>&1 && echo cargo installed || (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh)"
+  shell: "command -v cargo >/dev/null 2>&1 && echo cargo installed || (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y)"
   register: result_of_install_cargo
   changed_when: false
   ignore_errors: true
