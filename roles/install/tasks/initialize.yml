@@ -1,6 +1,33 @@
 ---
 # tasks file for install
 
+- name: get path
+  command: echo $PATH
+  register: current_path_result
+  tags:
+    - initialize
+
+- name: print path
+  debug:
+    msg: "{{ current_path_result.stdout }}"
+  tags:
+    - initialize
+
+- name: check chezmoi installed
+  shell: "command -v chezmoi >/dev/null 2>&1 && echo chezmoi installed || (curl -fsLS get.chezmoi.io | sh -s -- -b /usr/local/bin)"
+  changed_when: false
+  become: true
+  become_method: sudo
+  tags:
+    - initialize
+
+- name: chezmoi apply
+  shell: "chezmoi init && chezmoi apply --force"
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+
 - name: check existing brew on macOS
   shell: "brew --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_brew
@@ -174,7 +201,7 @@
   when: is_ubuntu_os
 
 - name: install xcode-select on macOS
-  shell: "xcode-select -v >/dev/null 2>&1 ||xcode-select --install"
+  shell: "xcode-select -v >/dev/null 2>&1 || xcode-select --install"
   changed_when: false
   ignore_errors: true
   tags:
@@ -182,19 +209,48 @@
   when: is_mac_os
 
 - name: install packages on macOS
-  shell: 'if [ $(brew list | grep {{ item }} | wc -l) == "0" ]; then brew install {{ item }}; else echo {{ item }} is installed; fi'
-  with_items:
-    - wget
-    - tree
-    - zlib
-    - sqlite
-    - the_silver_searcher
-    - gnupg
-    - pinentry-mac
-    - ripgrep
-    - age
-    - shfmt
-    - shellcheck
+  homebrew:
+    name:
+      - wget
+      - tree
+      - zlib
+      - sqlite
+      - the_silver_searcher
+      - gnupg
+      - pinentry-mac
+      - ripgrep
+      - age
+      - shfmt
+      - shellcheck
+      - esolitos/ipa/sshpass
+      - knot
+    state: present
+  changed_when: false
+  tags:
+    - initialize
+  when: is_mac_os and ansible_user_id != "root"
+
+- name: 信任第三方 tap farion1231/ccswitch
+  command: brew trust farion1231/ccswitch
+  tags:
+    - initialize
+  when: is_mac_os and ansible_user_id != "root"
+
+- name: 添加 tap farion1231/ccswitch
+  community.general.homebrew_tap:
+    name: farion1231/ccswitch
+    state: present
+  tags:
+    - initialize
+  when: is_mac_os and ansible_user_id != "root"
+
+- name: install cask packages on macOS
+  community.general.homebrew:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - cc-switch
+    - warp
   changed_when: false
   ignore_errors: true
   tags:
@@ -227,41 +283,21 @@
     - initialize
   when: is_mac_os and ansible_user_id != "root" and macports_installed.stdout == "0"
 
-- name: check sshpass installed on macOS
-  shell: "sshpass -V >/dev/null 2>&1 && echo 0 || echo 1"
-  register: existing_of_sshpass_on_mac
-  changed_when: false
-  tags:
-    - initialize
-  when: is_mac_os
-
-- name: install sshpass on macOS
-  shell: "brew install esolitos/ipa/sshpass && brew install sshpass"
-  changed_when: false
-  ignore_errors: true
-  tags:
-    - initialize
-  when: is_mac_os and ansible_user_id != "root" and existing_of_sshpass_on_mac.stdout == "1"
-
-- name: install cc-switch on macOS
-  shell: "command -v switch >/dev/null 2>&1 && echo cc-switch installed || (brew tap farion1231/ccswitch && brew install --cask cc-switch)"
-  changed_when: false
-  ignore_errors: true
-  tags:
-    - initialize
-  when: is_mac_os and ansible_user_id != "root" and existing_of_sshpass_on_mac.stdout == "1"
-
 - name: check drone installed
   shell: "command -v drone >/dev/null 2>&1 && echo drone installed || (cd /tmp && curl -L https://github.com/drone/drone-cli/releases/latest/download/drone_linux_amd64.tar.gz | tar zx && sudo install drone /usr/local/bin && rm -f drone)"
   changed_when: false
   ignore_errors: true
+  become: true
+  become_method: sudo
   tags:
     - initialize
 
 - name: check act installed
-  shell: "command -v act >/dev/null 2>&1 && echo act installed || (curl -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash -s -- -b $HOME/.local/bin)"
+  shell: "command -v act >/dev/null 2>&1 && echo act installed || (curl -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash -s -- -b /usr/local/bin)"
   changed_when: false
   ignore_errors: true
+  become: true
+  become_method: sudo
   tags:
     - initialize
 
@@ -287,7 +323,7 @@
   ignore_errors: true
   tags:
     - initialize
-  when: is_linux_os and ansible_user_id != "root"
+  when: (is_linux_os or (is_mac_os and ansible_distribution_version | default('0') is version('13.0', '>'))) and ansible_user_id != "root"
 
 - name: check nix installed
   shell: "command -v nix >/dev/null 2>&1 && echo nix installed || (curl -L https://releases.nixos.org/nix/nix-2.18.1/install | sh)"
@@ -295,7 +331,7 @@
   ignore_errors: true
   tags:
     - initialize
-  when: is_mac_os and ansible_user_id != "root"
+  when: is_mac_os and ansible_distribution_version | default('0') is version('13.0', '<=') and ansible_user_id != "root"
 
 - name: "macOS修改nix配置"
   copy:
@@ -316,13 +352,6 @@
   tags:
     - initialize
 
-- name: check chezmoi installed
-  shell: "command -v chezmoi >/dev/null 2>&1 && echo chezmoi installed || (curl -fsLS get.chezmoi.io | sh -s -- -b $HOME/.local/bin)"
-  changed_when: false
-  ignore_errors: true
-  tags:
-    - initialize
-
 - name: check atuin installed
   shell: "command -v atuin >/dev/null 2>&1 && echo atuin installed || (curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh -s -- --non-interactive)"
   changed_when: false
@@ -336,6 +365,7 @@
   ignore_errors: true
   tags:
     - initialize
+  when: is_linux_os
 
 - name: check cargo installed
   shell: "command -v cargo >/dev/null 2>&1 && echo cargo installed || (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y)"
@@ -344,6 +374,22 @@
   ignore_errors: true
   tags:
     - initialize
+
+- name: 检查 rustup 默认工具链是否已设置
+  shell: rustup default | grep -q stable && echo 0 || echo 1
+  register: rustup_default_needed
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+
+- name: 设置 rustup 默认工具链为 stable
+  shell: 'rustup default stable 2>/dev/null || true'
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - initialize
+  when: rustup_default_needed.stdout == "1"
 
 - name: cargo install packages
   shell: 'if [ $(cargo install --list | grep {{ item }} | wc -l) == "0" ]; then cargo install {{ item }}; else echo {{ item }} is installed; fi'

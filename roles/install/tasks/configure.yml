@@ -1,6 +1,11 @@
 ---
 # tasks file for install
 
+# 1. 需要配置 sudo 免密 vi /etc/sudoers
+# seekplum        ALL=(ALL) NOPASSWD: ALL
+# %sudo   ALL=(ALL) NOPASSWD: ALL
+# 2. macOS 需要先安装基础软件才能登陆 xcode-select --install
+
 - name: create project dir
   file:
     dest: "{{ item }}"
@@ -9,6 +14,7 @@
   with_items:
     - "{{ HOME_ROOT }}/.ssh"
     - "{{ HOME_ROOT }}/.pip"
+    - "/usr/local/bin"
     # - "{{ GOPATH }}"
     # - "{{ PythonProjects }}"
     # - "{{ WebProjects }}"
@@ -29,6 +35,9 @@
     - "replace_config.sh"
   tags:
     - configure
+  become: true
+  become_method: sudo
+  ignore_errors: true
   when: is_mac_os
 
 # - name: replace brew source On macOS

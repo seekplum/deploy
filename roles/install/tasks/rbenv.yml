@@ -67,20 +67,27 @@
   tags:
     - rbenv
 
-- name: check ruby installed
-  shell: "ruby --version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: installed_of_ruby
+- name: get system ruby version
+  shell: |
+    ruby --version 2>/dev/null | awk '{print $2}' | cut -d'p' -f1 || true
+  register: dynamic_ruby_version
   changed_when: false
   tags:
     - rbenv
 
+- name: set rube version
+  set_fact:
+    # ruby_version: "{{ dynamic_ruby_version.stdout | default('2.7.7', true) }}"
+    ruby_version: "3.2.0"
+  tags:
+    - rbenv
+
 - name: install ruby
-  shell: "{{ RBENV_ROOT }}/bin/rbenv install 2.7.7"
-  when: installed_of_ruby.stdout == "1"
+  shell: "{{ RBENV_ROOT }}/bin/rbenv install {{ ruby_version }} --skip-existing"
   tags:
     - rbenv
 
 - name: set global ruby
-  shell: "{{ RBENV_ROOT }}/bin/rbenv global 2.7.7"
+  shell: "{{ RBENV_ROOT }}/bin/rbenv global {{ ruby_version }} --skip-existing"
   tags:
     - rbenv

@@ -11,7 +11,7 @@
     - uninstall
     - remove
   environment:
-    PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
+    PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin"
 
 - name: install_task
   hosts: common
@@ -24,7 +24,7 @@
     - deploy
   environment:
     PIP_INDEX_URL: "{{ PIP_INDEX_URL }}"
-    PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin"
+    PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin:/usr/local/n/bin"
     PASSPHRASE: test
 
 - name: k3s_task

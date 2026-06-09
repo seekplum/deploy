@@ -21,9 +21,11 @@
       when: installed_of_n.stdout == "1"
       tags:
         - nodejs
+      become: true
+      become_method: sudo
 
     - name: change directory mode
-      shell: "chown -R $(whoami):$(whoami) /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share"
+      shell: "chown -R $(whoami):$(id -g -n) /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share"
       when: installed_of_node.stdout == "1"
       tags:
         - nodejs

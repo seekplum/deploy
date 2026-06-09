@@ -59,7 +59,7 @@
     - name: download oh-my-zsh
       shell:
         cmd: |
-          sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)" <<EOF
+          sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" <<EOF
           exit
           EOF
       when: installed_of_oh_my_zsh.stdout == "1"
