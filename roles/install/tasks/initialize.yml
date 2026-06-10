@@ -15,7 +15,6 @@
 
 - name: check chezmoi installed
   shell: "command -v chezmoi >/dev/null 2>&1 && echo chezmoi installed || (curl -fsLS get.chezmoi.io | sh -s -- -b /usr/local/bin)"
-  changed_when: false
   become: true
   become_method: sudo
   tags:
@@ -31,7 +30,6 @@
 - name: check existing brew on macOS
   shell: "brew --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: existing_of_brew
-  changed_when: false
   tags:
     - initialize
   when: is_mac_os and ansible_user_id != "root"
@@ -46,7 +44,6 @@
 #   shell: sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
 #   tags:
 #     - initialize
-#   changed_when: false
 #   ignore_errors: true
 #   when: is_centos_os
 
@@ -54,7 +51,6 @@
   shell: sudo curl -fSL --connect-timeout 5 --retry 100 --retry-connrefused --retry-delay 1 --retry-max-time 100 https://archive.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }} -o /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}
   tags:
     - initialize
-  changed_when: false
   ignore_errors: true
   when: is_centos_os
 
@@ -202,14 +198,26 @@
 
 - name: install xcode-select on macOS
   shell: "xcode-select -v >/dev/null 2>&1 || xcode-select --install"
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
   when: is_mac_os
 
+- name: 清除 brew 残留锁 & 临时文件
+  shell: |
+    rm -rf ~/Library/Caches/Homebrew/*.incomplete
+    rm -rf ~/Library/Caches/Homebrew/*.lock
+    rm -rf /private/tmp/.brew_lock
+    brew cleanup --force 2>/dev/null ||
+    pkill -f "brew install" 2>/dev/null || true
+    pkill -f "brew" 2>/dev/null || true
+  ignore_errors: true
+  tags:
+    - initialize
+  when: is_mac_os and ansible_user_id != "root"
+
 - name: install packages on macOS
-  homebrew:
+  community.general.homebrew:
     name:
       - wget
       - tree
@@ -224,34 +232,25 @@
       - shellcheck
       - esolitos/ipa/sshpass
       - knot
+      - go
+      - zulu@8
+      - lua
+      - maccy
+      - mongodb/brew/mongodb-community
+      - redis
+      - lima
     state: present
-  changed_when: false
-  tags:
-    - initialize
-  when: is_mac_os and ansible_user_id != "root"
-
-- name: 信任第三方 tap farion1231/ccswitch
-  command: brew trust farion1231/ccswitch
-  tags:
-    - initialize
-  when: is_mac_os and ansible_user_id != "root"
-
-- name: 添加 tap farion1231/ccswitch
-  community.general.homebrew_tap:
-    name: farion1231/ccswitch
-    state: present
+  ignore_errors: true
   tags:
     - initialize
   when: is_mac_os and ansible_user_id != "root"
 
 - name: install cask packages on macOS
   community.general.homebrew:
-    name: "{{ item }}"
+    name:
+      - farion1231/ccswitch/cc-switch
+      - warp
     state: present
-  loop:
-    - cc-switch
-    - warp
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
@@ -268,7 +267,6 @@
 - name: Check MacPorts installed
   shell: "command -v port >/dev/null 2>&1 && echo 0 || echo 1"
   register: macports_installed
-  changed_when: false
   tags:
     - initialize
   when: is_mac_os and ansible_user_id != "root"
@@ -277,7 +275,6 @@
   shell: 'if [ $(port installed | grep {{ item }} | wc -l) == "0" ]; then sudo port -N install {{ item }} && sudo port load {{ item }}; else echo {{ item }} is installed; fi'
   with_items:
     - knot
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
@@ -285,7 +282,6 @@
 
 - name: check drone installed
   shell: "command -v drone >/dev/null 2>&1 && echo drone installed || (cd /tmp && curl -L https://github.com/drone/drone-cli/releases/latest/download/drone_linux_amd64.tar.gz | tar zx && sudo install drone /usr/local/bin && rm -f drone)"
-  changed_when: false
   ignore_errors: true
   become: true
   become_method: sudo
@@ -294,7 +290,6 @@
 
 - name: check act installed
   shell: "command -v act >/dev/null 2>&1 && echo act installed || (curl -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash -s -- -b /usr/local/bin)"
-  changed_when: false
   ignore_errors: true
   become: true
   become_method: sudo
@@ -303,14 +298,12 @@
 
 - name: check uv installed
   shell: "command -v uv >/dev/null 2>&1 && echo uv installed || (curl -LsSf https://astral.sh/uv/install.sh | sh)"
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
 
 - name: check devbox installed
   shell: "command -v devbox >/dev/null 2>&1 && echo devbox installed || (curl -fsSL https://get.jetify.com/devbox | bash -s -- -f)"
-  changed_when: false
   ignore_errors: true
   become: true
   become_method: sudo
@@ -319,19 +312,17 @@
 
 - name: check nix installed
   shell: "command -v nix >/dev/null 2>&1 && echo nix installed || (curl -L https://nixos.org/nix/install | sh)"
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
-  when: (is_linux_os or (is_mac_os and ansible_distribution_version | default('0') is version('13.0', '>'))) and ansible_user_id != "root"
+  when: (is_linux_os or is_high_mac_os) and ansible_user_id != "root"
 
 - name: check nix installed
   shell: "command -v nix >/dev/null 2>&1 && echo nix installed || (curl -L https://releases.nixos.org/nix/nix-2.18.1/install | sh)"
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
-  when: is_mac_os and ansible_distribution_version | default('0') is version('13.0', '<=') and ansible_user_id != "root"
+  when: is_mac_os and not is_high_mac_os and ansible_user_id != "root"
 
 - name: "macOS修改nix配置"
   copy:
@@ -346,22 +337,19 @@
   when: is_mac_os and ansible_user_id != "root"
 
 - name: check direnv installed
-  shell: "command -v direnv >/dev/null 2>&1 && echo direnv installed || (curl -sfL https://direnv.net/install.sh | bash)"
-  changed_when: false
+  shell: "command -v direnv >/dev/null 2>&1 && echo direnv installed || (curl -sfL https://direnv.net/install.sh | bin_path=/usr/local/bin sudo -E bash)"
   ignore_errors: true
   tags:
     - initialize
 
 - name: check atuin installed
   shell: "command -v atuin >/dev/null 2>&1 && echo atuin installed || (curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh -s -- --non-interactive)"
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
 
 - name: check sing-box installed
   shell: "command -v sing-box >/dev/null 2>&1 && echo sing-box installed || (curl -fsSL https://sing-box.app/install.sh | sh)"
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
@@ -370,7 +358,6 @@
 - name: check cargo installed
   shell: "command -v cargo >/dev/null 2>&1 && echo cargo installed || (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y)"
   register: result_of_install_cargo
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
@@ -385,7 +372,6 @@
 
 - name: 设置 rustup 默认工具链为 stable
   shell: 'rustup default stable 2>/dev/null || true'
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
@@ -398,7 +384,6 @@
     - du-dust
     - sd
     - tokei
-  changed_when: false
   ignore_errors: true
   tags:
     - initialize
@@ -407,7 +392,6 @@
 # - name: check pip installed
 #   shell: "command -v pip >/dev/null 2>&1 && echo 0 || echo 1"
 #   register: existing_of_pip
-#   changed_when: false
 #   tags:
 #     - initialize
 
@@ -420,7 +404,6 @@
 # - name: install pip
 #   shell: "easy_install pip"
 #   register: result_of_install_pip
-#   changed_when: false
 #   ignore_errors: true
 #   tags:
 #     - initialize
@@ -460,7 +443,6 @@
 
 # - name: install trash-cli
 #   shell: "pip install trash-cli"
-#   changed_when: false
 #   tags:
 #     - initialize
 #   when: existing_of_trash.stdout == "1"

@@ -19,6 +19,9 @@
     is_centos_os: '{{ ansible_os_family == "RedHat" }}'
     is_ubuntu_os: '{{ ansible_os_family == "Debian" }}'
     is_mac_os: '{{ ansible_os_family == "Darwin" }}'
+    is_apple_mac_os: '{{ ansible_os_family == "Darwin" and ansible_architecture | default("") == "arm64" }}'
+    is_intel_mac_os: '{{ ansible_os_family == "Darwin" and ansible_architecture | default("") == "x86_64" }}'
+    is_high_mac_os: '{{ ansible_os_family == "Darwin" and (ansible_distribution_version | default("0") is version("13.0", ">")) }}'
   tags:
     - common
     - always

@@ -82,12 +82,21 @@
   tags:
     - rbenv
 
+- name: check ruby installed
+  shell: "ruby --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: installed_of_ruby
+  changed_when: false
+  tags:
+    - rbenv
+
 - name: install ruby
   shell: "{{ RBENV_ROOT }}/bin/rbenv install {{ ruby_version }} --skip-existing"
   tags:
     - rbenv
+  when: installed_of_ruby.stdout == "1"
 
 - name: set global ruby
   shell: "{{ RBENV_ROOT }}/bin/rbenv global {{ ruby_version }} --skip-existing"
   tags:
     - rbenv
+  when: installed_of_ruby.stdout == "1"
