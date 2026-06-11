@@ -186,6 +186,8 @@
       - shellcheck
       - unzip
       - age
+      - certbot
+      - python3-certbot-nginx
     state: present
     update_cache: true
     cache_valid_time: 86400
@@ -216,6 +218,14 @@
     - initialize
   when: is_mac_os and ansible_user_id != "root"
 
+- name: 信任mongodb官方brew源
+  community.general.homebrew_tap:
+    name: mongodb/brew
+    state: present
+  tags:
+    - initialize
+  when: is_mac_os and ansible_user_id != "root"
+
 - name: install packages on macOS
   community.general.homebrew:
     name:
@@ -236,9 +246,10 @@
       - zulu@8
       - lua
       - maccy
-      - mongodb/brew/mongodb-community
+      - mongodb-community
       - redis
       - lima
+      - showkey
     state: present
   ignore_errors: true
   tags:
