@@ -1,11 +1,16 @@
 ---
-- name: make virtualenv
-  shell: "[[ ! -d {{ VIRTUEL_ROOT }}/{{ env_item.version }} ]] && uv venv {{ VIRTUEL_ROOT }}/{{ env_item.version }} --prompt {{ env_item.version }} --python {{ env_item.version }} || echo {{ env_item.version }} virtualenv is exist"
+- name: 创建虚拟环境
+  ansible.builtin.command:
+    cmd: >-
+      uv venv {{ install_virtual_root }}/{{ env_item.version }}
+      --prompt {{ env_item.version }}
+      --python {{ env_item.version }}
+    creates: "{{ install_virtual_root }}/{{ env_item.version }}/bin/python"
   tags:
     - virtualenv
 
-- name: copy requirements.in
-  copy:
+- name: 复制 requirements.in
+  ansible.builtin.copy:
     src: "requirements.in"
     dest: "/tmp/requirements.in"
     mode: "0644"
@@ -14,10 +19,18 @@
   tags:
     - virtualenv
 
-- name: install packages
-  shell: "[[ ! -f {{ VIRTUEL_ROOT }}/{{ env_item.version }}/bin/trash ]] && uv pip install --python {{ VIRTUEL_ROOT }}/{{ env_item.version }}/bin/python -r /tmp/requirements.in || echo {{ env_item.version }} virtualenv packages is exist"
-  with_items: "{{ VIRTUAL_ENVS }}"
-  ignore_errors: true
+- name: 安装虚拟环境依赖包
+  ansible.builtin.shell: |
+    if [ -f "{{ install_virtual_root }}/{{ env_item.version }}/bin/trash" ]; then
+      echo "{{ env_item.version }} virtualenv packages is exist"
+    else
+      uv pip install \
+        --python "{{ install_virtual_root }}/{{ env_item.version }}/bin/python" \
+        -r /tmp/requirements.in
+    fi
+  register: install_virtualenv_packages_result
+  changed_when: "'virtualenv packages is exist' not in install_virtualenv_packages_result.stdout"
+  failed_when: false
   tags:
     - virtualenv
   when: env_item.version.startswith("3.")

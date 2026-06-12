@@ -1,57 +1,74 @@
 ---
-
-- name: check n installed
-  shell: "n --version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: installed_of_n
+- name: 检查 n 是否已安装
+  ansible.builtin.shell: "n --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_installed_of_n
   changed_when: false
   tags:
     - nodejs
 
-- name: check node installed
-  shell: "node -v >/dev/null 2>&1 && echo 0 || echo 1"
-  register: installed_of_node
+- name: 检查 Node.js 是否已安装
+  ansible.builtin.shell: "node -v >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_installed_of_node
   changed_when: false
   tags:
     - nodejs
 
-- name: install nodejs
+- name: 安装 Node.js
+  tags:
+    - nodejs
+
   block:
-    - name: install n
-      shell: "export N_PREFIX=/usr/local/n && curl -L https://bit.ly/n-install | bash -s -- -y {{ NODE_VERSION }}"
-      when: installed_of_n.stdout == "1"
+    - name: 安装 n
+      ansible.builtin.shell: |
+        set -o pipefail
+        export N_PREFIX=/usr/local/n
+        curl -L https://bit.ly/n-install | bash -s -- -y "{{ install_node_version }}"
+      args:
+        executable: /bin/bash
+      changed_when: true
+      when: install_installed_of_n.stdout == "1"
       tags:
         - nodejs
       become: true
-      become_method: sudo
+      become_method: ansible.builtin.sudo
 
-    - name: change directory mode
-      shell: "chown -R $(whoami):$(id -g -n) /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share"
-      when: installed_of_node.stdout == "1"
+    - name: 修改目录权限
+      ansible.builtin.shell: "chown -R $(whoami):$(id -g -n) /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share"
+      changed_when: true
+      when: install_installed_of_node.stdout == "1"
       tags:
         - nodejs
       become: true
-      become_method: sudo
+      become_method: ansible.builtin.sudo
 
-    - name: install node
-      shell: "/usr/local/n/bin/n {{ NODE_VERSION }}"
-      when: installed_of_node.stdout == "1"
+    - name: 安装 Node.js 版本
+      ansible.builtin.command: "/usr/local/n/bin/n {{ install_node_version }}"
+      changed_when: true
+      when: install_installed_of_node.stdout == "1"
       tags:
         - nodejs
       become: true
-      become_method: sudo
-  tags:
-    - nodejs
-
-- name: install node packages
-  shell: 'if [ $(npm list -g --depth=0 {{ item }} | grep {{ item }} | wc -l) -eq 0 ]; then npm install -g {{ item }}; else echo {{ item }} is installed; fi'
+      become_method: ansible.builtin.sudo
+- name: 安装 Node.js 全局软件包
+  ansible.builtin.shell: |
+    set -o pipefail
+    if [ "$(npm list -g --depth=0 "{{ item }}" | grep -c "{{ item }}")" -eq 0 ]; then
+      npm install -g "{{ item }}"
+    else
+      echo "{{ item }} is installed"
+    fi
+  args:
+    executable: /bin/bash
+  register: install_node_package_result
+  changed_when: "'is installed' not in install_node_package_result.stdout"
+  failed_when: false
   with_items:
     - "yarn"
     - "copilot-api"
     - "git-format-staged"
     - "pnpm"
     - "ts-node"
-  ignore_errors: true
   tags:
     - nodejs
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo

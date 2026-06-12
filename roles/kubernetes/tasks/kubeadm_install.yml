@@ -1,92 +1,92 @@
 ---
-
 - name: "清除注释"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/hosts
     regexp: "# k8s node"
     state: absent
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "配置hosts"
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/hosts
     state: present
     marker: "# k8s node"
     block: |
       {{ hostvars[item].ansible_default_ipv4.address }} {{ hostvars[item].ansible_hostname }}
   become: true
-  become_method: sudo
-  with_flattened:
-    - '{{ groups["masters"] }}'
-    - '{{ groups["slaves"] }}'
+  become_method: ansible.builtin.sudo
+  loop: "{{ groups['masters'] + groups['slaves'] }}"
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "Ubuntu关闭防火墙"
-  service:
+  ansible.builtin.service:
     name: "ufw"
     state: "stopped"
     enabled: "no"
   tags:
     - kubeadm
-  when: is_ubuntu_os
+  when: common_is_ubuntu_os
 
 - name: "RedHat关闭防火墙"
-  service:
+  ansible.builtin.service:
     name: "firewalld"
     state: "stopped"
     enabled: "no"
   tags:
     - kubeadm
-  when: is_centos_os
+  when: common_is_centos_os
 
 - name: "临时关闭交换分区"
-  shell: swapoff -a
+  ansible.builtin.command: swapoff -a
+  changed_when: false
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "Linux获取交换分区名字"
-  shell: cat /etc/fstab | grep " swap " | awk '{print $1}'
-  register: swap_name
-  changed_when: False
+  ansible.builtin.command: awk '$3 == "swap" {print $1}' /etc/fstab
+  register: kubernetes_swap_name
+  changed_when: false
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "Linux永久关闭交换分区"
-  replace:
+  ansible.builtin.replace:
     path: /etc/fstab
-    regexp: '^({{ swap_name.stdout }})'
-    replace: '# \1'
+    regexp: "^({{ kubernetes_swap_name.stdout }})"
+    replace: "# \\1"
   tags:
     - kubeadm
-  when: is_linux_os and "stdout" in swap_name and not swap_name.stdout.startswith("#")
+  when: common_is_linux_os and "stdout" in kubernetes_swap_name and not kubernetes_swap_name.stdout.startswith("#")
 
 - name: "Ubuntu添加阿里源"
-  shell: "curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -"
-  changed_when: False
+  ansible.builtin.apt_key:
+    url: https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg
+    state: present
+  changed_when: false
   tags:
     - kubeadm
-  when: is_ubuntu_os
+  when: common_is_ubuntu_os
 
 - name: "Ubuntu修改k8s源内容"
-  shell:
-    cmd: |
-      tee /etc/apt/sources.list.d/kubernetes.list <<EOF
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/kubernetes.list
+    mode: "0644"
+    content: |
       deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
-      EOF
   tags:
     - kubeadm
-  when: is_ubuntu_os
+  when: common_is_ubuntu_os
 
 - name: "RedHat添加阿里源"
-  shell:
+  ansible.builtin.shell:
     cmd: |
       cat >/etc/yum.repos.d/kubernetes.repo<<EOF
       [kubernetes]
@@ -95,93 +95,94 @@
       gpgcheck=0
       enable=1
       EOF
-  changed_when: False
+  changed_when: false
   tags:
     - kubeadm
-  when: is_centos_os
+  when: common_is_centos_os
 
 - name: "Linux配置k8s内核参数"
-  shell:
-    cmd: |
-      cat >/etc/sysctl.d/k8s.conf<<EOF
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/k8s.conf
+    mode: "0644"
+    content: |
       net.bridge.bridge-nf-call-ip6tables = 1
       net.bridge.bridge-nf-call-iptables = 1
       vm.swappiness=0
-      EOF
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "Linux生效内核参数"
-  shell: sysctl --system
+  ansible.builtin.command: sysctl --system
+  changed_when: false
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "RedHat安装kubeadm"
-  yum:
-    name: ['kubelet', 'kubectl', 'kubeadm']
+  ansible.builtin.dnf:
+    name: ["kubelet", "kubectl", "kubeadm"]
     state: present
     update_cache: true
   tags:
     - kubeadm
-  when: is_centos_os
+  when: common_is_centos_os
 
 - name: "Ubuntu安装kubeadm"
-  apt:
-    pkg: ['kubelet', 'kubectl', 'kubeadm']
+  ansible.builtin.apt:
+    pkg: ["kubelet", "kubectl", "kubeadm"]
     state: present
     update_cache: true
   tags:
     - kubeadm
-  when: is_ubuntu_os
+  when: common_is_ubuntu_os
 
 - name: "Linux重启Docker"
-  systemd:
+  ansible.builtin.systemd:
     name: "docker"
     state: "restarted"
-    daemon_reload: yes
+    daemon_reload: true
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "Linux重启kubelet"
-  service:
+  ansible.builtin.service:
     name: "kubelet"
     state: "restarted"
     enabled: "yes"
-    daemon_reload: yes
+    daemon_reload: true
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "Linux检查kubeadm-flags.env文件是否存在"
-  shell: "test -f /var/lib/kubelet/kubeadm-flags.env && echo 0 || echo 1"
-  register: existing_of_flags
-  changed_when: False
+  ansible.builtin.shell: "test -f /var/lib/kubelet/kubeadm-flags.env && echo 0 || echo 1"
+  register: kubernetes_existing_of_flags
+  changed_when: false
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "Linux修改kubelet cgroup类型"
-  replace:
+  ansible.builtin.replace:
     path: /var/lib/kubelet/kubeadm-flags.env
-    regexp: '^(--cgroup-driver=[a-zA-Z]*)'
-    replace: '--cgroup-driver=systemd'
-  ignore_errors: True
+    regexp: "^(--cgroup-driver=[a-zA-Z]*)"
+    replace: "--cgroup-driver=systemd"
+  failed_when: false
   tags:
     - kubeadm
-  when: is_linux_os and "stdout" in existing_of_flags and existing_of_flags.stdout == "0"
+  when: common_is_linux_os and "stdout" in kubernetes_existing_of_flags and kubernetes_existing_of_flags.stdout == "0"
 
 - name: "脚本方式拉取镜像"
-  script: "pull-images.sh"
-  changed_when: False
+  ansible.builtin.script: "pull-images.sh"
+  changed_when: false
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "删除重复的文件"
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
     force: true
@@ -192,47 +193,50 @@
     - "/etc/kubernetes/manifests/etcd.yaml"
   tags:
     - kubeadm
-  when: is_master_node
+  when: common_is_master_node
 
-- name: "Master修改server"
-  replace:
+- name: "修改 Master server 地址"
+  ansible.builtin.replace:
     path: "{{ item }}"
-    regexp: '^(server: https://.*:6443)'
-    replace: 'server: https://{{ ansible_default_ipv4.address }}:6443'
-  ignore_errors: True
+    regexp: "^(server: https://.*:6443)"
+    replace: "server: https://{{ ansible_default_ipv4.address }}:6443"
+  failed_when: false
   with_items:
-    - '/etc/kubernetes/kubelet.conf'
-    - '/etc/kubernetes/controller-manager.conf'
-    - '/etc/kubernetes/scheduler.conf'
+    - "/etc/kubernetes/kubelet.conf"
+    - "/etc/kubernetes/controller-manager.conf"
+    - "/etc/kubernetes/scheduler.conf"
   tags:
     - kubeadm
-  when: is_master_node
+  when: common_is_master_node
 
 - name: "检查CNI插件是否已经下载"
-  shell: "test -f {{ CNI_PLUGINS_PATH_ON_LINUX }} && echo 0 || echo 1"
-  register: existing_of_cni_plugins
-  changed_when: False
+  ansible.builtin.shell: "test -f {{ kubernetes_cni_plugins_path_on_linux }} && echo 0 || echo 1"
+  register: kubernetes_existing_of_cni_plugins
+  changed_when: false
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "安装CNI插件"
-  block:
-    - name: "创建目录"
-      shell: "mkdir -p {{ CNI_PLUGINS_DIRECTOR_ON_LINUX }}"
-
-    - name: "下载CNI插件"
-      get_url:
-        url: "{{ CNI_PLUGINS_URL_ON_LINUX }}"
-        dest: "{{ CNI_PLUGINS_PATH_ON_LINUX }}"
-        force: false
-      when: '"stdout" in existing_of_cni_plugins and existing_of_cni_plugins.stdout == "1"'
-
-    - name: "解压CNI插件"
-      unarchive:
-        src: "{{ CNI_PLUGINS_PATH_ON_LINUX }}"
-        dest: "{{ CNI_PLUGINS_DIRECTOR_ON_LINUX }}"
-        remote_src: true
   tags:
     - kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
+  block:
+    - name: "创建目录"
+      ansible.builtin.file:
+        path: "{{ kubernetes_cni_plugins_director_on_linux }}"
+        state: directory
+        mode: "0755"
+    - name: "下载CNI插件"
+      ansible.builtin.get_url:
+        url: "{{ kubernetes_cni_plugins_url_on_linux }}"
+        dest: "{{ kubernetes_cni_plugins_path_on_linux }}"
+        force: false
+        mode: "0644"
+      when: '"stdout" in kubernetes_existing_of_cni_plugins and kubernetes_existing_of_cni_plugins.stdout == "1"'
+
+    - name: "解压CNI插件"
+      ansible.builtin.unarchive:
+        src: "{{ kubernetes_cni_plugins_path_on_linux }}"
+        dest: "{{ kubernetes_cni_plugins_director_on_linux }}"
+        remote_src: true

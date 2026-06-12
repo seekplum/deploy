@@ -37,32 +37,32 @@ spec:
             path: /root/data/develop/nginx/logs
             type: DirectoryOrCreate
       containers:
-      - name: nginx
-        image: nginx:alpine
-        imagePullPolicy: IfNotPresent
-        ports:
-        - name: http
-          containerPort: 80
-        - name: https
-          containerPort: 443
-        volumeMounts:
-          - name: nginx-volume-certificates
-            mountPath: /etc/nginx/ssl
-            readOnly: true
-          - name: nginx-volume-conf-d
-            mountPath: /etc/nginx/conf.d
-            readOnly: true
-          - name: nginx-volume-inc-d
-            mountPath: /etc/nginx/inc.d
-            readOnly: true
-          - name: nginx-volume-nginx-conf
-            mountPath: /etc/nginx/nginx.conf
-            readOnly: true
-          - name: nginx-volume-www
-            mountPath: /var/www
-            readOnly: true
-          - name: nginx-volume-logs
-            mountPath: /var/log/nginx
+        - name: nginx
+          image: nginx:alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+          volumeMounts:
+            - name: nginx-volume-certificates
+              mountPath: /etc/nginx/ssl
+              readOnly: true
+            - name: nginx-volume-conf-d
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+            - name: nginx-volume-inc-d
+              mountPath: /etc/nginx/inc.d
+              readOnly: true
+            - name: nginx-volume-nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              readOnly: true
+            - name: nginx-volume-www
+              mountPath: /var/www
+              readOnly: true
+            - name: nginx-volume-logs
+              mountPath: /var/log/nginx
 ---
 apiVersion: v1
 kind: Service
@@ -71,14 +71,14 @@ metadata:
   namespace: seekplum
 spec:
   ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: 80
-  - name: https
-    port: 443
-    protocol: TCP
-    targetPort: 443
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
   selector:
     app: nginx
 status:

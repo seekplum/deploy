@@ -1,18 +1,20 @@
 ---
-
-- name: stop docker
-  service: name={{ item.name }} state={{ item.state }} enabled={{ item.enabled }}
+- name: 停止 Docker
+  ansible.builtin.service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
   with_items:
-    - name: 'docker'
-      enabled: 'no'
-      state: 'stopped'
-  ignore_errors: True
+    - name: "docker"
+      enabled: "no"
+      state: "stopped"
+  failed_when: false
   tags:
     - remove_docker
-  when: is_linux_os
+  when: common_is_linux_os
 
-- name: uninstall docker on Redhat
-  yum:
+- name: 在 RedHat 上卸载 Docker
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     update_cache: true
@@ -34,10 +36,10 @@
     - containerd.io
   tags:
     - remove_docker
-  when: is_centos_os
+  when: common_is_centos_os
 
-- name: uninstall docker on Ubuntu
-  apt:
+- name: 在 Ubuntu 上卸载 Docker
+  ansible.builtin.apt:
     pkg: "{{ item }}"
     state: absent
     update_cache: true
@@ -52,14 +54,15 @@
     - "containerd"
     - "runc"
   become: true
-  become_method: sudo
-  ignore_errors: True
+  become_method: ansible.builtin.sudo
+  failed_when: false
   tags:
     - remove_docker
-  when: is_ubuntu_os
+  when: common_is_ubuntu_os
 
-- name: uninstall docker docker-machine docker-compose on macOS
-  shell: "brew cask uninstall {{ item }}  --force || brew uninstall {{ item }} --force"
+- name: 在 macOS 上卸载 Docker 相关软件
+  ansible.builtin.shell: "brew cask uninstall {{ item }}  --force || brew uninstall {{ item }} --force"
+  changed_when: true
   with_items:
     - "docker"
     - "docker-machine"
@@ -67,13 +70,13 @@
     - "docker-completion"
     - "docker-compose-completion"
     - "docker-machine-completion"
-  ignore_errors: True
+  failed_when: false
   tags:
     - remove_docker
-  when: is_mac_os
+  when: common_is_mac_os
 
-- name: remove docker directory
-  file:
+- name: 删除 Docker 目录
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
     force: true
@@ -87,10 +90,10 @@
     - "/etc/yum.repos.d/docker-ce.repo"
     - "/var/run/docker.sock"
     - "/usr/local/bin/docker-compose"
-    - "{{ HOME_ROOT }}/Library/Caches/com.docker.docker"
-    - "{{ HOME_ROOT }}/Library/Containers/com.docker.docker"
-    - "{{ HOME_ROOT }}/Library/Containers/com.docker.helper"
+    - "{{ common_home_root }}/Library/Caches/com.docker.docker"
+    - "{{ common_home_root }}/Library/Containers/com.docker.docker"
+    - "{{ common_home_root }}/Library/Containers/com.docker.helper"
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   tags:
     - remove_docker

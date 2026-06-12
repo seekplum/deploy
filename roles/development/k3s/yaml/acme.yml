@@ -1,3 +1,4 @@
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -25,21 +26,21 @@ spec:
           hostPath:
             path: /root/data/aliyun/secret_key
       containers:
-      - name: acme
-        image: goacme/lego:latest
-        imagePullPolicy: IfNotPresent
-        command: ["/bin/sh"]
-        args: ["/cert.sh"]
-        envFrom:
-        - configMapRef:
-            name: acme
-        workingDir: /work
-        volumeMounts:
-          - name: acme-volume-work
-            mountPath: /work
-          - name: acme-volume-cert-sh
-            mountPath: /cert.sh
-          - name: acme-volume-access-key-file
-            mountPath: /access_key
-          - name: acme-volume-access-secret-file
-            mountPath: /secret_key
+        - name: acme
+          image: goacme/lego:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh"]
+          args: ["/cert.sh"]
+          envFrom:
+            - configMapRef:
+                name: acme
+          workingDir: /work
+          volumeMounts:
+            - name: acme-volume-work
+              mountPath: /work
+            - name: acme-volume-cert-sh
+              mountPath: /cert.sh
+            - name: acme-volume-access-key-file
+              mountPath: /access_key
+            - name: acme-volume-access-secret-file
+              mountPath: /secret_key

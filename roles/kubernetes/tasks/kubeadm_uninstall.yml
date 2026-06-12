@@ -1,36 +1,37 @@
 ---
 - name: "重置配置"
-  shell: kubeadm reset -f
-  ignore_errors: True
+  ansible.builtin.command: kubeadm reset -f
+  changed_when: false
+  failed_when: false
   tags:
     - remove_kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "Ubuntu卸载kubeadm"
-  apt:
-    pkg: ['kubelet', 'kubectl', 'kubeadm']
+  ansible.builtin.apt:
+    pkg: ["kubelet", "kubectl", "kubeadm"]
     state: absent
   tags:
     - remove_kubeadm_force
-  when: is_ubuntu_os
+  when: common_is_ubuntu_os
 
 - name: "RedHat卸载kubeadm"
-  yum:
-    name: ['kubelet', 'kubectl', 'kubeadm']
+  ansible.builtin.dnf:
+    name: ["kubelet", "kubectl", "kubeadm"]
     state: absent
     autoremove: "yes"
   tags:
     - remove_kubeadm_force
-  when: is_centos_os
+  when: common_is_centos_os
 
 - name: "删除文件"
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
     force: true
   with_items:
     - "/etc/kubernetes/"
-    - "${HOME}/.kube/"
+    - "{{ common_home_root }}/.kube/"
     - "/etc/systemd/system/kubelet.service.d"
     - "/etc/cni"
     - "/opt/cni"
@@ -57,29 +58,27 @@
     - "/var/lib/etcd"
   tags:
     - remove_kubeadm_force
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "清除hosts配置"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/hosts
     regexp: "(^{{ hostvars[item].ansible_default_ipv4.address }}\\s\\S+)|(\\S+\\s{{ hostvars[item].ansible_hostname }}$)"
     state: absent
-  with_flattened:
-    - '{{ groups["masters"] }}'
-    - '{{ groups["slaves"] }}'
+  loop: "{{ groups['masters'] + groups['slaves'] }}"
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   tags:
     - remove_kubeadm
-  when: is_linux_os
+  when: common_is_linux_os
 
 - name: "清除注释"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/hosts
     regexp: "# k8s node"
     state: absent
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   tags:
     - remove_kubeadm
-  when: is_linux_os
+  when: common_is_linux_os

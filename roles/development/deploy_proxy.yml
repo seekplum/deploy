@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,15 +20,15 @@ spec:
         app: universal-proxy
     spec:
       containers:
-      - image: universal_proxy:latest
-        imagePullPolicy: IfNotPresent # Never or IfNotPresent 镜像需要在 minikube 节点上存在
-        name: universal-proxy
-        env:
-          - name: SERVER_PORT
-            value: "8088"
-        ports:
-        - containerPort: 8088
-          hostPort: 8088 # 需要访问 minikube 节点的 IP, 如 curl http://192.168.99.100:8088/test
+        - image: universal_proxy:latest
+          imagePullPolicy: IfNotPresent # Never or IfNotPresent 镜像需要在 minikube 节点上存在
+          name: universal-proxy
+          env:
+            - name: SERVER_PORT
+              value: "8088"
+          ports:
+            - containerPort: 8088
+              hostPort: 8088 # 需要访问 minikube 节点的 IP, 如 curl http://192.168.99.100:8088/test
         # volumeMounts:
         # - mountPath: /code
         #   name: proxy-code

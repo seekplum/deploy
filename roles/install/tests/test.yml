@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: 测试 install 角色
+  hosts: localhost
   remote_user: root
   roles:
     - install

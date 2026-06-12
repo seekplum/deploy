@@ -1,14 +1,14 @@
 ---
 # vars file for common
-HOME_ROOT: "{{ ansible_user_dir }}" # 登陆用户的 home 目录
-LOGIN_USER: "{{ ansible_user_id }}"
-SOFT_INSTALL_ROOT: "/usr/local"
-GOROOT: "{{ SOFT_INSTALL_ROOT }}/go"
-JAVA_HOME: "{{ SOFT_INSTALL_ROOT }}/java"
-MVN_HOME: "${HOME}/packages/apache-maven-3.8.8"
-PIP_INDEX_URL: "https://mirrors.aliyun.com/pypi/simple"
-PIP_TRUSTED_HOST: "mirrors.aliyun.com"
-PIP_EXTRA_INDEX_URL: "https://pypi.org/simple"
-PIP_EXTRA_TRUSTED_HOST: "pypi.org"
-PYTHON3_VERSION: 3.13.13
-GO_VERSION: 1.23.4
+common_home_root: "{{ ansible_user_dir }}" # 登陆用户的 home 目录
+common_login_user: "{{ ansible_user_id }}"
+common_soft_install_root: "/usr/local"
+common_goroot: "{{ common_soft_install_root }}/go"
+common_java_home: "{{ common_soft_install_root }}/java"
+common_mvn_home: "{{ common_home_root }}/packages/apache-maven-3.8.8"
+common_pip_index_url: "https://mirrors.aliyun.com/pypi/simple"
+common_pip_trusted_host: "mirrors.aliyun.com"
+common_pip_extra_index_url: "https://pypi.org/simple"
+common_pip_extra_trusted_host: "pypi.org"
+common_python3_version: 3.13.13
+common_go_version: 1.23.4

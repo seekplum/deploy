@@ -1,6 +1,16 @@
 ---
-- name: install python
-  shell: 'if [ $(uv python list --only-installed {{ item.version }} | grep -v "<download" | wc -l) -gt 0 ]; then echo {{ item.version }} is installed; else uv python install {{ item.version }}; fi'
-  with_items: "{{ VIRTUAL_ENVS }}"
+- name: 安装 Python
+  ansible.builtin.shell: |
+    set -o pipefail
+    if [ "$(uv python list --only-installed "{{ item.version }}" | grep -vc "<download")" -gt 0 ]; then
+      echo "{{ item.version }} is installed"
+    else
+      uv python install "{{ item.version }}"
+    fi
+  args:
+    executable: /bin/bash
+  register: install_python_install_result
+  changed_when: "'is installed' not in install_python_install_result.stdout"
+  with_items: "{{ install_virtual_envs }}"
   tags:
     - python

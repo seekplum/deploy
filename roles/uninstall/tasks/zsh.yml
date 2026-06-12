@@ -1,33 +1,38 @@
 ---
-
-- name: change terminal
-  shell: "chsh -s /bin/bash {{ ansible_user_id }}"
+- name: 切换默认终端为 bash
+  ansible.builtin.command: "chsh -s /bin/bash {{ ansible_user_id }}"
+  changed_when: true
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   tags:
     - remove_zsh
 
-- name: check /etc/bahsrc exists
-  shell: cat ~/.bash_profile | grep "if \[ \-f /etc/bashrc \]; then" | wc -l
-  register: existing_of_etc_bashrc
-  changed_when: False
+- name: 检查 .bash_profile 是否引用 /etc/bashrc
+  ansible.builtin.shell: |
+    set -o pipefail
+    grep -c "if \[ \-f /etc/bashrc \]; then" "{{ common_home_root }}/.bash_profile" || true
+  args:
+    executable: /bin/bash
+  register: uninstall_existing_of_etc_bashrc
+  changed_when: false
   tags:
     - remove_zsh
 
-- name: change bashrc
-  shell:
+- name: 写入 /etc/bashrc 引用
+  ansible.builtin.shell:
     cmd: |
-      cat >>{{ HOME_ROOT }}/.bash_profile<<EOF
+      cat >>{{ common_home_root }}/.bash_profile<<EOF
       if [ -f /etc/bashrc ]; then
         . /etc/bashrc
       fi
       EOF
-  when: existing_of_etc_bashrc.stdout == "0"
+  changed_when: true
+  when: uninstall_existing_of_etc_bashrc.stdout == "0"
   tags:
     - remove_zsh
 
-- name: uninstall zsh on Redhat
-  yum:
+- name: 在 RedHat 上卸载 zsh
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     update_cache: true
@@ -35,40 +40,41 @@
     - zsh
   tags:
     - remove_zsh
-  when: is_centos_os
+  when: common_is_centos_os
 
-- name: uninstall zsh on Ubuntu
-  apt:
+- name: 在 Ubuntu 上卸载 zsh
+  ansible.builtin.apt:
     pkg: "{{ item }}"
     state: absent
   with_items:
     - zsh
   tags:
     - remove_zsh
-  when: is_ubuntu_os
+  when: common_is_ubuntu_os
 
-- name: uninstall zsh on macOS
-  shell: "brew uninstall {{ item }} --force"
-  ignore_errors: True
+- name: 在 macOS 上卸载 zsh
+  ansible.builtin.command: "brew uninstall {{ item }} --force"
+  changed_when: true
+  failed_when: false
   with_items:
     - zsh
     - zsh-completions
     - zsh-syntax-highlighting
   tags:
     - remove_zsh
-  when: is_mac_os
+  when: common_is_mac_os
 
-- name: remove zsh directory
-  file:
+- name: 删除 zsh 目录
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
     force: true
   with_items:
-    - "{{ HOME_ROOT }}/.zshrc"
-    - "{{ HOME_ROOT }}/.zshrc_history"
-    - "{{ HOME_ROOT }}/.zshrc.pre-oh-my-zsh"
-    - "{{ HOME_ROOT }}/.oh-my-zsh"
+    - "{{ common_home_root }}/.zshrc"
+    - "{{ common_home_root }}/.zshrc_history"
+    - "{{ common_home_root }}/.zshrc.pre-oh-my-zsh"
+    - "{{ common_home_root }}/.oh-my-zsh"
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   tags:
     - remove_zsh

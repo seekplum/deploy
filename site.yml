@@ -1,9 +1,9 @@
 ---
 # This playbook deploys the whole application stack in this site.
 
-- name: uninstall_task
+- name: Uninstall task
   hosts: common
-  gather_facts: False
+  gather_facts: false
   roles:
     - common
     - uninstall
@@ -11,11 +11,12 @@
     - uninstall
     - remove
   environment:
-    PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin"
+    HOME: "{{ ansible_user_dir | default('') }}"
+    PATH: "{{ ansible_env.PATH | default('/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin') }}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin:{{ ansible_user_dir | default('') }}/.lima/.bin"
 
-- name: install_task
+- name: Install task
   hosts: common
-  gather_facts: False
+  gather_facts: false
   roles:
     - common
     - install
@@ -23,22 +24,23 @@
     - install
     - deploy
   environment:
-    PIP_INDEX_URL: "{{ PIP_INDEX_URL }}"
-    PATH: "${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin:/usr/local/n/bin"
+    HOME: "{{ ansible_user_dir | default('') }}"
+    PIP_INDEX_URL: "{{ common_pip_index_url }}"
+    PATH: "{{ ansible_env.PATH | default('/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin') }}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin:/usr/local/n/bin:{{ ansible_user_dir | default('') }}/.local/bin:{{ ansible_user_dir | default('') }}/.lima/.bin::{{ ansible_user_dir | default('') }}/.cargo/bin"
     PASSPHRASE: test
 
-- name: k3s_task
+- name: K3s task
   hosts: masters,slaves
-  gather_facts: False
+  gather_facts: false
   roles:
     - common
     - k3s
   tags:
     - k3s
 
-- name: kubernetes_task
+- name: Kubernetes task
   hosts: masters,slaves
-  gather_facts: False
+  gather_facts: false
   roles:
     - common
     - kubernetes

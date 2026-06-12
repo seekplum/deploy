@@ -1,38 +1,38 @@
 ---
-- name: check zsh installed
-  shell: "zsh --version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: installed_of_zsh
+- name: 检查 zsh 是否已安装
+  ansible.builtin.shell: "zsh --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_installed_of_zsh
   changed_when: false
   tags:
     - zsh
 
-- name: check oh-my-zsh installed
-  shell: "test -d {{ HOME_ROOT }}/.oh-my-zsh/ && echo 0 || echo 1"
-  register: installed_of_oh_my_zsh
+- name: 检查 oh-my-zsh 是否已安装
+  ansible.builtin.shell: "test -d {{ common_home_root }}/.oh-my-zsh/ && echo 0 || echo 1"
+  register: install_installed_of_oh_my_zsh
   changed_when: false
   tags:
     - zsh
 
-- name: check zsh-autosuggestions installed
-  shell: "test -d {{ HOME_ROOT }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions && echo 0 || echo 1"
-  register: installed_of_oh_my_zsh_autosuggestions
+- name: 检查 zsh-autosuggestions 是否已安装
+  ansible.builtin.shell: "test -d {{ common_home_root }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions && echo 0 || echo 1"
+  register: install_installed_of_oh_my_zsh_autosuggestions
   changed_when: false
   tags:
     - zsh
 
-- name: install zsh on Redhat
-  yum:
+- name: 在 Redhat 上安装 zsh
+  ansible.builtin.dnf:
     name: "zsh"
     state: present
     update_cache: true
   # shell: yum install -y zsh
   tags:
     - zsh
-  when: is_centos_os and installed_of_zsh.stdout == "1"
+  when: common_is_centos_os and install_installed_of_zsh.stdout == "1"
 
 # sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A1715D88E1DF1F24
-- name: install zsh on Ubuntu
-  apt:
+- name: 在 Ubuntu 上安装 zsh
+  ansible.builtin.apt:
     pkg: "{{ item }}"
     state: present
     update_cache: true
@@ -41,52 +41,54 @@
   tags:
     - zsh
   become: true
-  become_method: sudo
-  when: is_ubuntu_os and installed_of_zsh.stdout == "1"
+  become_method: ansible.builtin.sudo
+  when: common_is_ubuntu_os and install_installed_of_zsh.stdout == "1"
 
-- name: install zsh on macOS
-  shell: 'if [ $(brew list | grep {{ item }} | wc -l) == "0" ]; then brew install {{ item }}; else echo {{ item }} is installed; fi'
+- name: 在 macOS 上安装 zsh
+  ansible.builtin.shell: |
+    set -o pipefail
+    if [ "$(brew list | grep -c "{{ item }}")" = "0" ]; then
+      brew install "{{ item }}"
+    else
+      echo "{{ item }} is installed"
+    fi
+  args:
+    executable: /bin/bash
+  register: install_zsh_package_result
+  changed_when: "'is installed' not in install_zsh_package_result.stdout"
   with_items:
     - zsh
     - zsh-completions
     - zsh-syntax-highlighting
   tags:
     - zsh
-  when: is_mac_os and installed_of_zsh.stdout == "1"
+  when: common_is_mac_os and install_installed_of_zsh.stdout == "1"
 
-- name: install oh-my-zsh
+- name: 安装 oh-my-zsh
+  tags:
+    - zsh
+
   block:
-    - name: download oh-my-zsh
-      shell:
+    - name: 下载 oh-my-zsh
+      ansible.builtin.shell:
         cmd: |
           sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" <<EOF
           exit
           EOF
-      when: installed_of_oh_my_zsh.stdout == "1"
+      changed_when: true
+      when: install_installed_of_oh_my_zsh.stdout == "1"
 
-    - name: download zsh autosuggestions
-      git:
+    - name: 下载 zsh 自动建议插件
+      ansible.builtin.git:
         repo: git@github.com:zsh-users/zsh-autosuggestions
-        dest: "{{ HOME_ROOT }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+        dest: "{{ common_home_root }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
         accept_hostkey: true
-      when: installed_of_oh_my_zsh_autosuggestions.stdout == "1"
-  tags:
-    - zsh
-
-- name: change terminal
-  shell: "chsh -s /bin/zsh {{ ansible_user_id }}"
+        version: master
+      when: install_installed_of_oh_my_zsh_autosuggestions.stdout == "1"
+- name: 修改默认终端 shell
+  ansible.builtin.command: "chsh -s /bin/zsh {{ ansible_user_id }}"
+  changed_when: true
   become: true
-  become_method: sudo
-  tags:
-    - zsh
-
-- name: update bash_profile configuare
-  lineinfile:
-    dest: "{{ HOME_ROOT }}/.bash_profile"
-    state: absent
-    regexp: "{{ item }}"
-    backup: false
-  with_items:
-    - 'export PS1="'
+  become_method: ansible.builtin.sudo
   tags:
     - zsh

@@ -6,26 +6,26 @@
 # %sudo   ALL=(ALL) NOPASSWD: ALL
 # 2. macOS 需要先安装基础软件才能登陆 xcode-select --install
 
-- name: create project dir
-  file:
+- name: 创建项目目录
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     mode: "0755"
   with_items:
-    - "{{ HOME_ROOT }}/.ssh"
-    - "{{ HOME_ROOT }}/.pip"
+    - "{{ common_home_root }}/.ssh"
+    - "{{ common_home_root }}/.pip"
     - "/usr/local/bin"
-    # - "{{ GOPATH }}"
-    # - "{{ PythonProjects }}"
-    # - "{{ WebProjects }}"
-    # - "{{ JavaProjects }}"
-    - "{{ PACKAGES_ROOT }}"
+    # - "{{ install_gopath }}"
+    # - "{{ install_python_projects }}"
+    # - "{{ install_web_projects }}"
+    # - "{{ install_java_projects }}"
+    - "{{ install_packages_root }}"
   tags:
     - configure
 
-- name: virtualbox script link to path On macOS
-  file:
-    src: "{{ PACKAGES_ROOT }}/{{ item }}"
+- name: 在 macOS 上链接 VirtualBox 脚本到 PATH
+  ansible.builtin.file:
+    src: "{{ install_packages_root }}/{{ item }}"
     dest: "/usr/local/bin/{{ item.replace('.sh', '') }}"
     state: link
     force: false # 避免原主机文件被覆盖
@@ -36,58 +36,63 @@
   tags:
     - configure
   become: true
-  become_method: sudo
-  ignore_errors: true
-  when: is_mac_os
+  become_method: ansible.builtin.sudo
+  failed_when: false
+  when: common_is_mac_os
 
 # - name: replace brew source On macOS
-#   shell: "{{ PACKAGES_ROOT }}/replace_brew_source.sh"
+#   shell: "{{ install_packages_root }}/replace_brew_source.sh"
 #   tags:
 #     - configure
 #   ignore_errors: true
-#   when: is_mac_os
+#   when: common_is_mac_os
 
-- name: import gpg key on Ubuntu
-  shell: "wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -"
+- name: 在 Ubuntu 上导入 GPG 密钥
+  ansible.builtin.shell: |
+    set -o pipefail
+    wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+  args:
+    executable: /bin/bash
+  changed_when: false
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   tags:
     - configure
-  when: is_ubuntu_os
+  when: common_is_ubuntu_os
 
-- name: copy apt source list on Ubuntu
-  copy:
+- name: 在 Ubuntu 上复制 apt 源列表
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/etc/apt/"
     mode: "0644"
     force: true
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   with_items:
     - "sources.list"
   tags:
     - configure
-  when: is_ubuntu_os
+  when: common_is_ubuntu_os
 
-- name: copy git ppa list on Ubuntu
-  copy:
+- name: 在 Ubuntu 上复制 Git PPA 源列表
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/etc/apt/sources.list.d/"
     mode: "0644"
     force: true
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   with_items:
     - "mongodb-org.list"
     - "git-core-ubuntu-ppa-focal.list"
   tags:
     - configure
-  when: is_ubuntu_os
+  when: common_is_ubuntu_os
 
-- name: backup repo on Redhat
-  copy:
+- name: 在 Redhat 上备份软件源配置
+  ansible.builtin.copy:
     src: "/etc/yum.repos.d/{{ item }}"
-    dest: "/etc/yum.repos.d/{{ item }}.{{ backup_date }}.{{ backup_epoch }}"
+    dest: "/etc/yum.repos.d/{{ item }}.{{ install_backup_date }}.{{ install_backup_epoch }}"
     remote_src: true
     mode: preserve
   with_items:
@@ -96,16 +101,16 @@
     - "CentOS-SCLo-scl-rh.repo"
     - "wandisco-git.repo"
     - "mongodb-4.4.repo"
-  ignore_errors: true
   changed_when: false
+  failed_when: false
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   tags:
     - configure
-  when: is_centos_os
+  when: common_is_centos_os
 
-- name: copy repo on Redhat
-  copy:
+- name: 在 Redhat 上复制软件源配置
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/etc/yum.repos.d/"
     mode: "0644"
@@ -117,63 +122,67 @@
     - "wandisco-git.repo"
     - "mongodb-4.4.repo"
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   tags:
     - configure
-  when: is_centos_os
+  when: common_is_centos_os
 
-- name: import gpg key on Redhat
-  shell: "rpm --import http://opensource.wandisco.com/RPM-GPG-KEY-WANdisco"
+- name: 在 Redhat 上导入 GPG 密钥
+  ansible.builtin.rpm_key:
+    key: http://opensource.wandisco.com/RPM-GPG-KEY-WANdisco
+    state: present
   become: true
-  become_method: sudo
-  ignore_errors: true
+  become_method: ansible.builtin.sudo
+  failed_when: false
   tags:
     - configure
-  when: is_centos_os
+  when: common_is_centos_os
 
-- name: automatic startup execution on Ubuntu
+- name: 在 Ubuntu 上配置开机自动执行
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - configure
+  when: common_is_linux_os
+
   block:
-    - name: copy my-rc-local.service
-      copy:
+    - name: 复制 my-rc-local.service 服务文件
+      ansible.builtin.copy:
         src: "rc-local.service"
         dest: "/etc/systemd/system/my-rc-local.service"
-        mode: 755
+        mode: "0755"
         force: true
         backup: false
-    - name: copy /etc/my-rc.local
-      template:
+      failed_when: false
+    - name: 复制 /etc/my-rc.local 启动脚本
+      ansible.builtin.template:
         src: "rc.local"
         dest: "/etc/my-rc.local"
-        mode: 755
+        mode: "0755"
         force: true
         backup: false
-    - name: start my-rc-local service
-      service:
+      failed_when: false
+    - name: 启动 my-rc-local 服务
+      ansible.builtin.service:
         name: "my-rc-local"
         state: "started"
         enabled: true
+      failed_when: false
+- name: 配置DNS
   become: true
-  become_method: sudo
-  ignore_errors: true
+  become_method: ansible.builtin.sudo
   tags:
     - configure
-  when: is_linux_os
-
-- name: 配置DNS
+  when: common_is_ubuntu_os
   block:
     - name: "修改DNS"
-      replace:
-        path: '/etc/systemd/resolved.conf'
-        regexp: '^#?DNS=.*'
-        replace: 'DNS=8.8.8.8 114.114.114.114'
+      ansible.builtin.replace:
+        path: "/etc/systemd/resolved.conf"
+        regexp: "^#?DNS=.*"
+        replace: "DNS=8.8.8.8 114.114.114.114"
     - name: "重启服务"
-      systemd:
+      ansible.builtin.systemd:
         name: "systemd-resolved"
         state: "restarted"
         enabled: true
         daemon_reload: true
-  become: true
-  become_method: sudo
-  tags:
-    - configure
-  when: is_ubuntu_os

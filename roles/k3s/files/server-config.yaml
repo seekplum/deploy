@@ -1,3 +1,4 @@
+---
 kubelet-arg:
   - "config=/etc/rancher/k3s/kube-config.yaml"
   - "eviction-hard=imagefs.available<6%,memory.available<6%,nodefs.available<6%"

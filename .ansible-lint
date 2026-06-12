@@ -1,0 +1,4 @@
+skip_list:
+  # This role intentionally keeps legacy uppercase/public variable names for
+  # compatibility with existing inventory and extra-vars.
+  - yaml[line-length]

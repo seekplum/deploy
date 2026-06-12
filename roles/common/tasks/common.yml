@@ -1,5 +1,4 @@
 ---
-
 - name: 获取ansible系统变量
   ansible.builtin.setup:
     filter:
@@ -7,53 +6,60 @@
       - ansible_hostname
       - ansible_user_id
       - ansible_user_dir
+      - ansible_env
+      - ansible_architecture
+      - ansible_distribution_version
       - ansible_default_ipv4
   tags:
     - common
     - always
-  when: done_once_role is not defined
+  when: common_done_once_role is not defined
 
 - name: "检查当前节点操作系统"
-  set_fact:
-    is_linux_os: '{{ ansible_os_family == "RedHat" or ansible_os_family == "Debian" }}'
-    is_centos_os: '{{ ansible_os_family == "RedHat" }}'
-    is_ubuntu_os: '{{ ansible_os_family == "Debian" }}'
-    is_mac_os: '{{ ansible_os_family == "Darwin" }}'
-    is_apple_mac_os: '{{ ansible_os_family == "Darwin" and ansible_architecture | default("") == "arm64" }}'
-    is_intel_mac_os: '{{ ansible_os_family == "Darwin" and ansible_architecture | default("") == "x86_64" }}'
-    is_high_mac_os: '{{ ansible_os_family == "Darwin" and (ansible_distribution_version | default("0") is version("13.0", ">")) }}'
+  ansible.builtin.set_fact:
+    common_is_linux_os: '{{ ansible_os_family == "RedHat" or ansible_os_family == "Debian" }}'
+    common_is_centos_os: '{{ ansible_os_family == "RedHat" }}'
+    common_is_ubuntu_os: '{{ ansible_os_family == "Debian" }}'
+    common_is_mac_os: '{{ ansible_os_family == "Darwin" }}'
+    common_is_apple_mac_os: '{{ ansible_os_family == "Darwin" and ansible_architecture | default("") == "arm64" }}'
+    common_is_intel_mac_os: '{{ ansible_os_family == "Darwin" and ansible_architecture | default("") == "x86_64" }}'
+    common_is_high_mac_os: '{{ ansible_os_family == "Darwin" and (ansible_distribution_version | default("0") is version("13.0", ">")) }}'
   tags:
     - common
     - always
-  when: done_once_role is not defined
+  when: common_done_once_role is not defined
 
 - name: "输出节点操作系统"
-  debug:
-    msg: "[{{ ansible_hostname }}] is_linux_os: {{ is_linux_os }}, is_ubuntu_os: {{ is_ubuntu_os }}, is_centos_os: {{ is_centos_os }}, is_mac_os: {{ is_mac_os }}"
+  ansible.builtin.debug:
+    msg: "[{{ ansible_hostname }}] common_is_linux_os: {{ common_is_linux_os }}, common_is_ubuntu_os: {{ common_is_ubuntu_os }}, common_is_centos_os: {{ common_is_centos_os
+      }}, common_is_mac_os: {{ common_is_mac_os }}"
   tags:
     - common
     - always
-  when: done_once_role is not defined
+  when: common_done_once_role is not defined
 
 - name: "检查当前节点类型"
-  set_fact:
-    is_common_node: '{{ "common" in group_names }}'
-    is_master_node: '{{ "masters" in group_names }}'
-    is_slaves_node: '{{ "slaves" in group_names }}'
+  ansible.builtin.set_fact:
+    common_is_common_node: '{{ "common" in group_names }}'
+    common_is_master_node: '{{ "masters" in group_names }}'
+    common_is_slaves_node: '{{ "slaves" in group_names }}'
   tags:
     - common
     - always
-  when: done_once_role is not defined
+  when: common_done_once_role is not defined
 
 - name: "输出节点类型"
-  debug:
-    msg: "[{{ ansible_hostname }}] Group Names: {{ group_names }}, Is Common Node {{ is_common_node }}, Is Master Node {{ is_master_node }}, Is Slaves Node {{ is_slaves_node }}."
+  ansible.builtin.debug:
+    msg: "[{{ ansible_hostname }}] Group Names: {{ group_names }}, Is Common Node {{ common_is_common_node }}, Is Master Node {{ common_is_master_node }}, Is Slaves
+      Node {{ common_is_slaves_node }}."
   tags:
     - common
     - always
-  when: done_once_role is not defined
+  when: common_done_once_role is not defined
 
-- set_fact: done_once_role=1
+- name: 标记 common 角色已执行
+  ansible.builtin.set_fact:
+    common_done_once_role: 1
   tags:
     - common
     - always

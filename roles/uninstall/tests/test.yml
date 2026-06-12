@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: 测试 uninstall 角色
+  hosts: localhost
   remote_user: root
   roles:
     - uninstall

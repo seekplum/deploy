@@ -45,7 +45,7 @@ spec:
   selector:
     app: whoami
   ports:
-      # 默认情况下，为了方便起见，`targetPort` 被设置为与 `port` 字段相同的值。
+    # 默认情况下，为了方便起见，`targetPort` 被设置为与 `port` 字段相同的值。
     - name: web
       port: 80
       targetPort: 80

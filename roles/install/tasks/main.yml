@@ -1,13 +1,13 @@
 ---
-- name: set backup timestamp fact
-  set_fact:
-    backup_date: "{{ lookup('pipe', 'date +%Y%m%d') }}"
-    backup_epoch: "{{ lookup('pipe', 'date +%s') }}"
+- name: 设置备份时间戳变量
+  ansible.builtin.set_fact:
+    install_backup_date: "{{ lookup('pipe', 'date +%Y%m%d') }}"
+    install_backup_epoch: "{{ lookup('pipe', 'date +%s') }}"
 
-- name: install shell wrapper for install role
-  copy:
+- name: 安装 install 角色的 shell 包装器
+  ansible.builtin.copy:
     dest: /tmp/ansible-shell-wrapper
-    mode: '0755'
+    mode: "0755"
     content: |
       #!/bin/sh
       if [ "$1" = "-c" ]; then
@@ -19,91 +19,102 @@
       fi
       exec /bin/sh "$@"
 
-- name: run install role tasks with zsh wrapper when available
+- name: 使用可用的 zsh 包装器执行 install 角色任务
   block:
-    - include_tasks:
+    - name: 执行 configure 任务
+      ansible.builtin.include_tasks:
         file: configure.yml
         apply:
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
 
-    - include_tasks:
+    - name: 执行 initialize 任务
+      ansible.builtin.include_tasks:
         file: initialize.yml
         apply:
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
 
-    - include_tasks:
+    - name: 执行 zsh 任务
+      ansible.builtin.include_tasks:
         file: zsh.yml
         apply:
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
 
-    - include_tasks:
+    - name: 执行 Python 任务
+      ansible.builtin.include_tasks:
         file: python.yml
         apply:
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
 
-    - include_tasks:
+    - name: 执行 virtualenv 任务
+      ansible.builtin.include_tasks:
         file: virtualenv.yml
         apply:
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
 
-    - include_tasks:
+    - name: 执行 Docker 任务
+      ansible.builtin.include_tasks:
         file: docker.yml
         apply:
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
 
-    - include_tasks:
+    - name: 执行 Golang 任务
+      ansible.builtin.include_tasks:
         file: golang.yml
         apply:
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
 
-    - include_tasks:
+    - name: 执行 Java 任务
+      ansible.builtin.include_tasks:
         file: java.yml
         apply:
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
 
-    - include_tasks:
+    - name: 执行 Node.js 任务
+      ansible.builtin.include_tasks:
         file: nodejs.yml
         apply:
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
 
-    - include_tasks:
+    - name: 执行 rbenv 任务
+      ansible.builtin.include_tasks:
         file: rbenv.yml
         apply:
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
 
-    - name: check existing ansible
-      shell: "ansible --version >/dev/null 2>&1 && echo 0 || echo 1"
+    - name: 检查 ansible 是否已安装
+      ansible.builtin.shell: "ansible --version >/dev/null 2>&1 && echo 0 || echo 1"
       args:
         executable: /tmp/ansible-shell-wrapper
-      register: existing_of_ansible
+      register: install_existing_of_ansible
       changed_when: false
       tags:
         - ansible
 
-    - name: install ansible
-      shell: "pip install ansible"
+    - name: 安装 ansible
+      ansible.builtin.shell: "pip install ansible"
       args:
         executable: /tmp/ansible-shell-wrapper
+      changed_when: true
       tags:
         - ansible
-      when: existing_of_ansible.stdout == "1"
+      when: install_existing_of_ansible.stdout == "1"

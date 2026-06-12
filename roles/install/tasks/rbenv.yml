@@ -1,102 +1,109 @@
 ---
-- name: check rbenv installed
-  shell: "test -d {{ RBENV_ROOT }} && echo 0 || echo 1"
-  register: installed_of_rbenv
+- name: 检查 rbenv 是否已安装
+  ansible.builtin.shell: "test -d {{ install_rbenv_root }} && echo 0 || echo 1"
+  register: install_installed_of_rbenv
   changed_when: false
   tags:
     - rbenv
 
-- name: download rbenv
-  git:
-    repo: "{{ RBENV_REPOSITORY }}"
-    dest: "{{ RBENV_ROOT }}"
+- name: 下载 rbenv
+  ansible.builtin.git:
+    repo: "{{ install_rbenv_repository }}"
+    dest: "{{ install_rbenv_root }}"
     accept_hostkey: true
-  when: installed_of_rbenv.stdout == "1"
+    version: master
+  when: install_installed_of_rbenv.stdout == "1"
   tags:
     - rbenv
 
-- name: pull rbenv
+- name: 更新 rbenv
+  when: install_installed_of_rbenv.stdout == "0"
+  tags:
+    - rbenv
+
   block:
-    - name: repository set-url
-      git_config:
-        repo: "{{ RBENV_ROOT }}"
+    - name: 设置仓库远程地址
+      community.general.git_config:
+        repo: "{{ install_rbenv_root }}"
         scope: "local"
         name: "remote.origin.url"
-        value: "{{ RBENV_REPOSITORY }}"
-    - name: pull repository
-      git:
-        repo: "{{ RBENV_REPOSITORY }}"
-        dest: "{{ RBENV_ROOT }}"
+        value: "{{ install_rbenv_repository }}"
+    - name: 拉取仓库更新
+      ansible.builtin.git:
+        repo: "{{ install_rbenv_repository }}"
+        dest: "{{ install_rbenv_root }}"
         update: true
         version: master
-  when: installed_of_rbenv.stdout == "0"
-  tags:
-    - rbenv
-
-- name: check rbenv plugins installed
-  shell: "test -d {{ RBENV_ROOT }}/plugins/ruby-build && echo 0 || echo 1"
-  register: installed_of_rbenv_plugins
+- name: 检查 rbenv 插件是否已安装
+  ansible.builtin.shell: "test -d {{ install_rbenv_root }}/plugins/ruby-build && echo 0 || echo 1"
+  register: install_installed_of_rbenv_plugins
   changed_when: false
   tags:
     - rbenv
 
-- name: download rbenv plugins
-  git:
-    repo: "{{ RUBY_BUILD_REPOSITORY }}"
-    dest: "{{ RUBY_BUILD_ROOT }}"
+- name: 下载 rbenv 插件
+  ansible.builtin.git:
+    repo: "{{ install_ruby_build_repository }}"
+    dest: "{{ install_ruby_build_root }}"
     accept_hostkey: true
-  when: installed_of_rbenv_plugins.stdout == "1"
+    version: master
+  when: install_installed_of_rbenv_plugins.stdout == "1"
   tags:
     - rbenv
 
-- name: pull rbenv plugins
+- name: 更新 rbenv 插件
+  when: install_installed_of_rbenv.stdout == "0"
+  tags:
+    - rbenv
+
   block:
-    - name: repository set-url
-      git_config:
-        repo: "{{ RUBY_BUILD_ROOT }}"
+    - name: 设置仓库远程地址
+      community.general.git_config:
+        repo: "{{ install_ruby_build_root }}"
         scope: "local"
         name: "remote.origin.url"
-        value: "{{ RUBY_BUILD_REPOSITORY }}"
-    - name: pull repository
-      git:
-        repo: "{{ RUBY_BUILD_REPOSITORY }}"
-        dest: "{{ RUBY_BUILD_ROOT }}"
+        value: "{{ install_ruby_build_repository }}"
+    - name: 拉取仓库更新
+      ansible.builtin.git:
+        repo: "{{ install_ruby_build_repository }}"
+        dest: "{{ install_ruby_build_root }}"
         update: true
         version: master
-  when: installed_of_rbenv.stdout == "0"
-  tags:
-    - rbenv
-
-- name: get system ruby version
-  shell: |
+- name: 获取系统 Ruby 版本
+  ansible.builtin.shell: |
+    set -o pipefail
     ruby --version 2>/dev/null | awk '{print $2}' | cut -d'p' -f1 || true
-  register: dynamic_ruby_version
+  args:
+    executable: /bin/bash
+  register: install_dynamic_ruby_version
   changed_when: false
   tags:
     - rbenv
 
-- name: set rube version
-  set_fact:
-    # ruby_version: "{{ dynamic_ruby_version.stdout | default('2.7.7', true) }}"
-    ruby_version: "3.2.0"
+- name: 设置 Ruby 版本
+  ansible.builtin.set_fact:
+    # install_ruby_version: "{{ install_dynamic_ruby_version.stdout | default('2.7.7', true) }}"
+    install_ruby_version: "3.2.0"
   tags:
     - rbenv
 
-- name: check ruby installed
-  shell: "ruby --version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: installed_of_ruby
+- name: 检查 Ruby 是否已安装
+  ansible.builtin.shell: "ruby --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_installed_of_ruby
   changed_when: false
   tags:
     - rbenv
 
-- name: install ruby
-  shell: "{{ RBENV_ROOT }}/bin/rbenv install {{ ruby_version }} --skip-existing"
+- name: 安装 Ruby
+  ansible.builtin.command: "{{ install_rbenv_root }}/bin/rbenv install {{ install_ruby_version }} --skip-existing"
+  changed_when: true
   tags:
     - rbenv
-  when: installed_of_ruby.stdout == "1"
+  when: install_installed_of_ruby.stdout == "1"
 
-- name: set global ruby
-  shell: "{{ RBENV_ROOT }}/bin/rbenv global {{ ruby_version }} --skip-existing"
+- name: 设置全局 Ruby 版本
+  ansible.builtin.command: "{{ install_rbenv_root }}/bin/rbenv global {{ install_ruby_version }} --skip-existing"
+  changed_when: true
   tags:
     - rbenv
-  when: installed_of_ruby.stdout == "1"
+  when: install_installed_of_ruby.stdout == "1"

@@ -8,6 +8,7 @@ plum_tools
 trash-cli
 supervisor
 ansible
+ansible-lint
 youtube-dl
 you-get
 mitmproxy

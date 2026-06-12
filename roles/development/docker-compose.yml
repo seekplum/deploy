@@ -1,10 +1,11 @@
+---
 version: "3.4"
 
-x-defaults: &defaults
+x-defaults:
   restart: unless-stopped
   build:
     context: ./sentry
-#  image: sentry:9.1.2-onbuild  # build 后的镜像
+  #  image: sentry:9.1.2-onbuild  # build 后的镜像
   depends_on:
     - redis
     - postgres
@@ -75,7 +76,7 @@ services:
       LDAP_PASSWORD: "guest@123!"
       GERRIT_INIT_ARGS: --install-plugin=download-commands
       INITIAL_ADMIN_USER: admin
-      INITIAL_ADMIN_PASSWORD: admin  # 固定值，设置后可以用 ldap 的 admin 密码登录
+      INITIAL_ADMIN_PASSWORD: admin # 固定值，设置后可以用 ldap 的 admin 密码登录
       LISTEN_ADDR: "*:30418"
     restart: on-failure
     healthcheck:
@@ -109,7 +110,7 @@ services:
       - FULL_DOMAIN=seekplum.top
   nginx:
     image: nginx:alpine
-#    network_mode: host  # MacOSX不支持host模式
+    #    network_mode: host  # MacOSX不支持host模式
     ports:
       - 80:80
       - 443:443

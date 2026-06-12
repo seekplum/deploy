@@ -19,18 +19,18 @@ spec:
             path: /root/data/develop/jenkins
             type: DirectoryOrCreate
       containers:
-      - name: jenkins
-        image: jenkins/jenkins:latest
-        imagePullPolicy: IfNotPresent
-        envFrom:
-        - configMapRef:
-            name: jenkins
-        ports:
-        - name: http
-          containerPort: 8080
-        volumeMounts:
-          - name: jenkins-volume-home
-            mountPath: /var/jenkins_home
+        - name: jenkins
+          image: jenkins/jenkins:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: jenkins
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: jenkins-volume-home
+              mountPath: /var/jenkins_home
 ---
 apiVersion: v1
 kind: Service
@@ -39,10 +39,10 @@ metadata:
   namespace: seekplum
 spec:
   ports:
-  - name: http
-    port: 8080
-    protocol: TCP
-    targetPort: 8080
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
   selector:
     app: jenkins
 status:

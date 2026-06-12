@@ -1,9 +1,9 @@
 #!/bin/bash
 
 set -e
-LOG_FILE="{{ HOME_ROOT }}/mystart.log"
-SCRIPTS_FILES="{{ HOME_ROOT }}/packages/mystart.sh"
-USER="{{ LOGIN_USER }}"
+LOG_FILE="{{ common_home_root }}/mystart.log"
+SCRIPTS_FILES="{{ common_home_root }}/packages/mystart.sh"
+USER="{{ common_login_user }}"
 
 function start() {
     echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local start" >> ${LOG_FILE}

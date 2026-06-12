@@ -1,80 +1,82 @@
 ---
-
 - name: "Ubuntu关闭防火墙"
-  service:
+  ansible.builtin.service:
     name: "ufw"
     state: "stopped"
     enabled: "no"
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  when: is_ubuntu_os
+  become_method: ansible.builtin.sudo
+  when: common_is_ubuntu_os
 
 - name: "RedHat关闭防火墙"
-  service:
+  ansible.builtin.service:
     name: "firewalld"
     state: "stopped"
     enabled: "no"
   tags:
     - k3s_common
-  ignore_errors: True
+  failed_when: false
   become: true
-  become_method: sudo
-  when: is_centos_os
+  become_method: ansible.builtin.sudo
+  when: common_is_centos_os
 
 - name: "临时关闭交换分区"
-  shell: swapoff -a
+  ansible.builtin.command: swapoff -a
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  when: is_linux_os
+  become_method: ansible.builtin.sudo
+  changed_when: false
+  when: common_is_linux_os
 
 - name: "Linux获取交换分区名字"
-  shell: cat /etc/fstab | grep " swap " | awk '{print $1}'
-  register: swap_name
-  changed_when: False
+  ansible.builtin.command: awk '$3 == "swap" {print $1}' /etc/fstab
+  register: k3s_swap_name
+  changed_when: false
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  when: is_linux_os
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os
 
 - name: "Linux永久关闭交换分区"
-  replace:
+  ansible.builtin.replace:
     path: /etc/fstab
-    regexp: '^({{ swap_name.stdout }})'
-    replace: '# \1'
+    regexp: "^({{ k3s_swap_name.stdout }})"
+    replace: "# \\1"
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  when: is_linux_os and "stdout" in swap_name and swap_name.stdout and not swap_name.stdout.startswith("#")
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os and "stdout" in k3s_swap_name and k3s_swap_name.stdout | length > 0 and not k3s_swap_name.stdout.startswith("#")
 
 - name: "Ubuntu添加阿里源"
-  shell: "curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -"
-  changed_when: False
+  ansible.builtin.apt_key:
+    url: https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg
+    state: present
+  changed_when: false
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  when: is_ubuntu_os
+  become_method: ansible.builtin.sudo
+  when: common_is_ubuntu_os
 
 - name: "Ubuntu修改k8s源内容"
-  shell:
-    cmd: |
-      tee /etc/apt/sources.list.d/kubernetes.list <<EOF
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/kubernetes.list
+    mode: "0644"
+    content: |
       deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
-      EOF
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  when: is_ubuntu_os
+  become_method: ansible.builtin.sudo
+  when: common_is_ubuntu_os
 
 - name: "RedHat添加阿里源"
-  shell:
+  ansible.builtin.shell:
     cmd: |
       cat >/etc/yum.repos.d/kubernetes.repo<<EOF
       [kubernetes]
@@ -83,34 +85,36 @@
       gpgcheck=0
       enable=1
       EOF
-  changed_when: False
+  changed_when: false
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   tags:
     - k3s_common
-  when: is_centos_os
+  when: common_is_centos_os
 
 - name: "Linux配置k8s内核参数"
-  shell:
-    cmd: |
-      cat >/etc/sysctl.d/k8s.conf<<EOF
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/k8s.conf
+    mode: "0644"
+    content: |
       net.bridge.bridge-nf-call-ip6tables = 1
       net.bridge.bridge-nf-call-iptables = 1
       vm.swappiness=0
-      EOF
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  when: is_linux_os
+  become_method: ansible.builtin.sudo
+  changed_when: false
+  when: common_is_linux_os
 
 - name: "Linux生效内核参数"
-  shell: sysctl --system
+  ansible.builtin.command: sysctl --system
+  changed_when: false
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  when: is_linux_os
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os
 
 # - name: install k3s depends on Redhat
 #   yum:
@@ -122,8 +126,8 @@
 #   tags:
 #     - k3s_common
 #   become: true
-#   become_method: sudo
-#   when: is_centos_os
+#   become_method: ansible.builtin.sudo
+#   when: common_is_centos_os
 
 # - name: install k3s depends on Ubuntu
 #   apt:
@@ -135,8 +139,8 @@
 #   tags:
 #     - k3s_common
 #   become: true
-#   become_method: sudo
-#   when: is_ubuntu_os
+#   become_method: ansible.builtin.sudo
+#   when: common_is_ubuntu_os
 
 # - name: start containerd on Linux
 #   service:
@@ -146,112 +150,123 @@
 #   tags:
 #     - k3s_common
 #   become: true
-#   become_method: sudo
-#   when: is_linux_os
+#   become_method: ansible.builtin.sudo
+#   when: common_is_linux_os
 
-- name: create rancher dir
-  file:
+- name: Create rancher dir
+  ansible.builtin.file:
     dest: "/etc/rancher/k3s"
     state: directory
-    mode: 0755
+    mode: "0755"
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  when: is_linux_os
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os
 
-- name: copy k3s files
-  copy:
+- name: 复制 k3s 配置文件
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/etc/rancher/k3s"
-    mode: 0644
+    mode: "0644"
     force: true
   with_items:
     - kube-config.yaml
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  when: is_linux_os
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os
 
 - name: "删除旧的iptables"
-  shell: "update-alternatives --remove {{ item }} /usr/local/sbin/{{ item }}"
+  ansible.builtin.command: "update-alternatives --remove {{ item }} /usr/local/sbin/{{ item }}"
   with_items:
     - iptables
     - ip6tables
   tags:
     - k3s_common
   become: true
-  become_method: sudo
-  ignore_errors: True
-  when: is_linux_os
+  become_method: ansible.builtin.sudo
+  changed_when: false
+  failed_when: false
+  when: common_is_linux_os
 
-- name: install k3s-selinux on Redhat
-  shell: rpm -i https://github.com/k3s-io/k3s-selinux/releases/download/v1.6.latest.1/k3s-selinux-1.6-1.el7.noarch.rpm
-  ignore_errors: True
+- name: 在 RedHat 上安装 k3s-selinux
+  ansible.builtin.dnf:
+    name: https://github.com/k3s-io/k3s-selinux/releases/download/v1.6.latest.1/k3s-selinux-1.6-1.el7.noarch.rpm
+    state: present
+    disable_gpg_check: true
   tags:
     - k3s_common
-  when: is_centos_os
+  failed_when: false
+  when: common_is_centos_os
 
-- name: copy k3s server config file
-  copy:
+- name: 复制 k3s server 配置文件
+  ansible.builtin.copy:
     src: "server-config.yaml"
     dest: "/etc/rancher/k3s/config.yaml"
-    mode: 0644
+    mode: "0644"
     force: true
   tags:
     - k3s_server
   become: true
-  become_method: sudo
-  when: is_linux_os
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os
 
 - name: "设置安装k3s-server命令"
-  set_fact:
+  ansible.builtin.set_fact:
     # https://update.k3s.io/v1-release/channels/stable
     # INSTALL_K3S_VERSION=v1.25.7+k3s1 --extra-vars 'INSTALL_K3S_EXTRA="--kube-apiserver-arg service-node-port-range=1-65000 --kube-apiserver-arg default-not-ready-toleration-seconds=10 --kube-apiserver-arg default-unreachable-toleration-seconds=10 --node-label worker.node=true"'
-    k3s_server_cmd: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_VERSION={{ INSTALL_K3S_VERSION | default('') }} INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC='server --docker {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
+    k3s_server_cmd: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_VERSION={{ INSTALL_K3S_VERSION | default('') }} INSTALL_K3S_MIRROR=cn
+      INSTALL_K3S_EXEC='server --docker {{ INSTALL_K3S_EXTRA | default('') }}' sh -s -"
   tags:
     - k3s_server
-  when: is_linux_os and is_master_node
+  when: common_is_linux_os and common_is_master_node
 
 - name: "输出安装k3s-server命令"
-  debug:
+  ansible.builtin.debug:
     msg: "{{ k3s_server_cmd }}"
   tags:
     - k3s_server
-  when: is_linux_os and is_master_node and k3s_server_cmd is defined
+  when: common_is_linux_os and common_is_master_node and k3s_server_cmd is defined
 
-- name: install k3s server on Linux
-  shell: "{{ k3s_server_cmd }}"
+- name: 在 Linux 上安装 k3s server
+  ansible.builtin.shell: |
+    set -o pipefail
+    {{ k3s_server_cmd }}
+  args:
+    executable: /bin/bash
   register: k3s_install_result
+  changed_when: true
   tags:
     - k3s_server
   become: true
-  become_method: sudo
-  when: is_linux_os and is_master_node
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os and common_is_master_node
 
 - name: "输出安装信息"
-  debug:
+  ansible.builtin.debug:
     msg: "{{ k3s_install_result }}"
   tags:
     - k3s_server
-  when: is_linux_os and is_master_node
+  when: common_is_linux_os and common_is_master_node
 
-- name: start k3s on ubuntu or Redhat
-  service:
+- name: 在 Linux 上启动 k3s
+  ansible.builtin.service:
     name: "k3s"
     state: "started"
     enabled: "yes"
-  register: log
-  ignore_errors: True
+  register: k3s_service_result
+  failed_when: false
   tags:
     - k3s_server
-  when: is_linux_os and is_master_node
+  when: common_is_linux_os and common_is_master_node
 
 # 安装后 helm-install-traefik 的状态会是 Completed
 - name: "查询节点、Pod状态"
-  shell: "{{ item }}"
+  ansible.builtin.command: "{{ item }}"
   register: k3s_pods_info
+  changed_when: false
   with_items:
     - /usr/local/bin/kubectl get nodes,cs -o wide
     - /usr/local/bin/kubectl --namespace kube-system get pods -o wide
@@ -259,122 +274,137 @@
   tags:
     - k3s_server
   become: true
-  become_method: sudo
-  when: is_linux_os and is_master_node
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os and common_is_master_node
 
 - name: "输出Pod信息"
-  debug:
+  ansible.builtin.debug:
     msg: "{{ k3s_pods_info }}"
   tags:
     - k3s_server
-  when: is_linux_os and is_master_node
+  when: common_is_linux_os and common_is_master_node
 
-- name: check stern installed
-  shell: "stern --version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: installed_of_stern
-  changed_when: False
+- name: 检查 stern 是否已安装
+  ansible.builtin.shell: "stern --version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: k3s_installed_of_stern
+  changed_when: false
   tags:
     - stern
-  when: is_linux_os and is_master_node
+  when: common_is_linux_os and common_is_master_node
 
-- name: install stern
+- name: 安装 stern
+  tags:
+    - stern
+
   block:
-    - name: check existing java packages on Linux
-      shell: "test -f {{ STERN_PACKAGE_PATH_ON_LINUX }} && echo 0 || echo 1"
-      register: existing_of_stern_on_linux
-      changed_when: False
-      when: (is_linux_os) and installed_of_stern.stdout == "1"
+    - name: 检查 Linux 上是否已有 stern 安装包
+      ansible.builtin.shell: "test -f {{ k3s_stern_package_path_on_linux }} && echo 0 || echo 1"
+      register: k3s_existing_of_stern_on_linux
+      changed_when: false
+      when: (common_is_linux_os) and k3s_installed_of_stern.stdout == "1"
 
-    - name: download stern packages on Linux
-      get_url:
-        url: "{{ STERN_DOWNLOAD_URL_ON_LINUX }}"
-        dest: "{{ STERN_PACKAGE_PATH_ON_LINUX }}"
+    - name: 在 Linux 上下载 stern 安装包
+      ansible.builtin.get_url:
+        url: "{{ k3s_stern_download_url_on_linux }}"
+        dest: "{{ k3s_stern_package_path_on_linux }}"
         force: false
-      when: is_linux_os and is_master_node and installed_of_stern.stdout == "1" and existing_of_stern_on_linux.stdout == "1"
-    - name: unarchive stern on Linux
-      unarchive:
-        src: "{{ STERN_PACKAGE_PATH_ON_LINUX }}"
+        mode: "0644"
+      when: common_is_linux_os and common_is_master_node and k3s_installed_of_stern.stdout == "1" and k3s_existing_of_stern_on_linux.stdout == "1"
+    - name: 在 Linux 上解压 stern
+      ansible.builtin.unarchive:
+        src: "{{ k3s_stern_package_path_on_linux }}"
         dest: "/tmp"
         remote_src: true
-      when: is_linux_os and is_master_node and installed_of_stern.stdout == "1"
-    - name: copy stern
-      copy:
+      when: common_is_linux_os and common_is_master_node and k3s_installed_of_stern.stdout == "1"
+    - name: 复制 stern
+      ansible.builtin.copy:
         src: "/tmp/stern"
         dest: "/usr/local/bin"
-        mode: 0755
+        mode: "0755"
         force: true
         remote_src: true
-      when: is_linux_os and is_master_node and installed_of_stern.stdout == "1"
-  tags:
-    - stern
-
-- name: check existing helm packages on Linux
-  shell: "test -f {{ HELM_PACKAGE_PATH_ON_LINUX }} && echo 0 || echo 1"
-  register: existing_of_helm_on_linux
-  changed_when: False
+      when: common_is_linux_os and common_is_master_node and k3s_installed_of_stern.stdout == "1"
+- name: 检查 Linux 上是否已有 helm 安装包
+  ansible.builtin.shell: "test -f {{ k3s_helm_package_path_on_linux }} && echo 0 || echo 1"
+  register: k3s_existing_of_helm_on_linux
+  changed_when: false
   tags:
     - helm
-  when: is_linux_os and is_master_node
+  when: common_is_linux_os and common_is_master_node
 
-- name: check helm installed
-  shell: "helm version >/dev/null 2>&1 && echo 0 || echo 1"
-  register: installed_of_helm
-  changed_when: False
+- name: 检查 helm 是否已安装
+  ansible.builtin.shell: "helm version >/dev/null 2>&1 && echo 0 || echo 1"
+  register: k3s_installed_of_helm
+  changed_when: false
   tags:
     - helm
-  when: is_linux_os and is_master_node
+  when: common_is_linux_os and common_is_master_node
 
-- name: install helm
+- name: 安装 helm
+  tags:
+    - helm
+
   block:
-    - name: download helm packages on Linux
-      get_url:
-        url: "{{ HELM_DOWNLOAD_URL_ON_LINUX }}"
-        dest: "{{ HELM_PACKAGE_PATH_ON_LINUX }}"
+    - name: 在 Linux 上下载 helm 安装包
+      ansible.builtin.get_url:
+        url: "{{ k3s_helm_download_url_on_linux }}"
+        dest: "{{ k3s_helm_package_path_on_linux }}"
         force: false
-      when: is_linux_os and is_master_node and existing_of_helm_on_linux.stdout == "1"
+        mode: "0644"
+      when: common_is_linux_os and common_is_master_node and k3s_existing_of_helm_on_linux.stdout == "1"
 
-    - name: unarchive helm on Linux
-      unarchive:
-        src: "{{ HELM_PACKAGE_PATH_ON_LINUX }}"
+    - name: 在 Linux 上解压 helm
+      ansible.builtin.unarchive:
+        src: "{{ k3s_helm_package_path_on_linux }}"
         dest: "/tmp"
         remote_src: true
-      when: is_linux_os and is_master_node and installed_of_helm.stdout == "1"
+      when: common_is_linux_os and common_is_master_node and k3s_installed_of_helm.stdout == "1"
 
-    - name: copy helm
-      copy:
+    - name: 复制 helm
+      ansible.builtin.copy:
         src: "/tmp/linux-amd64/helm"
         dest: "/usr/local/bin"
-        mode: 0755
+        mode: "0755"
         force: true
         remote_src: true
-      when: is_linux_os and is_master_node
+      when: common_is_linux_os and common_is_master_node
+- name: 添加 helm 仓库
+  ansible.builtin.shell: |
+    set -o pipefail
+    helm repo remove stable || true
+    helm repo add stable https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
+    helm repo update
+  args:
+    executable: /bin/bash
+  register: k3s_helm_repo_info
+  changed_when: true
   tags:
     - helm
+  when: common_is_linux_os and common_is_master_node
 
-- name: add repo
-  shell: "{{ item }}"
-  register: helm_repo_info
-  with_items:
-    - helm repo remove stable || echo "stable not exists"
-    - helm repo add stable https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
-    - helm repo update
-    - helm list --all-namespaces
+- name: 查询 helm 发布列表
+  ansible.builtin.command: helm list --all-namespaces
+  register: k3s_helm_release_info
+  changed_when: false
+  failed_when: false
   tags:
     - helm
-  when: is_linux_os and is_master_node
+  when: common_is_linux_os and common_is_master_node
 
-- name: "输出repo信息"
-  debug:
-    msg: "{{ helm_repo_info }}"
+- name: "输出 helm 仓库信息"
+  ansible.builtin.debug:
+    msg:
+      repo: "{{ k3s_helm_repo_info }}"
+      releases: "{{ k3s_helm_release_info }}"
   tags:
     - helm
-  when: is_linux_os and is_master_node
+  when: common_is_linux_os and common_is_master_node
 
 - name: 取消 KUBECONFIG 注释
-  replace:
-    path: '{{ HOME_ROOT }}/.bash_profile'
-    regexp: '^#\s*(export KUBECONFIG.*)'
-    replace: '\1'
+  ansible.builtin.replace:
+    path: "{{ common_home_root }}/.bash_profile"
+    regexp: "^#\\s*(export KUBECONFIG.*)"
+    replace: "\\1"
   tags:
     - helm
-  when: is_linux_os and is_master_node
+  when: common_is_linux_os and common_is_master_node
