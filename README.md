@@ -1,5 +1,9 @@
 # 快速搭建开发环境
 
+## 项目文档
+
+* [Ansible Role 维护手册](docs/ansible-role-maintenance.md)：记录 role 变量命名、目标机器环境变量、lint 约定和常见故障处理方式。
+
 ## 准备环境
 
 * 安装ansible
