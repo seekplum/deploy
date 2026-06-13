@@ -144,6 +144,38 @@
     - kubeadm
   when: common_is_ubuntu_os
 
+- name: "探测 CRI 运行时 socket 路径"
+  ansible.builtin.shell: |
+    set -o pipefail
+    for endpoint in /run/containerd/containerd.sock /var/run/containerd/containerd.sock; do
+      if crictl --runtime-endpoint "unix://$endpoint" info >/dev/null 2>&1; then
+        echo "$endpoint"
+        break
+      fi
+    done
+  args:
+    executable: /bin/bash
+  register: kubernetes_cri_socket_find
+  changed_when: false
+  failed_when: false
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
+- name: "设置 CRI socket 路径"
+  ansible.builtin.set_fact:
+    kubernetes_cri_socket: "{{ '/run/containerd/containerd.sock' if kubernetes_cri_socket_find.stdout == '' else kubernetes_cri_socket_find.stdout }}"
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
+- name: 输出 CRI socket 检查结果
+  ansible.builtin.debug:
+    msg: "CRI socket {{ kubernetes_cri_socket | default('/run/containerd/containerd.sock') }}"
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
 - name: "Linux重启Docker"
   ansible.builtin.systemd:
     name: "docker"
@@ -164,8 +196,9 @@
   when: common_is_linux_os
 
 - name: "Linux检查kubeadm-flags.env文件是否存在"
-  ansible.builtin.shell: "test -f /var/lib/kubelet/kubeadm-flags.env && echo 0 || echo 1"
-  register: kubernetes_existing_of_flags
+  ansible.builtin.stat:
+    path: /var/lib/kubelet/kubeadm-flags.env
+  register: kubernetes_flags_stat
   changed_when: false
   tags:
     - kubeadm
@@ -173,7 +206,7 @@
 
 - name: 输出 kubeadm-flags.env 检查结果
   ansible.builtin.debug:
-    msg: "kubeadm-flags.env {{ '已存在' if kubernetes_existing_of_flags.stdout == '0' else '不存在' }}"
+    msg: "kubeadm-flags.env {{ '已存在' if kubernetes_flags_stat.stat.exists else '不存在' }}"
   tags:
     - kubeadm
   when: common_is_linux_os
@@ -186,14 +219,14 @@
   failed_when: false
   tags:
     - kubeadm
-  when: common_is_linux_os and "stdout" in kubernetes_existing_of_flags and kubernetes_existing_of_flags.stdout == "0"
+  when: common_is_linux_os and kubernetes_flags_stat.stat.exists
 
-- name: "脚本方式拉取镜像"
-  ansible.builtin.script: "pull-images.sh"
-  changed_when: false
-  tags:
-    - kubeadm
-  when: common_is_linux_os
+# - name: "脚本方式拉取镜像"
+#   ansible.builtin.script: "pull-images.sh"
+#   changed_when: false
+#   tags:
+#     - kubeadm
+#   when: common_is_linux_os
 
 - name: "删除重复的文件"
   ansible.builtin.file:
@@ -224,8 +257,9 @@
   when: common_is_master_node
 
 - name: "检查CNI插件是否已经下载"
-  ansible.builtin.shell: "test -f {{ kubernetes_cni_plugins_path_on_linux }} && echo 0 || echo 1"
-  register: kubernetes_existing_of_cni_plugins
+  ansible.builtin.stat:
+    path: "{{ kubernetes_cni_plugins_path_on_linux }}"
+  register: kubernetes_cni_plugins_stat
   changed_when: false
   tags:
     - kubeadm
@@ -233,7 +267,7 @@
 
 - name: 输出 CNI 插件安装包检查结果
   ansible.builtin.debug:
-    msg: "CNI 插件安装包 {{ '已存在' if kubernetes_existing_of_cni_plugins.stdout == '0' else '不存在' }}"
+    msg: "CNI 插件安装包 {{ '已存在' if kubernetes_cni_plugins_stat.stat.exists else '不存在' }}"
   tags:
     - kubeadm
   when: common_is_linux_os
@@ -254,7 +288,7 @@
         dest: "{{ kubernetes_cni_plugins_path_on_linux }}"
         force: false
         mode: "0644"
-      when: '"stdout" in kubernetes_existing_of_cni_plugins and kubernetes_existing_of_cni_plugins.stdout == "1"'
+      when: common_is_linux_os and not kubernetes_cni_plugins_stat.stat.exists
 
     - name: "解压CNI插件"
       ansible.builtin.unarchive:

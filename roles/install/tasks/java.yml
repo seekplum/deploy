@@ -11,8 +11,9 @@
   when: common_is_linux_os
 
 - name: 检查 Linux 上是否已有 Java 安装包
-  ansible.builtin.shell: "test -f {{ install_java_package_path_on_linux }} && echo 0 || echo 1"
-  register: install_existing_of_java_on_linux
+  ansible.builtin.stat:
+    path: "{{ install_java_package_path_on_linux }}"
+  register: install_java_package_linux_stat
   changed_when: false
   tags:
     - java
@@ -20,7 +21,7 @@
 
 - name: 输出 Linux Java 安装包检查结果
   ansible.builtin.debug:
-    msg: "Linux Java 安装包 {{ '已存在' if install_existing_of_java_on_linux.stdout == '0' else '不存在' }}"
+    msg: "Linux Java 安装包 {{ '已存在' if install_java_package_linux_stat.stat.exists else '不存在' }}"
   tags:
     - java
   when: common_is_linux_os
@@ -51,7 +52,7 @@
         dest: "{{ install_java_package_path_on_linux }}"
         force: false
         mode: "0644"
-      when: (common_is_linux_os) and install_existing_of_java_on_linux.stdout == "1"
+      when: (common_is_linux_os) and not install_java_package_linux_stat.stat.exists
 
     - name: 在 Linux 上解压 Java
       ansible.builtin.unarchive:
@@ -63,8 +64,9 @@
       become_method: ansible.builtin.sudo
       when: (common_is_linux_os) and install_installed_of_java.stdout == "1"
 - name: 检查 Linux 上是否已有 Maven 安装包
-  ansible.builtin.shell: "test -f {{ install_mvn_package_path_on_linux }} && echo 0 || echo 1"
-  register: install_existing_of_mvn_on_linux
+  ansible.builtin.stat:
+    path: "{{ install_mvn_package_path_on_linux }}"
+  register: install_mvn_package_linux_stat
   changed_when: false
   tags:
     - java
@@ -72,7 +74,7 @@
 
 - name: 输出 Linux Maven 安装包检查结果
   ansible.builtin.debug:
-    msg: "Linux Maven 安装包 {{ '已存在' if install_existing_of_mvn_on_linux.stdout == '0' else '不存在' }}"
+    msg: "Linux Maven 安装包 {{ '已存在' if install_mvn_package_linux_stat.stat.exists else '不存在' }}"
   tags:
     - java
   when: common_is_linux_os
@@ -102,7 +104,7 @@
         dest: "{{ install_mvn_package_path_on_linux }}"
         force: false
         mode: "0644"
-      when: (common_is_linux_os) and install_existing_of_mvn_on_linux.stdout == "1"
+      when: (common_is_linux_os) and not install_mvn_package_linux_stat.stat.exists
 
     - name: 创建 Maven 安装目录
       ansible.builtin.file:

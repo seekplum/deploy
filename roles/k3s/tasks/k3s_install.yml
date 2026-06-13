@@ -312,14 +312,15 @@
 
   block:
     - name: 检查 Linux 上是否已有 stern 安装包
-      ansible.builtin.shell: "test -f {{ k3s_stern_package_path_on_linux }} && echo 0 || echo 1"
-      register: k3s_existing_of_stern_on_linux
+      ansible.builtin.stat:
+        path: "{{ k3s_stern_package_path_on_linux }}"
+      register: k3s_stern_package_linux_stat
       changed_when: false
       when: (common_is_linux_os) and k3s_installed_of_stern.stdout == "1"
 
     - name: 输出 Linux stern 安装包检查结果
       ansible.builtin.debug:
-        msg: "Linux stern 安装包 {{ '已存在' if k3s_existing_of_stern_on_linux.stdout == '0' else '不存在' }}"
+        msg: "Linux stern 安装包 {{ '已存在' if k3s_stern_package_linux_stat.stat.exists else '不存在' }}"
       when: (common_is_linux_os) and k3s_installed_of_stern.stdout == "1"
 
     - name: 在 Linux 上下载 stern 安装包
@@ -328,7 +329,7 @@
         dest: "{{ k3s_stern_package_path_on_linux }}"
         force: false
         mode: "0644"
-      when: common_is_linux_os and common_is_master_node and k3s_installed_of_stern.stdout == "1" and k3s_existing_of_stern_on_linux.stdout == "1"
+      when: common_is_linux_os and common_is_master_node and k3s_installed_of_stern.stdout == "1" and not k3s_stern_package_linux_stat.stat.exists
     - name: 在 Linux 上解压 stern
       ansible.builtin.unarchive:
         src: "{{ k3s_stern_package_path_on_linux }}"
@@ -344,8 +345,9 @@
         remote_src: true
       when: common_is_linux_os and common_is_master_node and k3s_installed_of_stern.stdout == "1"
 - name: 检查 Linux 上是否已有 helm 安装包
-  ansible.builtin.shell: "test -f {{ k3s_helm_package_path_on_linux }} && echo 0 || echo 1"
-  register: k3s_existing_of_helm_on_linux
+  ansible.builtin.stat:
+    path: "{{ k3s_helm_package_path_on_linux }}"
+  register: k3s_helm_package_linux_stat
   changed_when: false
   tags:
     - helm
@@ -353,7 +355,7 @@
 
 - name: 输出 Linux helm 安装包检查结果
   ansible.builtin.debug:
-    msg: "Linux helm 安装包 {{ '已存在' if k3s_existing_of_helm_on_linux.stdout == '0' else '不存在' }}"
+    msg: "Linux helm 安装包 {{ '已存在' if k3s_helm_package_linux_stat.stat.exists else '不存在' }}"
   tags:
     - helm
   when: common_is_linux_os and common_is_master_node
@@ -384,7 +386,7 @@
         dest: "{{ k3s_helm_package_path_on_linux }}"
         force: false
         mode: "0644"
-      when: common_is_linux_os and common_is_master_node and k3s_existing_of_helm_on_linux.stdout == "1"
+      when: common_is_linux_os and common_is_master_node and not k3s_helm_package_linux_stat.stat.exists
 
     - name: 在 Linux 上解压 helm
       ansible.builtin.unarchive:

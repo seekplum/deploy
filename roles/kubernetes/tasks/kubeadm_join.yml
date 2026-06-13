@@ -16,16 +16,32 @@
   register: kubernetes_kubeadm_init
   with_items:
     - "netstat -alnp | grep -E ':6443 |:10251 |:10252 |:10250 ' | awk '{print $7}' | cut -d'/' -f1 | grep -v '-' | xargs kill -9 >/dev/null 2&> 1"
-    - "kubeadm init"
+    - "kubeadm init --ignore-preflight-errors=Cri --cri-socket={{ kubernetes_cri_socket }}"
   changed_when: true
   failed_when: false
   tags:
     - join_kubeadm
   when: common_is_master_node
 
-- name: "输出初始化信息"
+- name: 输出初始化信息
   ansible.builtin.debug:
     msg: "{{ kubernetes_kubeadm_init }}"
+  tags:
+    - join_kubeadm
+  when: common_is_master_node
+
+- name: 检查 Master 初始化是否成功
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubernetes_admin_conf_stat
+  changed_when: false
+  tags:
+    - join_kubeadm
+  when: common_is_master_node
+
+- name: 输出 Master 初始化检查结果
+  ansible.builtin.debug:
+    msg: "Master 初始化 {{ '成功' if kubernetes_admin_conf_stat.stat.exists else '失败，请检查日志' }}"
   tags:
     - join_kubeadm
   when: common_is_master_node
@@ -38,18 +54,18 @@
   changed_when: true
   tags:
     - join_kubeadm
-  when: common_is_master_node
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists
 
-- name: "在 Master 上安装 Pod 网络"
-  ansible.builtin.shell: |
-    set -o pipefail
-    kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
-  args:
-    executable: /bin/bash
-  changed_when: true
-  tags:
-    - join_kubeadm
-  when: common_is_master_node
+# - name: "在 Master 上安装 Pod 网络"
+#   ansible.builtin.shell: |
+#     set -o pipefail
+#     kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+#   args:
+#     executable: /bin/bash
+#   changed_when: true
+#   tags:
+#     - join_kubeadm
+#   when: common_is_master_node
 
 - name: "查询coredns角色配置"
   ansible.builtin.command: "kubectl get clusterrole system:coredns -o yaml"
@@ -57,7 +73,7 @@
   changed_when: false
   tags:
     - join_kubeadm
-  when: common_is_master_node
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists
 
 - name: "设置更新后内容"
   ansible.builtin.set_fact:
@@ -65,14 +81,14 @@
       \  - watch' }}"
   tags:
     - join_kubeadm
-  when: common_is_master_node and "stdout" in kubernetes_coredns_configured
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists and "stdout" in kubernetes_coredns_configured
 
 - name: "输出coredns配置"
   ansible.builtin.debug:
     msg: "{{ kubernetes_coredns_yml_output }}"
   tags:
     - join_kubeadm
-  when: common_is_master_node and kubernetes_coredns_yml_output is defined
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists and kubernetes_coredns_yml_output is defined
 
 - name: "修复coredns角色异常"
   # https://github.com/coredns/helm/issues/9
@@ -84,7 +100,7 @@
   changed_when: true
   tags:
     - join_kubeadm
-  when: common_is_master_node and kubernetes_coredns_yml_output is defined
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists and kubernetes_coredns_yml_output is defined
 
 - name: "修复组件健康状态异常"
   ansible.builtin.replace:
@@ -96,7 +112,7 @@
     - /etc/kubernetes/manifests/kube-controller-manager.yaml
   tags:
     - join_kubeadm
-  when: common_is_master_node
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists
 
 - name: "重启kubelet"
   ansible.builtin.service:
@@ -105,7 +121,7 @@
     enabled: "yes"
   tags:
     - join_kubeadm
-  when: common_is_master_node
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists
 
 - name: "获取kubeadm token"
   ansible.builtin.shell: |
@@ -117,14 +133,14 @@
   changed_when: false
   tags:
     - join_kubeadm
-  when: common_is_master_node
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists
 
 - name: "设置 token 变量"
   ansible.builtin.set_fact:
     kubernetes_kubeadm_token: "{{ kubernetes_get_kubeadm_token.stdout }}"
   tags:
     - join_kubeadm
-  when: common_is_master_node and "stdout" in kubernetes_get_kubeadm_token
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists and "stdout" in kubernetes_get_kubeadm_token
 
 - name: "生成kubeadm token"
   ansible.builtin.command: kubeadm token create
@@ -132,21 +148,21 @@
   changed_when: false
   tags:
     - join_kubeadm
-  when: common_is_master_node and kubernetes_kubeadm_token is defined and kubernetes_kubeadm_token == ""
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists and kubernetes_kubeadm_token is defined and kubernetes_kubeadm_token == ""
 
 - name: "设置重新生成的 token 变量"
   ansible.builtin.set_fact:
     kubernetes_kubeadm_token: "{{ kubernetes_create_kubeadm_token.stdout }}"
   tags:
     - join_kubeadm
-  when: common_is_master_node and kubernetes_kubeadm_token is defined and kubernetes_kubeadm_token == ""
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists and kubernetes_kubeadm_token is defined and kubernetes_kubeadm_token == ""
 
 - name: "输出token"
   ansible.builtin.debug:
     var: kubernetes_kubeadm_token
   tags:
     - join_kubeadm
-  when: common_is_master_node and kubernetes_kubeadm_token is defined
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists and kubernetes_kubeadm_token is defined
 
 - name: "生成kubeadm join命令"
   ansible.builtin.command: "echo kubeadm join --token={{ kubernetes_kubeadm_token }} {{ hostvars[groups['masters'][0]].ansible_default_ipv4.address }}:6443 --discovery-token-unsafe-skip-ca-verification"
@@ -154,14 +170,14 @@
   changed_when: false
   tags:
     - join_kubeadm
-  when: common_is_master_node and kubernetes_kubeadm_token is defined
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists and kubernetes_kubeadm_token is defined
 
 - name: "输出join命令"
   ansible.builtin.debug:
     var: kubernetes_kubeadm_join_token.stdout
   tags:
     - join_kubeadm
-  when: common_is_master_node and kubernetes_kubeadm_join_token is defined and "results" in kubernetes_kubeadm_join_token and "stdout" in
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists and kubernetes_kubeadm_join_token is defined and "results" in kubernetes_kubeadm_join_token and "stdout" in
     kubernetes_kubeadm_join_token
 
 - name: "设置加入节点命令"
@@ -169,7 +185,7 @@
     kubernetes_kubeadm_join_token_cmd: "{{ kubernetes_kubeadm_join_token.stdout }}"
   tags:
     - join_kubeadm
-  when: common_is_master_node and "stdout" in kubernetes_kubeadm_join_token
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists and "stdout" in kubernetes_kubeadm_join_token
 
 - name: "将 Slave 节点加入 Kubernetes"
   ansible.builtin.command: '{{ hostvars[groups["masters"][0]]["kubernetes_kubeadm_join_token_cmd"] }}'
@@ -177,7 +193,7 @@
   changed_when: true
   tags:
     - join_kubeadm
-  when: common_is_slaves_node and "kubernetes_kubeadm_join_token_cmd" in hostvars[groups["masters"][0]] and
+  when: common_is_slaves_node and kubernetes_admin_conf_stat.stat.exists and "kubernetes_kubeadm_join_token_cmd" in hostvars[groups["masters"][0]] and
     hostvars[groups["masters"][0]]["kubernetes_kubeadm_join_token_cmd"] != ""
 
 - name: "输出slave join结果"
@@ -185,7 +201,7 @@
     var: kubernetes_slave_kubeadm_join_result.stdout
   tags:
     - join_kubeadm
-  when: common_is_slaves_node
+  when: common_is_slaves_node and kubernetes_admin_conf_stat.stat.exists
 
 - name: "查询节点、Pod状态"
   ansible.builtin.command: "{{ item }}"
@@ -196,11 +212,11 @@
     - kubectl --namespace kube-system get pods -o wide
   tags:
     - join_kubeadm
-  when: common_is_master_node
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists
 
 - name: "输出Pod信息"
   ansible.builtin.debug:
     msg: "{{ kubernetes_kubeadm_pods_info }}"
   tags:
     - join_kubeadm
-  when: common_is_master_node
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists
