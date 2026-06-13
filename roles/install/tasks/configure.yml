@@ -40,13 +40,6 @@
   failed_when: false
   when: common_is_mac_os
 
-# - name: replace brew source On macOS
-#   shell: "{{ install_packages_root }}/replace_brew_source.sh"
-#   tags:
-#     - configure
-#   ignore_errors: true
-#   when: common_is_mac_os
-
 - name: 在 Ubuntu 上导入 GPG 密钥
   ansible.builtin.shell: |
     set -o pipefail

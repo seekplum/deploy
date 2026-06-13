@@ -9,7 +9,7 @@
 * 安装ansible
 
 ```bash
-sudo pip install ansible -i https://pypi.douban.com/simple/
+uv sync
 ```
 
 ## 适用系统
@@ -27,7 +27,6 @@ sudo pip install ansible -i https://pypi.douban.com/simple/
 * `docker`: 安装docker
 * `golang`: 安装golang和govendor
 * `nodejs`: 安装npm和nodejs
-* `ansible`: 安装ansible
 * `install`: 运行所有安装任务
 * `uninstall`: 运行所有卸载任务
 
@@ -79,7 +78,7 @@ ansible-playbook site.yml -i hosts -l common -t common,remove_docker
 * 执行安装操作
 
 ```bash
-ansible-playbook site.yml -e @.local-variables.yml -i hosts -t install --skip-tags "configure,initialize,zsh,python,virtualenv,rbenv,docker,golang,java,nodejs,ansible"
+ansible-playbook site.yml -i hosts -t install --skip-tags "configure,initialize,zsh,python,virtualenv,rbenv,docker,golang,java,nodejs"
 
 ansible-playbook site.yml -i hosts -l common -t common,docker --extra-vars DOCKER_VERSION=-23.0.3-1.el7 --extra-vars DOCKER_CLI_VERSION=-23.0.3-1.el7
 ```

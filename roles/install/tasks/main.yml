@@ -100,21 +100,3 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
-
-    - name: 检查 ansible 是否已安装
-      ansible.builtin.shell: "ansible --version >/dev/null 2>&1 && echo 0 || echo 1"
-      args:
-        executable: /tmp/ansible-shell-wrapper
-      register: install_existing_of_ansible
-      changed_when: false
-      tags:
-        - ansible
-
-    - name: 安装 ansible
-      ansible.builtin.shell: "pip install ansible"
-      args:
-        executable: /tmp/ansible-shell-wrapper
-      changed_when: true
-      tags:
-        - ansible
-      when: install_existing_of_ansible.stdout == "1"
