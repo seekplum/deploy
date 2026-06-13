@@ -1,0 +1,21 @@
+---
+- name: 卸载 nvm、npm 和 node
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ common_home_root }}/.nvm"
+    - "{{ common_home_root }}/.npm"
+    - "{{ common_home_root }}/.yarn"
+    - "{{ common_home_root }}/.pnpm-state "
+    - "{{ common_home_root }}/.node-gyp"
+    - "{{ common_home_root }}/.npminstall_tarball"
+    - "/usr/local/n"
+    - "/usr/local/bin/node"
+    - "/usr/local/bin/npm"
+    - "/usr/local/bin/n"
+    - "/usr/local/lib/node_modules"
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_nodejs

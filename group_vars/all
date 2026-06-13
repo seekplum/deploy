@@ -3,3 +3,4 @@
 
 httpd_port: 80
 repository: https://github.com/seekplum/deploy.git
+common_fallback_path: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin"

@@ -31,8 +31,18 @@
 
 - name: "输出节点操作系统"
   ansible.builtin.debug:
-    msg: "[{{ ansible_hostname }}] common_is_linux_os: {{ common_is_linux_os }}, common_is_ubuntu_os: {{ common_is_ubuntu_os }}, common_is_centos_os: {{ common_is_centos_os
-      }}, common_is_mac_os: {{ common_is_mac_os }}"
+    msg:
+      节点名称: "{{ ansible_hostname }}"
+      系统家族: "{{ ansible_os_family }}"
+      系统版本: "{{ ansible_distribution_version | default('未知') }}"
+      CPU架构: "{{ ansible_architecture | default('未知') }}"
+      是否Linux: "{{ '是' if common_is_linux_os else '否' }}"
+      是否Ubuntu或Debian: "{{ '是' if common_is_ubuntu_os else '否' }}"
+      是否RedHat或CentOS: "{{ '是' if common_is_centos_os else '否' }}"
+      是否macOS: "{{ '是' if common_is_mac_os else '否' }}"
+      是否Apple芯片macOS: "{{ '是' if common_is_apple_mac_os else '否' }}"
+      是否Intel芯片macOS: "{{ '是' if common_is_intel_mac_os else '否' }}"
+      是否macOS高版本: "{{ '是' if common_is_high_mac_os else '否' }}"
   tags:
     - common
     - always
@@ -50,8 +60,68 @@
 
 - name: "输出节点类型"
   ansible.builtin.debug:
-    msg: "[{{ ansible_hostname }}] Group Names: {{ group_names }}, Is Common Node {{ common_is_common_node }}, Is Master Node {{ common_is_master_node }}, Is Slaves
-      Node {{ common_is_slaves_node }}."
+    msg:
+      节点名称: "{{ ansible_hostname }}"
+      所属主机组: "{{ group_names }}"
+      是否通用节点: "{{ '是' if common_is_common_node else '否' }}"
+      是否Master节点: "{{ '是' if common_is_master_node else '否' }}"
+      是否Slave节点: "{{ '是' if common_is_slaves_node else '否' }}"
+  tags:
+    - common
+    - always
+  when: common_done_once_role is not defined
+
+- name: 获取目标节点登录 shell PATH
+  ansible.builtin.shell: |
+    set -o pipefail
+    {{ ansible_env.SHELL | default('/bin/sh') }} -lc 'printf "%s" "$PATH"'
+  args:
+    executable: /bin/bash
+  register: common_login_path_result
+  changed_when: false
+  failed_when: false
+  tags:
+    - common
+    - always
+  when: common_done_once_role is not defined
+
+- name: 生成目标节点环境变量
+  ansible.builtin.set_fact:
+    common_target_home: "{{ ansible_user_dir | default(common_home_root | default('')) }}"
+    common_target_path: >-
+      {{
+        (
+          [
+            common_login_path_result.stdout | default(''),
+            ansible_env.PATH | default(''),
+            common_fallback_path
+          ] +
+          [
+            (ansible_user_dir | default(common_home_root | default(''))) + '/.local/bin',
+            (ansible_user_dir | default(common_home_root | default(''))) + '/.lima/.bin',
+            (ansible_user_dir | default(common_home_root | default(''))) + '/.cargo/bin',
+            (ansible_user_dir | default(common_home_root | default(''))) + '/.atuin/bin',
+            '/usr/local/sbin',
+            '/usr/local/bin',
+            '/usr/sbin',
+            '/sbin',
+            '/usr/bin',
+            '/bin',
+            '/opt/homebrew/bin',
+            '/usr/local/n/bin',
+            '/nix/var/nix/profiles/default/bin/nix'
+          ]
+        ) | reject('match', '^$') | unique | join(':')
+      }}
+  tags:
+    - common
+    - always
+  when: common_done_once_role is not defined
+
+- name: 打印目标节点 PATH
+  ansible.builtin.debug:
+    msg: "{{ common_target_path }}"
+  changed_when: false
   tags:
     - common
     - always

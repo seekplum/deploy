@@ -3,64 +3,35 @@
 
 - name: 执行 zsh 卸载任务
   ansible.builtin.include_tasks: zsh.yml
+  tags:
+    - always
 
 - name: 执行 Docker 卸载任务
   ansible.builtin.include_tasks: docker.yml
-
-- name: 在 macOS 上卸载 Homebrew
-  ansible.builtin.shell: '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"'
-  changed_when: true
   tags:
-    - remove_brew
-  when: common_is_mac_os and ansible_user_id != "root"
+    - always
 
-- name: 卸载 nvm、npm 和 node
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - "{{ common_home_root }}/.nvm"
-    - "{{ common_home_root }}/.npm"
-    - "{{ common_home_root }}/.yarn"
-    - "{{ common_home_root }}/.pnpm-state "
-    - "{{ common_home_root }}/.node-gyp"
-    - "{{ common_home_root }}/.npminstall_tarball"
-    - "/usr/local/n"
-    - "/usr/local/bin/node"
-    - "/usr/local/bin/npm"
-    - "/usr/local/bin/n"
-    - "/usr/local/lib/node_modules"
-  become: true
-  become_method: ansible.builtin.sudo
+- name: 执行初始化软件卸载任务
+  ansible.builtin.include_tasks: initialize.yml
   tags:
-    - remove_nodejs
+    - always
 
-- name: 卸载 Go
-  ansible.builtin.file:
-    path: "{{ common_goroot }}"
-    state: absent
-  become: true
-  become_method: ansible.builtin.sudo
+- name: 执行 Node.js 卸载任务
+  ansible.builtin.include_tasks: nodejs.yml
   tags:
-    - remove_golang
+    - always
 
-- name: 在 RedHat 上卸载 Java 软件包
-  ansible.builtin.dnf:
-    name: "*java*"
-    state: absent
-    autoremove: true
-  become: true
-  become_method: ansible.builtin.sudo
-  failed_when: false
+- name: 执行 Go 卸载任务
+  ansible.builtin.include_tasks: golang.yml
   tags:
-    - remove_java
-  when: common_is_centos_os
+    - always
 
-- name: 卸载 Java
-  ansible.builtin.file:
-    path: "{{ common_java_home }}"
-    state: absent
-  become: true
-  become_method: ansible.builtin.sudo
+- name: 执行 Java 卸载任务
+  ansible.builtin.include_tasks: java.yml
   tags:
-    - remove_java
+    - always
+
+- name: 执行 Python Virtualenv 卸载任务
+  ansible.builtin.include_tasks: virtualenv.yml
+  tags:
+    - always

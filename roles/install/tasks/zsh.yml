@@ -6,6 +6,12 @@
   tags:
     - zsh
 
+- name: 输出 zsh 检查结果
+  ansible.builtin.debug:
+    msg: "zsh {{ '已安装' if install_installed_of_zsh.stdout == '0' else '未安装' }}"
+  tags:
+    - zsh
+
 - name: 检查 oh-my-zsh 是否已安装
   ansible.builtin.shell: "test -d {{ common_home_root }}/.oh-my-zsh/ && echo 0 || echo 1"
   register: install_installed_of_oh_my_zsh
@@ -13,10 +19,22 @@
   tags:
     - zsh
 
+- name: 输出 oh-my-zsh 检查结果
+  ansible.builtin.debug:
+    msg: "oh-my-zsh {{ '已安装' if install_installed_of_oh_my_zsh.stdout == '0' else '未安装' }}"
+  tags:
+    - zsh
+
 - name: 检查 zsh-autosuggestions 是否已安装
   ansible.builtin.shell: "test -d {{ common_home_root }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions && echo 0 || echo 1"
   register: install_installed_of_oh_my_zsh_autosuggestions
   changed_when: false
+  tags:
+    - zsh
+
+- name: 输出 zsh-autosuggestions 检查结果
+  ansible.builtin.debug:
+    msg: "zsh-autosuggestions {{ '已安装' if install_installed_of_oh_my_zsh_autosuggestions.stdout == '0' else '未安装' }}"
   tags:
     - zsh
 

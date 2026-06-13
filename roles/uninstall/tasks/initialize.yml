@@ -1,0 +1,189 @@
+---
+- name: 删除 chezmoi
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/bin/chezmoi
+    - "{{ common_home_root }}/.local/bin/chezmoi"
+    - "{{ common_home_root }}/.config/chezmoi"
+    - "{{ common_home_root }}/.local/share/chezmoi"
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_initialize
+    - remove_chezmoi
+
+- name: 删除 drone
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/bin/drone
+    - "{{ common_home_root }}/.drone"
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_initialize
+    - remove_drone
+
+- name: 删除 act
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/bin/act
+    - "{{ common_home_root }}/.cache/act"
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_initialize
+    - remove_act
+
+- name: 删除 uv
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ common_home_root }}/.local/bin/uv"
+    - "{{ common_home_root }}/.local/bin/uvx"
+    - "{{ common_home_root }}/.cache/uv"
+    - "{{ common_home_root }}/.uv"
+  tags:
+    - remove_initialize
+    - remove_uv
+
+- name: 删除 devbox
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/bin/devbox
+    - "{{ common_home_root }}/.local/bin/devbox"
+    - "{{ common_home_root }}/.cache/devbox"
+    - "{{ common_home_root }}/.local/share/devbox"
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_initialize
+    - remove_devbox
+
+- name: 卸载 nix daemon 或标记直接删除
+  ansible.builtin.shell: |
+    set -o pipefail
+    if [ -x /nix/nix-installer ]; then
+      /nix/nix-installer uninstall --no-confirm
+    elif command -v nix >/dev/null 2>&1; then
+      echo "nix exists, remove nix files directly"
+    else
+      echo "nix not exists"
+    fi
+  args:
+    executable: /bin/bash
+  register: uninstall_nix_daemon_result
+  changed_when: "'nix not exists' not in uninstall_nix_daemon_result.stdout"
+  failed_when: false
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_initialize
+    - remove_nix
+
+- name: 删除 nix 文件
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /nix
+    - /etc/nix
+    - "{{ common_home_root }}/.nix-profile"
+    - "{{ common_home_root }}/.nix-defexpr"
+    - "{{ common_home_root }}/.nix-channels"
+    - "{{ common_home_root }}/.cache/nix"
+    - "{{ common_home_root }}/.config/nix"
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_initialize
+    - remove_nix
+
+- name: 删除 direnv
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/bin/direnv
+    - "{{ common_home_root }}/.config/direnv"
+    - "{{ common_home_root }}/.local/share/direnv"
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_initialize
+    - remove_direnv
+
+- name: 删除 atuin
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ common_home_root }}/.atuin"
+    - "{{ common_home_root }}/.local/bin/atuin"
+    - "{{ common_home_root }}/.config/atuin"
+    - "{{ common_home_root }}/.local/share/atuin"
+  tags:
+    - remove_initialize
+    - remove_atuin
+
+- name: 删除 sing-box
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/bin/sing-box
+    - /usr/bin/sing-box
+    - /etc/sing-box
+    - /var/lib/sing-box
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_initialize
+    - remove_sing_box
+  when: common_is_linux_os
+
+- name: 删除 Rust 和 cargo
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ common_home_root }}/.cargo"
+    - "{{ common_home_root }}/.rustup"
+  tags:
+    - remove_initialize
+    - remove_cargo
+
+- name: 在 macOS 上通过 MacPorts 卸载软件包
+  ansible.builtin.command: "port -N uninstall {{ item }}"
+  loop:
+    - knot
+  register: uninstall_macports_package_result
+  changed_when: uninstall_macports_package_result.rc == 0
+  failed_when: false
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_initialize
+    - remove_macports
+  when: common_is_mac_os
+
+- name: 在 macOS 上卸载 Homebrew Cask 应用
+  ansible.builtin.command: "brew uninstall --cask {{ item }} --force"
+  loop:
+    - cc-switch
+    - warp
+  register: uninstall_homebrew_cask_result
+  changed_when: uninstall_homebrew_cask_result.rc == 0
+  failed_when: false
+  tags:
+    - remove_initialize
+    - remove_brew
+  when: common_is_mac_os

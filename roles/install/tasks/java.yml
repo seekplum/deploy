@@ -18,10 +18,24 @@
     - java
   when: common_is_linux_os
 
+- name: 输出 Linux Java 安装包检查结果
+  ansible.builtin.debug:
+    msg: "Linux Java 安装包 {{ '已存在' if install_existing_of_java_on_linux.stdout == '0' else '不存在' }}"
+  tags:
+    - java
+  when: common_is_linux_os
+
 - name: 检查 Java 是否已安装
   ansible.builtin.shell: "java --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_installed_of_java
   changed_when: false
+  tags:
+    - java
+  when: common_is_linux_os
+
+- name: 输出 Java 检查结果
+  ansible.builtin.debug:
+    msg: "Java {{ '已安装' if install_installed_of_java.stdout == '0' else '未安装' }}"
   tags:
     - java
   when: common_is_linux_os
@@ -56,10 +70,24 @@
     - java
   when: common_is_linux_os
 
+- name: 输出 Linux Maven 安装包检查结果
+  ansible.builtin.debug:
+    msg: "Linux Maven 安装包 {{ '已存在' if install_existing_of_mvn_on_linux.stdout == '0' else '不存在' }}"
+  tags:
+    - java
+  when: common_is_linux_os
+
 - name: 检查 Maven 是否已安装
   ansible.builtin.shell: "mvn --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_installed_of_mvn
   changed_when: false
+  tags:
+    - java
+  when: common_is_linux_os
+
+- name: 输出 Maven 检查结果
+  ansible.builtin.debug:
+    msg: "Maven {{ '已安装' if install_installed_of_mvn.stdout == '0' else '未安装' }}"
   tags:
     - java
   when: common_is_linux_os

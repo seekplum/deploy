@@ -61,6 +61,44 @@
    - 确认会修改系统：`changed_when: true`
    - 允许失败但不中断：使用 `failed_when: false`，不要用 `ignore_errors`
 
+7. 先检查、输出结果、再操作
+
+   安装、卸载、配置修改这类可重复执行任务，应拆成三段：
+
+   - 检查任务：只判断状态，注册 role 前缀变量，`changed_when: false`
+   - 输出任务：用中文 `debug` 输出检查结果，便于从 playbook 日志判断为什么跳过或执行
+   - 操作任务：只在检查结果需要变更时执行
+
+   示例：
+
+   ```yaml
+   - name: 检查 Node.js 是否已安装
+     ansible.builtin.shell: "node -v >/dev/null 2>&1 && echo 0 || echo 1"
+     register: install_installed_of_node
+     changed_when: false
+
+   - name: 输出 Node.js 检查结果
+     ansible.builtin.debug:
+       msg: "Node.js {{ '已安装' if install_installed_of_node.stdout == '0' else '未安装' }}"
+
+   - name: 安装 Node.js 版本
+     ansible.builtin.command: "/usr/local/n/bin/n {{ install_node_version }}"
+     changed_when: true
+     when: install_installed_of_node.stdout == "1"
+   ```
+
+   检查返回值约定：`0` 表示已存在或已安装，`1` 表示不存在或未安装。输出文本按语义使用“已安装/未安装”“已存在/不存在”“已设置/未设置”。
+
+8. 已存在的 Git 仓库默认不更新
+
+   通过 `ansible.builtin.git` 下载 rbenv、插件或类似工具时，如果需求是“已存在则不更新”，必须显式设置：
+
+   ```yaml
+   update: false
+   ```
+
+   不要再额外写“已安装则拉取仓库更新”的 block。需要升级时单独增加明确的 update tag 或专门任务，避免常规安装每次联网拉取。
+
 ## 目标机器环境变量
 
 不要在 playbook 中使用控制机环境：
@@ -104,6 +142,14 @@ PATH: "{{ ansible_env.PATH | default('/usr/local/sbin:/usr/local/bin:/usr/sbin:/
 
 `install` 不维护 `helm`、`stern`、`k3s` 相关变量。这些变量属于 `k3s` role。
 
+虚拟环境任务需要按同样的三段式处理：
+
+- 检查虚拟环境目录或 `bin/python`
+- 输出虚拟环境检查结果
+- 不存在时创建虚拟环境
+- 检查依赖安装标记，例如 `.requirements_installed`
+- 未安装依赖时执行 `uv pip install` 并写入标记文件
+
 ### k3s
 
 `k3s` 自己维护 Kubernetes 辅助工具变量：
@@ -127,6 +173,32 @@ PATH: "{{ ansible_env.PATH | default('/usr/local/sbin:/usr/local/bin:/usr/sbin:/
 - `kubernetes_kubeadm_join_token_cmd`
 
 不要使用大写变量名或无 role 前缀的 register/set_fact 变量。
+
+### uninstall
+
+`uninstall` 应按功能拆分任务文件，`tasks/main.yml` 只负责 include，不直接堆叠具体卸载逻辑。
+
+推荐结构：
+
+- `zsh.yml`
+- `docker.yml`
+- `initialize.yml`
+- `nodejs.yml`
+- `golang.yml`
+- `java.yml`
+- `virtualenv.yml`
+
+每个 include 任务应带 `always` tag，保证通过 `-t remove_virtualenv`、`-t remove_nodejs` 等单独标签执行时可以进入对应任务文件。
+
+安装 role 新增工具时，应同步检查是否需要在 `uninstall` 中增加对应卸载逻辑。例如 `initialize.yml` 安装 `chezmoi`、`uv`、`devbox`、`nix`、`direnv`、`atuin`、`sing-box`、`cargo`，`roles/uninstall/tasks/initialize.yml` 也应维护对应清理任务。
+
+卸载 Python Virtualenv 使用 `uninstall_virtual_root`，默认与安装路径保持一致：
+
+```yaml
+uninstall_virtual_root: "{{ common_home_root }}/packages/pythonenv"
+```
+
+不要在 `uninstall` 中直接引用 `install_virtual_root`。跨 role 路径要么使用 `common_*` 公共变量，要么在当前 role 定义自己的 `uninstall_*` 变量。
 
 ## 常见故障
 
@@ -249,6 +321,26 @@ args:
   failed_when: false
 ```
 
+### 检查任务没有输出导致跳过原因不清楚
+
+只写检查任务和 `when` 条件时，playbook 日志只能看到“skipping”，不容易判断是已安装、安装包已存在，还是检查条件没有命中。
+
+处理方式：每个检查任务后面都补一个中文 `debug` 输出。例如：
+
+```yaml
+- name: 输出 helm 检查结果
+  ansible.builtin.debug:
+    msg: "helm {{ '已安装' if k3s_installed_of_helm.stdout == '0' else '未安装' }}"
+```
+
+对于 `stat` 检查，用 `stat.exists` 输出：
+
+```yaml
+- name: 输出 k3s server 卸载脚本检查结果
+  ansible.builtin.debug:
+    msg: "k3s server 卸载脚本 {{ '已存在' if k3s_server_scripts.stat.exists else '不存在' }}"
+```
+
 ## 验证命令
 
 本地执行 lint 时，如果沙箱或权限不允许写 `~/.ansible/tmp`，可以显式指定临时目录：
@@ -284,10 +376,15 @@ ansible-lint roles/kubernetes
 - [ ] 所有 task `name` 是中文说明
 - [ ] 新变量带 role 前缀
 - [ ] 没有跨 role 引用私有变量
+- [ ] 需要变更的任务按“检查、输出结果、操作”拆分
+- [ ] 每个检查任务后面都有中文检查结果输出
 - [ ] 没有 `ignore_errors`
 - [ ] `command` / `shell` 有 `changed_when`
 - [ ] shell 管道有 `set -o pipefail`
 - [ ] 需要 shell 语法的任务没有误用 `command`
 - [ ] 目标机器路径使用 `common_home_root` 或 `ansible_user_dir`
+- [ ] 已安装则不更新的 Git 仓库设置了 `update: false`
+- [ ] 新增安装逻辑时同步补充对应卸载任务
+- [ ] `uninstall/tasks/main.yml` 只 include 子任务文件，不堆叠具体卸载逻辑
 - [ ] `ansible-lint` 通过
 - [ ] `ansible-playbook --syntax-check` 通过

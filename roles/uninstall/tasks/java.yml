@@ -1,0 +1,34 @@
+---
+- name: 在 RedHat 上卸载 Java 软件包
+  ansible.builtin.dnf:
+    name: "*java*"
+    state: absent
+    autoremove: true
+  become: true
+  become_method: ansible.builtin.sudo
+  failed_when: false
+  tags:
+    - remove_java
+  when: common_is_centos_os
+
+- name: 卸载 Java
+  ansible.builtin.file:
+    path: "{{ common_java_home }}"
+    state: absent
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_java
+
+- name: 卸载 Maven
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ common_mvn_home }}"
+    - "{{ common_home_root }}/apache-maven-3.8.8-bin.tar.gz"
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_java
+    - remove_maven

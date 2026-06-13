@@ -6,10 +6,22 @@
   tags:
     - nodejs
 
+- name: 输出 n 检查结果
+  ansible.builtin.debug:
+    msg: "n {{ '已安装' if install_installed_of_n.stdout == '0' else '未安装' }}"
+  tags:
+    - nodejs
+
 - name: 检查 Node.js 是否已安装
   ansible.builtin.shell: "node -v >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_installed_of_node
   changed_when: false
+  tags:
+    - nodejs
+
+- name: 输出 Node.js 检查结果
+  ansible.builtin.debug:
+    msg: "Node.js {{ '已安装' if install_installed_of_node.stdout == '0' else '未安装' }}"
   tags:
     - nodejs
 

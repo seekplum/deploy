@@ -1,32 +1,31 @@
 ---
 # tasks file for install
 
-- name: 获取 PATH
-  ansible.builtin.command: echo $PATH
-  register: install_current_path_result
+- name: 检查 chezmoi 是否已安装
+  ansible.builtin.shell: "command -v chezmoi >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_chezmoi
   changed_when: false
   tags:
     - initialize
 
-- name: 打印 PATH
+- name: 输出 chezmoi 检查结果
   ansible.builtin.debug:
-    msg: "{{ install_current_path_result.stdout }}"
+    msg: "chezmoi {{ '已安装' if install_existing_of_chezmoi.stdout == '0' else '未安装' }}"
   tags:
     - initialize
 
-- name: 检查并安装 chezmoi
+- name: 安装 chezmoi
   ansible.builtin.shell: |
     set -o pipefail
-    command -v chezmoi >/dev/null 2>&1 && echo chezmoi installed ||
-      (curl -fsLS get.chezmoi.io | sh -s -- -b /usr/local/bin)
+    curl -fsLS get.chezmoi.io | sh -s -- -b /usr/local/bin
   args:
     executable: /bin/bash
-  register: install_chezmoi_result
-  changed_when: "'chezmoi installed' not in install_chezmoi_result.stdout"
+  changed_when: true
   become: true
   become_method: ansible.builtin.sudo
   tags:
     - initialize
+  when: install_existing_of_chezmoi.stdout == "1"
 
 - name: 应用 chezmoi 配置
   ansible.builtin.shell: "chezmoi init && chezmoi apply --force"
@@ -41,14 +40,21 @@
   changed_when: false
   tags:
     - initialize
-  when: common_is_mac_os and ansible_user_id != "root"
+  when: common_is_mac_os
+
+- name: 输出 Homebrew 检查结果
+  ansible.builtin.debug:
+    msg: "Homebrew {{ '已安装' if install_existing_of_brew.stdout == '0' else '未安装' }}"
+  tags:
+    - initialize
+  when: common_is_mac_os
 
 - name: 在 macOS 上安装 Homebrew
   ansible.builtin.shell: 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
   changed_when: true
   tags:
     - initialize
-  when: common_is_mac_os and ansible_user_id != "root" and install_existing_of_brew.stdout == "1"
+  when: common_is_mac_os and install_existing_of_brew.stdout == "1"
 
 # - name: add mysql repo on Redhat
 #   shell: sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
@@ -245,7 +251,7 @@
   failed_when: false
   tags:
     - initialize
-  when: common_is_mac_os and ansible_user_id != "root"
+  when: common_is_mac_os
 
 - name: 信任brew源
   community.general.homebrew_tap:
@@ -257,7 +263,7 @@
     - sunnyyoung/tap
   tags:
     - initialize
-  when: common_is_mac_os and ansible_user_id != "root"
+  when: common_is_mac_os
 
 - name: 在 macOS 上安装基础软件包
   community.general.homebrew:
@@ -290,7 +296,7 @@
   failed_when: false
   tags:
     - initialize
-  when: common_is_mac_os and ansible_user_id != "root"
+  when: common_is_mac_os
 
 - name: 检查 macOS Cask 应用是否已存在
   ansible.builtin.stat:
@@ -305,7 +311,15 @@
   register: install_macos_cask_apps
   tags:
     - initialize
-  when: common_is_mac_os and ansible_user_id != "root"
+  when: common_is_mac_os
+
+- name: 输出 macOS Cask 应用检查结果
+  ansible.builtin.debug:
+    msg: "{{ item.item.name }} {{ '已存在' if item.stat.exists else '不存在' }}"
+  loop: "{{ install_macos_cask_apps.results }}"
+  tags:
+    - initialize
+  when: common_is_mac_os
 
 - name: 在 macOS 上安装 Cask 软件包
   ansible.builtin.shell: |
@@ -320,7 +334,7 @@
   tags:
     - initialize
   when:
-    - common_is_mac_os and ansible_user_id != "root"
+    - common_is_mac_os
     - not item.stat.exists
 
 # 1. 访问 https://www.macports.org/install.php 安装 MacPorts，安装完成后执行以下命令更换 MacPorts 镜像源
@@ -337,7 +351,14 @@
   changed_when: false
   tags:
     - initialize
-  when: common_is_mac_os and ansible_user_id != "root"
+  when: common_is_mac_os
+
+- name: 输出 MacPorts 检查结果
+  ansible.builtin.debug:
+    msg: "MacPorts {{ '已安装' if install_macports_installed.stdout == '0' else '未安装' }}"
+  tags:
+    - initialize
+  when: common_is_mac_os
 
 - name: 在 macOS 上通过 MacPorts 安装软件包
   ansible.builtin.shell: |
@@ -357,100 +378,170 @@
   failed_when: false
   tags:
     - initialize
-  when: common_is_mac_os and ansible_user_id != "root" and install_macports_installed.stdout == "0"
+  when: common_is_mac_os and install_macports_installed.stdout == "0"
 
-- name: 检查并安装 drone
+- name: 检查 drone 是否已安装
+  ansible.builtin.shell: "command -v drone >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_drone
+  changed_when: false
+  tags:
+    - initialize
+
+- name: 输出 drone 检查结果
+  ansible.builtin.debug:
+    msg: "drone {{ '已安装' if install_existing_of_drone.stdout == '0' else '未安装' }}"
+  tags:
+    - initialize
+
+- name: 安装 drone
   ansible.builtin.shell: |
     set -o pipefail
-    command -v drone >/dev/null 2>&1 && echo drone installed || (
-      cd /tmp &&
-      curl -L https://github.com/drone/drone-cli/releases/latest/download/drone_linux_amd64.tar.gz |
-        tar zx &&
-      sudo install drone /usr/local/bin &&
-      rm -f drone
-    )
+    cd /tmp
+    curl -L https://github.com/drone/drone-cli/releases/latest/download/drone_linux_amd64.tar.gz |
+      tar zx
+    sudo install drone /usr/local/bin
+    rm -f drone
   args:
     executable: /bin/bash
-  register: install_drone_result
-  changed_when: "'drone installed' not in install_drone_result.stdout"
-  failed_when: false
+  changed_when: true
   become: true
   become_method: ansible.builtin.sudo
   tags:
     - initialize
+  when: install_existing_of_drone.stdout == "1"
 
-- name: 检查并安装 act
+- name: 检查 act 是否已安装
+  ansible.builtin.shell: "command -v act >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_act
+  changed_when: false
+  tags:
+    - initialize
+
+- name: 输出 act 检查结果
+  ansible.builtin.debug:
+    msg: "act {{ '已安装' if install_existing_of_act.stdout == '0' else '未安装' }}"
+  tags:
+    - initialize
+
+- name: 安装 act
   ansible.builtin.shell: |
     set -o pipefail
-    command -v act >/dev/null 2>&1 && echo act installed || (
-      curl -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh |
-        sudo bash -s -- -b /usr/local/bin
-    )
+    curl -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh |
+      sudo bash -s -- -b /usr/local/bin
   args:
     executable: /bin/bash
-  register: install_act_result
-  changed_when: "'act installed' not in install_act_result.stdout"
-  failed_when: false
+  changed_when: true
   become: true
   become_method: ansible.builtin.sudo
   tags:
     - initialize
+  when: install_existing_of_act.stdout == "1"
 
-- name: 检查并安装 uv
-  ansible.builtin.shell: |
-    set -o pipefail
-    command -v uv >/dev/null 2>&1 && echo uv installed ||
-      (curl -LsSf https://astral.sh/uv/install.sh | sh)
-  args:
-    executable: /bin/bash
-  register: install_uv_result
-  changed_when: "'uv installed' not in install_uv_result.stdout"
-  failed_when: false
+- name: 检查 uv 是否已安装
+  ansible.builtin.shell: "command -v uv >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_uv
+  changed_when: false
   tags:
     - initialize
 
-- name: 检查并安装 devbox
+- name: 输出 uv 检查结果
+  ansible.builtin.debug:
+    msg: "uv {{ '已安装' if install_existing_of_uv.stdout == '0' else '未安装' }}"
+  tags:
+    - initialize
+
+- name: 安装 uv
   ansible.builtin.shell: |
     set -o pipefail
-    command -v devbox >/dev/null 2>&1 && echo devbox installed ||
-      (curl -fsSL https://get.jetify.com/devbox | bash -s -- -f)
+    curl -LsSf https://astral.sh/uv/install.sh | sh
   args:
     executable: /bin/bash
-  register: install_devbox_result
-  changed_when: "'devbox installed' not in install_devbox_result.stdout"
-  failed_when: false
+  changed_when: true
+  tags:
+    - initialize
+  when: install_existing_of_uv.stdout == "1"
+
+- name: 检查 devbox 是否已安装
+  ansible.builtin.shell: "command -v devbox >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_devbox
+  changed_when: false
+  tags:
+    - initialize
+
+- name: 输出 devbox 检查结果
+  ansible.builtin.debug:
+    msg: "devbox {{ '已安装' if install_existing_of_devbox.stdout == '0' else '未安装' }}"
+  tags:
+    - initialize
+
+- name: 安装 devbox
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -fsSL https://get.jetify.com/devbox | bash -s -- -f
+  args:
+    executable: /bin/bash
+  changed_when: true
   become: true
   become_method: ansible.builtin.sudo
   tags:
     - initialize
+  when: install_existing_of_devbox.stdout == "1"
 
-- name: Linux/macOS15 检查并安装 nix
-  ansible.builtin.shell: |
-    set -o pipefail
-    command -v nix >/dev/null 2>&1 && echo nix installed ||
-      (curl -L https://nixos.org/nix/install | sh)
-  args:
-    executable: /bin/bash
-  register: install_nix_result
-  changed_when: "'nix installed' not in install_nix_result.stdout"
-  failed_when: false
+- name: 检查 nix 是否已安装
+  ansible.builtin.shell: "command -v nix >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_nix
+  changed_when: false
   tags:
     - initialize
-  when: (common_is_linux_os or common_is_high_mac_os) and ansible_user_id != "root"
+  when: (common_is_linux_os or common_is_high_mac_os)
 
-- name: MacOS13 检查并安装 nix
-  ansible.builtin.shell: |
-    set -o pipefail
-    command -v nix >/dev/null 2>&1 && echo nix installed ||
-      (curl -L https://releases.nixos.org/nix/nix-2.18.1/install | sh)
-  args:
-    executable: /bin/bash
-  register: install_legacy_nix_result
-  changed_when: "'nix installed' not in install_legacy_nix_result.stdout"
-  failed_when: false
+- name: 输出 nix 检查结果
+  ansible.builtin.debug:
+    msg: "nix {{ '已安装' if install_existing_of_nix.stdout == '0' else '未安装' }}"
   tags:
     - initialize
-  when: common_is_mac_os and not common_is_high_mac_os and ansible_user_id != "root"
+  when: (common_is_linux_os or common_is_high_mac_os)
+
+- name: 在 Linux/macOS15 上安装 nix
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -L https://nixos.org/nix/install | sh -s -- --daemon
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - initialize
+  when:
+    - common_is_linux_os or common_is_high_mac_os
+    - install_existing_of_nix.stdout == "1"
+
+- name: 检查旧版 nix 是否已安装
+  ansible.builtin.shell: "command -v nix >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_legacy_nix
+  changed_when: false
+  tags:
+    - initialize
+  when: common_is_mac_os and not common_is_high_mac_os
+
+- name: 输出旧版 nix 检查结果
+  ansible.builtin.debug:
+    msg: "nix {{ '已安装' if install_existing_of_legacy_nix.stdout == '0' else '未安装' }}"
+  tags:
+    - initialize
+  when: common_is_mac_os and not common_is_high_mac_os
+
+- name: 在 MacOS13 上安装 nix
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -L https://releases.nixos.org/nix/nix-2.18.1/install | sh
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - initialize
+  when:
+    - common_is_mac_os and not common_is_high_mac_os
+    - install_existing_of_legacy_nix.stdout == "1"
 
 - name: "MacOS修改nix配置"
   ansible.builtin.copy:
@@ -462,64 +553,109 @@
   become_method: ansible.builtin.sudo
   tags:
     - initialize
-  when: common_is_mac_os and ansible_user_id != "root"
+  when: common_is_mac_os
 
-- name: 检查并安装 direnv
-  ansible.builtin.shell: |
-    set -o pipefail
-    command -v direnv >/dev/null 2>&1 && echo direnv installed || (
-      curl -sfL https://direnv.net/install.sh |
-        bin_path=/usr/local/bin sudo -E bash
-    )
-  args:
-    executable: /bin/bash
-  register: install_direnv_result
-  changed_when: "'direnv installed' not in install_direnv_result.stdout"
-  failed_when: false
+- name: 检查 direnv 是否已安装
+  ansible.builtin.shell: "command -v direnv >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_direnv
+  changed_when: false
   tags:
     - initialize
+
+- name: 输出 direnv 检查结果
+  ansible.builtin.debug:
+    msg: "direnv {{ '已安装' if install_existing_of_direnv.stdout == '0' else '未安装' }}"
+  tags:
+    - initialize
+
+- name: 安装 direnv
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -sfL https://direnv.net/install.sh |
+      bin_path=/usr/local/bin sudo -E bash
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - initialize
+  when: install_existing_of_direnv.stdout == "1"
 
 - name: 检查 atuin 是否已安装
-  ansible.builtin.shell: |
-    set -o pipefail
-    command -v atuin >/dev/null 2>&1 && echo atuin installed || (
-      curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh |
-        sh -s -- --non-interactive
-    )
-  args:
-    executable: /bin/bash
-  register: install_atuin_result
-  changed_when: "'atuin installed' not in install_atuin_result.stdout"
-  failed_when: false
+  ansible.builtin.shell: "command -v atuin >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_atuin
+  changed_when: false
   tags:
     - initialize
 
-- name: 检查并安装 sing-box
+- name: 输出 atuin 检查结果
+  ansible.builtin.debug:
+    msg: "atuin {{ '已安装' if install_existing_of_atuin.stdout == '0' else '未安装' }}"
+  tags:
+    - initialize
+
+- name: 安装 atuin
   ansible.builtin.shell: |
     set -o pipefail
-    command -v sing-box >/dev/null 2>&1 && echo sing-box installed ||
-      (curl -fsSL https://sing-box.app/install.sh | sh)
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh |
+      sh -s -- --non-interactive
   args:
     executable: /bin/bash
-  register: install_sing_box_result
-  changed_when: "'sing-box installed' not in install_sing_box_result.stdout"
-  failed_when: false
+  changed_when: true
+  tags:
+    - initialize
+  when: install_existing_of_atuin.stdout == "1"
+
+- name: 检查 sing-box 是否已安装
+  ansible.builtin.shell: "command -v sing-box >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_sing_box
+  changed_when: false
   tags:
     - initialize
   when: common_is_linux_os
 
-- name: 检查并安装 cargo
-  ansible.builtin.shell: |
-    set -o pipefail
-    command -v cargo >/dev/null 2>&1 && echo cargo installed ||
-      (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y)
-  args:
-    executable: /bin/bash
-  register: install_cargo_result
-  changed_when: "'cargo installed' not in install_cargo_result.stdout"
-  failed_when: false
+- name: 输出 sing-box 检查结果
+  ansible.builtin.debug:
+    msg: "sing-box {{ '已安装' if install_existing_of_sing_box.stdout == '0' else '未安装' }}"
   tags:
     - initialize
+  when: common_is_linux_os
+
+- name: 安装 sing-box
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -fsSL https://sing-box.app/install.sh | sh
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - initialize
+  when:
+    - common_is_linux_os
+    - install_existing_of_sing_box.stdout == "1"
+
+- name: 检查 cargo 是否已安装
+  ansible.builtin.shell: "command -v cargo >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_cargo
+  changed_when: false
+  tags:
+    - initialize
+
+- name: 输出 cargo 检查结果
+  ansible.builtin.debug:
+    msg: "cargo {{ '已安装' if install_existing_of_cargo.stdout == '0' else '未安装' }}"
+  tags:
+    - initialize
+
+- name: 安装 cargo
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - initialize
+  when: install_existing_of_cargo.stdout == "1"
 
 - name: 检查 rustup 默认工具链是否已设置
   ansible.builtin.shell: |
@@ -530,6 +666,12 @@
   register: install_rustup_default_needed
   changed_when: false
   failed_when: false
+  tags:
+    - initialize
+
+- name: 输出 rustup 默认工具链检查结果
+  ansible.builtin.debug:
+    msg: "rustup 默认工具链 {{ '已设置为 stable' if install_rustup_default_needed.stdout == '0' else '未设置为 stable' }}"
   tags:
     - initialize
 
@@ -562,4 +704,4 @@
   failed_when: false
   tags:
     - initialize
-  when: install_cargo_result is defined
+  when: install_existing_of_cargo.stdout == "0" or install_existing_of_cargo.stdout == "1"

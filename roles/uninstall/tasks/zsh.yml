@@ -18,6 +18,12 @@
   tags:
     - remove_zsh
 
+- name: 输出 .bash_profile 引用 /etc/bashrc 检查结果
+  ansible.builtin.debug:
+    msg: ".bash_profile {{ '已引用 /etc/bashrc' if uninstall_existing_of_etc_bashrc.stdout != '0' else '未引用 /etc/bashrc' }}"
+  tags:
+    - remove_zsh
+
 - name: 写入 /etc/bashrc 引用
   ansible.builtin.shell:
     cmd: |

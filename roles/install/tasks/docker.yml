@@ -6,6 +6,12 @@
   tags:
     - docker
 
+- name: 输出 Docker 检查结果
+  ansible.builtin.debug:
+    msg: "Docker {{ '已安装' if install_installed_of_docker.stdout == '0' else '未安装' }}"
+  tags:
+    - docker
+
 - name: 检查 docker-machine 是否已安装
   ansible.builtin.shell: "docker-machine --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_installed_of_docker_machine
@@ -13,10 +19,22 @@
   tags:
     - docker
 
+- name: 输出 docker-machine 检查结果
+  ansible.builtin.debug:
+    msg: "docker-machine {{ '已安装' if install_installed_of_docker_machine.stdout == '0' else '未安装' }}"
+  tags:
+    - docker
+
 - name: 检查 docker-compose 是否已安装
   ansible.builtin.shell: "docker-compose --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_installed_of_docker_compose
   changed_when: false
+  tags:
+    - docker
+
+- name: 输出 docker-compose 检查结果
+  ansible.builtin.debug:
+    msg: "docker-compose {{ '已安装' if install_installed_of_docker_compose.stdout == '0' else '未安装' }}"
   tags:
     - docker
 
@@ -113,6 +131,13 @@
     - docker
   when: common_is_mac_os
 
+- name: 输出 macOS Docker Desktop 检查结果
+  ansible.builtin.debug:
+    msg: "macOS Docker Desktop {{ '已存在' if install_macos_docker_desktop_app.stat.exists else '不存在' }}"
+  tags:
+    - docker
+  when: common_is_mac_os
+
 - name: 在 macOS 上安装 docker-machine
   ansible.builtin.command: "brew install docker-machine"
   changed_when: true
@@ -179,6 +204,15 @@
   ansible.builtin.stat:
     path: "{{ common_home_root }}/.docker/daemon.json"
   register: install_macos_docker_daemon_config
+  tags:
+    - docker
+  when:
+    - common_is_mac_os
+    - install_macos_docker_desktop_app.stat.exists
+
+- name: 输出 macOS Docker daemon.json 检查结果
+  ansible.builtin.debug:
+    msg: "macOS Docker daemon.json {{ '已存在' if install_macos_docker_daemon_config.stat.exists else '不存在' }}"
   tags:
     - docker
   when:

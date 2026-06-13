@@ -3,9 +3,15 @@
 
 - name: 执行 kubeadm 卸载任务
   ansible.builtin.include_tasks: kubeadm_uninstall.yml
+  tags:
+    - always
 
 - name: 执行 kubeadm 安装任务
   ansible.builtin.include_tasks: kubeadm_install.yml
+  tags:
+    - always
 
 - name: 执行 kubeadm 节点加入任务
   ansible.builtin.include_tasks: kubeadm_join.yml
+  tags:
+    - always

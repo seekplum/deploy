@@ -1,0 +1,9 @@
+---
+- name: 卸载 Go
+  ansible.builtin.file:
+    path: "{{ common_goroot }}"
+    state: absent
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_golang

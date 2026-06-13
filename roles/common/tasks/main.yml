@@ -1,3 +1,5 @@
 ---
 - name: 执行 common 任务
   ansible.builtin.include_tasks: common.yml
+  tags:
+    - always

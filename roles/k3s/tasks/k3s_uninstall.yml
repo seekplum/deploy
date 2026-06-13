@@ -7,10 +7,24 @@
     - remove_k3s
   when: common_is_linux_os and common_is_master_node
 
+- name: 输出 k3s server 卸载脚本检查结果
+  ansible.builtin.debug:
+    msg: "k3s server 卸载脚本 {{ '已存在' if k3s_server_scripts.stat.exists else '不存在' }}"
+  tags:
+    - remove_k3s
+  when: common_is_linux_os and common_is_master_node
+
 - name: 检查 k3s agent 卸载脚本是否存在
   ansible.builtin.stat:
     path: /usr/local/bin/k3s-agent-uninstall.sh
   register: k3s_agent_scripts
+  tags:
+    - remove_k3s
+  when: common_is_linux_os and common_is_slaves_node
+
+- name: 输出 k3s agent 卸载脚本检查结果
+  ansible.builtin.debug:
+    msg: "k3s agent 卸载脚本 {{ '已存在' if k3s_agent_scripts.stat.exists else '不存在' }}"
   tags:
     - remove_k3s
   when: common_is_linux_os and common_is_slaves_node
@@ -101,13 +115,4 @@
     - remove_helm
   become: true
   become_method: ansible.builtin.sudo
-  when: common_is_linux_os and common_is_master_node
-
-- name: 增加 KUBECONFIG 注释
-  ansible.builtin.replace:
-    path: "{{ common_home_root }}/.bash_profile"
-    regexp: "^(export KUBECONFIG.*)"
-    replace: "# \\1"
-  tags:
-    - remove_helm
   when: common_is_linux_os and common_is_master_node

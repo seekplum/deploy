@@ -19,6 +19,13 @@
     - golang
   when: common_is_linux_os
 
+- name: 输出 Linux Golang 安装包检查结果
+  ansible.builtin.debug:
+    msg: "Linux Golang 安装包 {{ '已存在' if install_existing_of_go_on_linux.stdout == '0' else '不存在' }}"
+  tags:
+    - golang
+  when: common_is_linux_os
+
 - name: 检查 macOS 上是否已有 Golang 安装包
   ansible.builtin.shell: "test -f {{ install_go_package_path_on_mac }} && echo 0 || echo 1"
   register: install_existing_of_go_on_mac
@@ -27,10 +34,23 @@
     - golang
   when: common_is_intel_mac_os
 
+- name: 输出 macOS Golang 安装包检查结果
+  ansible.builtin.debug:
+    msg: "macOS Golang 安装包 {{ '已存在' if install_existing_of_go_on_mac.stdout == '0' else '不存在' }}"
+  tags:
+    - golang
+  when: common_is_intel_mac_os
+
 - name: 检查 Golang 是否已安装
   ansible.builtin.shell: "test -d {{ common_goroot }} && echo 0 || echo 1"
   register: install_installed_of_go
   changed_when: false
+  tags:
+    - golang
+
+- name: 输出 Golang 检查结果
+  ansible.builtin.debug:
+    msg: "Golang {{ '已安装' if install_installed_of_go.stdout == '0' else '未安装' }}"
   tags:
     - golang
 

@@ -41,6 +41,13 @@
   become_method: ansible.builtin.sudo
   when: common_is_linux_os
 
+- name: 输出 Linux 交换分区检查结果
+  ansible.builtin.debug:
+    msg: "Linux 交换分区 {{ k3s_swap_name.stdout | default('') if (k3s_swap_name.stdout | default('')) != '' else '不存在' }}"
+  tags:
+    - k3s_common
+  when: common_is_linux_os
+
 - name: "Linux永久关闭交换分区"
   ansible.builtin.replace:
     path: /etc/fstab
@@ -292,6 +299,13 @@
     - stern
   when: common_is_linux_os and common_is_master_node
 
+- name: 输出 stern 检查结果
+  ansible.builtin.debug:
+    msg: "stern {{ '已安装' if k3s_installed_of_stern.stdout == '0' else '未安装' }}"
+  tags:
+    - stern
+  when: common_is_linux_os and common_is_master_node
+
 - name: 安装 stern
   tags:
     - stern
@@ -301,6 +315,11 @@
       ansible.builtin.shell: "test -f {{ k3s_stern_package_path_on_linux }} && echo 0 || echo 1"
       register: k3s_existing_of_stern_on_linux
       changed_when: false
+      when: (common_is_linux_os) and k3s_installed_of_stern.stdout == "1"
+
+    - name: 输出 Linux stern 安装包检查结果
+      ansible.builtin.debug:
+        msg: "Linux stern 安装包 {{ '已存在' if k3s_existing_of_stern_on_linux.stdout == '0' else '不存在' }}"
       when: (common_is_linux_os) and k3s_installed_of_stern.stdout == "1"
 
     - name: 在 Linux 上下载 stern 安装包
@@ -332,10 +351,24 @@
     - helm
   when: common_is_linux_os and common_is_master_node
 
+- name: 输出 Linux helm 安装包检查结果
+  ansible.builtin.debug:
+    msg: "Linux helm 安装包 {{ '已存在' if k3s_existing_of_helm_on_linux.stdout == '0' else '不存在' }}"
+  tags:
+    - helm
+  when: common_is_linux_os and common_is_master_node
+
 - name: 检查 helm 是否已安装
   ansible.builtin.shell: "helm version >/dev/null 2>&1 && echo 0 || echo 1"
   register: k3s_installed_of_helm
   changed_when: false
+  tags:
+    - helm
+  when: common_is_linux_os and common_is_master_node
+
+- name: 输出 helm 检查结果
+  ansible.builtin.debug:
+    msg: "helm {{ '已安装' if k3s_installed_of_helm.stdout == '0' else '未安装' }}"
   tags:
     - helm
   when: common_is_linux_os and common_is_master_node
@@ -396,15 +429,6 @@
     msg:
       repo: "{{ k3s_helm_repo_info }}"
       releases: "{{ k3s_helm_release_info }}"
-  tags:
-    - helm
-  when: common_is_linux_os and common_is_master_node
-
-- name: 取消 KUBECONFIG 注释
-  ansible.builtin.replace:
-    path: "{{ common_home_root }}/.bash_profile"
-    regexp: "^#\\s*(export KUBECONFIG.*)"
-    replace: "\\1"
   tags:
     - helm
   when: common_is_linux_os and common_is_master_node

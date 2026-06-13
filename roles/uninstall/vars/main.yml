@@ -1,2 +1,3 @@
 ---
 # vars file for uninstall
+uninstall_virtual_root: "{{ common_home_root }}/packages/pythonenv"

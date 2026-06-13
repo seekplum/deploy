@@ -6,38 +6,33 @@
   tags:
     - rbenv
 
+- name: 输出 rbenv 检查结果
+  ansible.builtin.debug:
+    msg: "rbenv {{ '已安装' if install_installed_of_rbenv.stdout == '0' else '未安装' }}"
+  tags:
+    - rbenv
+
 - name: 下载 rbenv
   ansible.builtin.git:
     repo: "{{ install_rbenv_repository }}"
     dest: "{{ install_rbenv_root }}"
     accept_hostkey: true
     version: master
+    update: false
   when: install_installed_of_rbenv.stdout == "1"
   tags:
     - rbenv
 
-- name: 更新 rbenv
-  when: install_installed_of_rbenv.stdout == "0"
-  tags:
-    - rbenv
-
-  block:
-    - name: 设置仓库远程地址
-      community.general.git_config:
-        repo: "{{ install_rbenv_root }}"
-        scope: "local"
-        name: "remote.origin.url"
-        value: "{{ install_rbenv_repository }}"
-    - name: 拉取仓库更新
-      ansible.builtin.git:
-        repo: "{{ install_rbenv_repository }}"
-        dest: "{{ install_rbenv_root }}"
-        update: true
-        version: master
 - name: 检查 rbenv 插件是否已安装
   ansible.builtin.shell: "test -d {{ install_rbenv_root }}/plugins/ruby-build && echo 0 || echo 1"
   register: install_installed_of_rbenv_plugins
   changed_when: false
+  tags:
+    - rbenv
+
+- name: 输出 rbenv 插件检查结果
+  ansible.builtin.debug:
+    msg: "rbenv 插件 ruby-build {{ '已安装' if install_installed_of_rbenv_plugins.stdout == '0' else '未安装' }}"
   tags:
     - rbenv
 
@@ -47,28 +42,11 @@
     dest: "{{ install_ruby_build_root }}"
     accept_hostkey: true
     version: master
+    update: false
   when: install_installed_of_rbenv_plugins.stdout == "1"
   tags:
     - rbenv
 
-- name: 更新 rbenv 插件
-  when: install_installed_of_rbenv.stdout == "0"
-  tags:
-    - rbenv
-
-  block:
-    - name: 设置仓库远程地址
-      community.general.git_config:
-        repo: "{{ install_ruby_build_root }}"
-        scope: "local"
-        name: "remote.origin.url"
-        value: "{{ install_ruby_build_repository }}"
-    - name: 拉取仓库更新
-      ansible.builtin.git:
-        repo: "{{ install_ruby_build_repository }}"
-        dest: "{{ install_ruby_build_root }}"
-        update: true
-        version: master
 - name: 获取系统 Ruby 版本
   ansible.builtin.shell: |
     set -o pipefail
@@ -91,6 +69,12 @@
   ansible.builtin.shell: "ruby --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_installed_of_ruby
   changed_when: false
+  tags:
+    - rbenv
+
+- name: 输出 Ruby 检查结果
+  ansible.builtin.debug:
+    msg: "Ruby {{ '已安装' if install_installed_of_ruby.stdout == '0' else '未安装' }}"
   tags:
     - rbenv
 

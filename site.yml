@@ -10,9 +10,9 @@
   tags:
     - uninstall
     - remove
-  environment:
-    HOME: "{{ ansible_user_dir | default('') }}"
-    PATH: "{{ ansible_env.PATH | default('/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin') }}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin:{{ ansible_user_dir | default('') }}/.lima/.bin"
+  environment: &common_play_environment
+    HOME: "{{ common_target_home | default(ansible_user_dir | default('')) }}"
+    PATH: "{{ common_target_path | default(common_fallback_path) }}"
 
 - name: Install task
   hosts: common
@@ -24,9 +24,8 @@
     - install
     - deploy
   environment:
-    HOME: "{{ ansible_user_dir | default('') }}"
+    <<: *common_play_environment
     PIP_INDEX_URL: "{{ common_pip_index_url }}"
-    PATH: "{{ ansible_env.PATH | default('/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin') }}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/homebrew/bin:/usr/local/n/bin:{{ ansible_user_dir | default('') }}/.local/bin:{{ ansible_user_dir | default('') }}/.lima/.bin::{{ ansible_user_dir | default('') }}/.cargo/bin"
     PASSPHRASE: test
 
 - name: K3s task
@@ -37,6 +36,8 @@
     - k3s
   tags:
     - k3s
+  environment:
+    <<: *common_play_environment
 
 - name: Kubernetes task
   hosts: masters,slaves
@@ -47,3 +48,5 @@
   tags:
     - k8s
     - kubernetes
+  environment:
+    <<: *common_play_environment

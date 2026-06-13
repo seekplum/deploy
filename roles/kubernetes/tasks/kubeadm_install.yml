@@ -57,6 +57,13 @@
     - kubeadm
   when: common_is_linux_os
 
+- name: 输出 Linux 交换分区检查结果
+  ansible.builtin.debug:
+    msg: "Linux 交换分区 {{ kubernetes_swap_name.stdout | default('') if (kubernetes_swap_name.stdout | default('')) != '' else '不存在' }}"
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
 - name: "Linux永久关闭交换分区"
   ansible.builtin.replace:
     path: /etc/fstab
@@ -164,6 +171,13 @@
     - kubeadm
   when: common_is_linux_os
 
+- name: 输出 kubeadm-flags.env 检查结果
+  ansible.builtin.debug:
+    msg: "kubeadm-flags.env {{ '已存在' if kubernetes_existing_of_flags.stdout == '0' else '不存在' }}"
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
 - name: "Linux修改kubelet cgroup类型"
   ansible.builtin.replace:
     path: /var/lib/kubelet/kubeadm-flags.env
@@ -213,6 +227,13 @@
   ansible.builtin.shell: "test -f {{ kubernetes_cni_plugins_path_on_linux }} && echo 0 || echo 1"
   register: kubernetes_existing_of_cni_plugins
   changed_when: false
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
+- name: 输出 CNI 插件安装包检查结果
+  ansible.builtin.debug:
+    msg: "CNI 插件安装包 {{ '已存在' if kubernetes_existing_of_cni_plugins.stdout == '0' else '不存在' }}"
   tags:
     - kubeadm
   when: common_is_linux_os

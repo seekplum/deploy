@@ -1,4 +1,17 @@
 ---
+- name: 检查虚拟环境是否已存在
+  ansible.builtin.stat:
+    path: "{{ install_virtual_root }}/{{ env_item.version }}/bin/python"
+  register: install_virtualenv_python_stat
+  tags:
+    - virtualenv
+
+- name: 输出虚拟环境检查结果
+  ansible.builtin.debug:
+    msg: "{{ env_item.version }} 虚拟环境 {{ '已存在' if install_virtualenv_python_stat.stat.exists else '不存在' }}"
+  tags:
+    - virtualenv
+
 - name: 创建虚拟环境
   ansible.builtin.command:
     cmd: >-
@@ -8,6 +21,7 @@
     creates: "{{ install_virtual_root }}/{{ env_item.version }}/bin/python"
   tags:
     - virtualenv
+  when: not install_virtualenv_python_stat.stat.exists
 
 - name: 复制 requirements.in
   ansible.builtin.copy:
@@ -19,18 +33,33 @@
   tags:
     - virtualenv
 
-- name: 安装虚拟环境依赖包
-  ansible.builtin.shell: |
-    if [ -f "{{ install_virtual_root }}/{{ env_item.version }}/bin/trash" ]; then
-      echo "{{ env_item.version }} virtualenv packages is exist"
-    else
-      uv pip install \
-        --python "{{ install_virtual_root }}/{{ env_item.version }}/bin/python" \
-        -r /tmp/requirements.in
-    fi
-  register: install_virtualenv_packages_result
-  changed_when: "'virtualenv packages is exist' not in install_virtualenv_packages_result.stdout"
-  failed_when: false
+- name: 检查虚拟环境依赖包是否已安装
+  ansible.builtin.stat:
+    path: "{{ install_virtual_root }}/{{ env_item.version }}/.requirements_installed"
+  register: install_virtualenv_packages_stat
   tags:
     - virtualenv
   when: env_item.version.startswith("3.")
+
+- name: 输出虚拟环境依赖包检查结果
+  ansible.builtin.debug:
+    msg: "{{ env_item.version }} 虚拟环境依赖包 {{ '已安装' if install_virtualenv_packages_stat.stat.exists else '未安装' }}"
+  tags:
+    - virtualenv
+  when: env_item.version.startswith("3.")
+
+- name: 安装虚拟环境依赖包
+  ansible.builtin.shell: |
+    set -o pipefail
+    uv pip install \
+      --python "{{ install_virtual_root }}/{{ env_item.version }}/bin/python" \
+      -r /tmp/requirements.in
+    touch "{{ install_virtual_root }}/{{ env_item.version }}/.requirements_installed"
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - virtualenv
+  when:
+    - env_item.version.startswith("3.")
+    - not install_virtualenv_packages_stat.stat.exists

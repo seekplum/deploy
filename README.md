@@ -70,7 +70,7 @@ ansible all -i hosts -l common -m ping -vvv
 * 执行卸载操作
 
 ```bash
-ansible-playbook site.yml -i hosts -t uninstall --skip-tags "remove_zsh,remove_docker,remove_nodejs,remove_golang,remove_java,remove_brew,remove_k3s,remove_helm"
+ansible-playbook site.yml -i hosts -t uninstall --skip-tags "remove_zsh,remove_docker,remove_nodejs,remove_golang,remove_java,remove_brew"
 
 ansible-playbook site.yml -i hosts -l common -t common,remove_docker
 ```

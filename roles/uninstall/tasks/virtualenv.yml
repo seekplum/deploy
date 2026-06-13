@@ -1,0 +1,21 @@
+---
+- name: 检查 Python Virtualenv 目录是否存在
+  ansible.builtin.stat:
+    path: "{{ uninstall_virtual_root }}"
+  register: uninstall_virtualenv_root_stat
+  tags:
+    - remove_virtualenv
+
+- name: 输出 Python Virtualenv 检查结果
+  ansible.builtin.debug:
+    msg: "Python Virtualenv {{ '已存在' if uninstall_virtualenv_root_stat.stat.exists else '不存在' }}"
+  tags:
+    - remove_virtualenv
+
+- name: 卸载 Python Virtualenv
+  ansible.builtin.file:
+    path: "{{ uninstall_virtual_root }}"
+    state: absent
+  tags:
+    - remove_virtualenv
+  when: uninstall_virtualenv_root_stat.stat.exists
