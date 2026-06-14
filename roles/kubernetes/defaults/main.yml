@@ -1,2 +1,18 @@
 ---
 # defaults file for kubernetes
+
+# Kubernetes 版本，使用全版本号如 v1.33.0
+kubernetes_version: "v1.33.0"
+
+# Pod 网络 CIDR，Calico 默认使用 192.168.0.0/16
+kubernetes_pod_network_cidr: "192.168.0.0/16"
+
+# kubeadm init 使用的镜像仓库（国内使用阿里云镜像）
+kubernetes_image_repository: "registry.aliyuncs.com/google_containers"
+
+# pause 镜像地址（国内替换为阿里云地址）
+kubernetes_pause_image: "registry.aliyuncs.com/google_containers/pause:3.10"
+
+# Docker Hub 镜像加速地址，留空则不配置镜像加速
+# 例如设置为 https://xxxx.mirror.aliyuncs.com
+kubernetes_docker_mirror: ""

@@ -38,15 +38,21 @@
   tags:
     - docker
 
-- name: 在 Redhat 上添加 Docker 软件源
-  ansible.builtin.command: "{{ item }}"
-  with_items:
-    - "rm -f /etc/yum.repos.d/docker-ce.repo"
-    - "yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo"
-    # - "yum-config-manager --add-repo https://mirrors.aliyun.com/repo/Centos-8.repo"
+- name: "CentOS 清理旧 Docker YUM 源"
+  ansible.builtin.command: "rm -f /etc/yum.repos.d/docker-ce.repo"
   tags:
     - docker
   changed_when: true
+  when: common_is_centos_os and install_installed_of_docker.stdout == "1"
+
+- name: "CentOS 配置 Docker 软件源"
+  ansible.builtin.include_tasks:
+    file: ../../common/tasks/docker-repo.yml
+    apply:
+      tags:
+        - docker
+  tags:
+    - docker
   when: common_is_centos_os and install_installed_of_docker.stdout == "1"
 
 # 安装containerd
@@ -78,24 +84,26 @@
     - docker
   when: common_is_centos_os and install_installed_of_docker.stdout == "1"
 
-- name: 在 Ubuntu 上添加 Docker GPG 密钥
+- name: "Ubuntu 清理旧版 Docker 包"
   ansible.builtin.command: "{{ item }}"
   with_items:
     - sudo apt-get autoremove -y docker docker.io containerd runc
     - for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
-    - sudo install -m 0755 -d /etc/apt/keyrings
-    - sudo rm -f /etc/apt/keyrings/docker.gpg
-    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    - sudo chmod a+r /etc/apt/keyrings/docker.gpg
-    - |-
-      echo \
-        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    - sudo apt-get update
   tags:
     - docker
   changed_when: true
+  when: common_is_ubuntu_os and install_installed_of_docker.stdout == "1"
+
+- name: "Ubuntu 配置 Docker 软件源"
+  ansible.builtin.include_tasks:
+    file: ../../common/tasks/docker-repo.yml
+    apply:
+      tags:
+        - docker
+  vars:
+    common_docker_apt_mirror: https://download.docker.com/linux/ubuntu
+  tags:
+    - docker
   when: common_is_ubuntu_os and install_installed_of_docker.stdout == "1"
 
 - name: 在 Ubuntu 上安装 Docker

@@ -73,6 +73,127 @@
     - kubeadm
   when: common_is_linux_os and "stdout" in kubernetes_swap_name and not kubernetes_swap_name.stdout.startswith("#")
 
+# --- 内核模块加载（overlay、br_netfilter）---
+- name: "Linux加载内核模块"
+  ansible.builtin.command: "modprobe {{ item }}"
+  changed_when: false
+  loop:
+    - overlay
+    - br_netfilter
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
+- name: "Linux持久化内核模块加载"
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/k8s.conf
+    mode: "0644"
+    content: |
+      overlay
+      br_netfilter
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
+# --- SELinux 禁用（仅 CentOS）---
+- name: "CentOS 禁用 SELinux（配置文件）"
+  ansible.builtin.selinux:
+    state: disabled
+  tags:
+    - kubeadm
+  when: common_is_centos_os
+
+- name: "CentOS 禁用 SELinux（立即生效）"
+  ansible.builtin.command: setenforce 0
+  changed_when: false
+  failed_when: false
+  tags:
+    - kubeadm
+  when: common_is_centos_os
+
+# --- containerd 安装与配置 ---
+- name: "配置 Docker 软件源"
+  ansible.builtin.include_tasks:
+    file: ../../common/tasks/docker-repo.yml
+    apply:
+      tags:
+        - kubeadm
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
+- name: "Linux 安装 containerd"
+  ansible.builtin.package:
+    name: containerd.io
+    state: present
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
+- name: "Linux 生成 containerd 默认配置"
+  ansible.builtin.command:
+    cmd: containerd config default
+  register: kubernetes_containerd_default_config
+  changed_when: false
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
+- name: "Linux 创建 containerd 配置目录"
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+    mode: "0755"
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
+- name: "Linux 写入 containerd 配置（SystemdCgroup + pause 镜像替换）"
+  ansible.builtin.copy:
+    dest: /etc/containerd/config.toml
+    mode: "0644"
+    content: |
+      {%- set _config = kubernetes_containerd_default_config.stdout |
+         regex_replace('SystemdCgroup = false', 'SystemdCgroup = true') |
+         regex_replace('sandbox_image = "registry\.k8s\.io/pause:3\.[0-9]+"', 'sandbox_image = "' ~ kubernetes_pause_image ~ '"') -%}
+      {{ _config }}
+  tags:
+    - kubeadm
+  when: common_is_linux_os and kubernetes_containerd_default_config.stdout | default('') != ''
+
+- name: "Linux 创建镜像加速目录"
+  ansible.builtin.file:
+    path: /etc/containerd/certs.d/docker.io
+    state: directory
+    mode: "0755"
+  tags:
+    - kubeadm
+  when: common_is_linux_os and kubernetes_docker_mirror != ""
+
+- name: "Linux 配置镜像加速（hosts.toml）"
+  ansible.builtin.copy:
+    dest: /etc/containerd/certs.d/docker.io/hosts.toml
+    mode: "0644"
+    content: |
+      server = "https://docker.io"
+      [host."{{ kubernetes_docker_mirror }}"]
+        capabilities = ["pull", "resolve"]
+  tags:
+    - kubeadm
+  when: common_is_linux_os and kubernetes_docker_mirror != ""
+
+- name: "Linux 重启 containerd"
+  ansible.builtin.systemd:
+    name: containerd
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  tags:
+    - kubeadm
+  when: common_is_linux_os
+
+# --- 以下为原有任务 ---
+
 - name: "Ubuntu添加阿里源"
   ansible.builtin.apt_key:
     url: https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg
@@ -115,6 +236,7 @@
       net.bridge.bridge-nf-call-ip6tables = 1
       net.bridge.bridge-nf-call-iptables = 1
       vm.swappiness=0
+      net.ipv4.ip_forward = 1
   tags:
     - kubeadm
   when: common_is_linux_os
@@ -140,6 +262,7 @@
     pkg: ["kubelet", "kubectl", "kubeadm"]
     state: present
     update_cache: true
+    allow_change_held_packages: true
   tags:
     - kubeadm
   when: common_is_ubuntu_os

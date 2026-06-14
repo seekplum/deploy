@@ -56,16 +56,18 @@
     - join_kubeadm
   when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists
 
-# - name: "在 Master 上安装 Pod 网络"
-#   ansible.builtin.shell: |
-#     set -o pipefail
-#     kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
-#   args:
-#     executable: /bin/bash
-#   changed_when: true
-#   tags:
-#     - join_kubeadm
-#   when: common_is_master_node
+- name: "部署 Calico CNI 网络插件"
+  ansible.builtin.shell: |
+    set -o pipefail
+    kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml
+  args:
+    executable: /bin/bash
+  register: kubernetes_calico_install
+  changed_when: true
+  failed_when: false
+  tags:
+    - join_kubeadm
+  when: common_is_master_node and kubernetes_admin_conf_stat.stat.exists
 
 - name: "查询coredns角色配置"
   ansible.builtin.command: "kubectl get clusterrole system:coredns -o yaml"
@@ -77,7 +79,7 @@
 
 - name: "设置更新后内容"
   ansible.builtin.set_fact:
-    kubernetes_coredns_yml_output: "{{ kubernetes_coredns_configured.stdout + 'apiGroups:\n  - discovery.k8s.io\n  resources:\n  - endpointslices\n  verbs:\n  - list\n\
+    kubernetes_coredns_yml_output: "{{ kubernetes_coredns_configured.stdout + '\n- apiGroups:\n  - discovery.k8s.io\n  resources:\n  - endpointslices\n  verbs:\n  - list\n\
       \  - watch' }}"
   tags:
     - join_kubeadm
@@ -94,7 +96,7 @@
   # https://github.com/coredns/helm/issues/9
   ansible.builtin.shell: |
     set -o pipefail
-    printf '%s\n' "{{ kubernetes_coredns_yml_output }}" | kubectl replace -f -
+    printf '%s\n' "{{ kubernetes_coredns_yml_output }}" | sed '/resourceVersion:/d' | kubectl apply -f -
   args:
     executable: /bin/bash
   changed_when: true
