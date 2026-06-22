@@ -73,6 +73,28 @@
   changed_when: false
   when: common_is_centos_os
 
+- name: 在 Redhat 上换源
+  ansible.builtin.shell: |
+    set -o pipefail
+    sed -i -e 's|^mirrorlist=|#mirrorlist=|g' \
+      -e 's|^# baseurl=https://repo.almalinux.org|baseurl=https://mirrors.aliyun.com|g' \
+      /etc/yum.repos.d/almalinux*.repo
+
+    sed -i -e 's|^metalink=|#metalink=|g' \
+      -e 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|g' \
+      -e 's|^#baseurl=https://download.fedoraproject.org/pub|baseurl=https://mirrors.aliyun.com|g' \
+      /etc/yum.repos.d/epel*.repo
+
+    dnf install epel-release -y
+  args:
+    executable: /bin/bash
+  tags:
+    - initialize
+  failed_when: false
+  become: true
+  become_method: ansible.builtin.sudo
+  when: common_is_centos_os
+
 - name: 在 Redhat 上安装基础软件包
   ansible.builtin.dnf:
     name: "{{ item }}"
@@ -80,8 +102,6 @@
     update_cache: true
     # nobest: true
   with_items:
-    # - python2-pip
-    - python3-pip
     - zip
     - unzip
     # - util-linux-user
@@ -106,8 +126,6 @@
     - tree
     - sshpass
     - openssl-devel
-    - openssl11
-    - openssl11-devel
     - yum-utils
     - device-mapper-persistent-data
     - lvm2
@@ -116,7 +134,9 @@
     - patch
     - pcre-devel
     - ripgrep
+    - mongodb-mongosh
     - knot
+    - telnet
   tags:
     - initialize
   when: common_is_centos_os
@@ -200,8 +220,6 @@
       - gnupg2
       - python3-apt
       - libffi-dev
-      - python3
-      - python3-pip
       - pinentry-gtk2
       - python3-tk
       - tk-dev
@@ -292,6 +310,7 @@
       - sunnyyoung/tap/wechattweak
       - yamlfmt
       - kubernetes-cli
+      - telnet
     state: present
   failed_when: false
   tags:

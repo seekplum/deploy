@@ -89,11 +89,8 @@
     remote_src: true
     mode: preserve
   with_items:
-    - "CentOS-Base.repo"
-    - "CentOS-SCLo-sclo.repo"
-    - "CentOS-SCLo-scl-rh.repo"
     - "wandisco-git.repo"
-    - "mongodb-4.4.repo"
+    - "mongodb.repo"
   changed_when: false
   failed_when: false
   become: true
@@ -109,11 +106,8 @@
     mode: "0644"
     force: true
   with_items:
-    - "CentOS-Base.repo"
-    - "CentOS-SCLo-sclo.repo"
-    - "CentOS-SCLo-scl-rh.repo"
     - "wandisco-git.repo"
-    - "mongodb-4.4.repo"
+    - "mongodb.repo"
   become: true
   become_method: ansible.builtin.sudo
   tags:
