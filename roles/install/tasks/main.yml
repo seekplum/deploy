@@ -28,6 +28,8 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
+      tags:
+        - always
 
     - name: 执行 initialize 任务
       ansible.builtin.include_tasks:
@@ -36,6 +38,8 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
+      tags:
+        - always
 
     - name: 执行 zsh 任务
       ansible.builtin.include_tasks:
@@ -44,6 +48,8 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
+      tags:
+        - always
 
     - name: 执行 Python 任务
       ansible.builtin.include_tasks:
@@ -52,6 +58,8 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
+      tags:
+        - always
 
     - name: 执行 virtualenv 任务
       ansible.builtin.include_tasks:
@@ -60,6 +68,8 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
+      tags:
+        - always
 
     - name: 执行 Docker 任务
       ansible.builtin.include_tasks:
@@ -68,6 +78,8 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
+      tags:
+        - always
 
     - name: 执行 Golang 任务
       ansible.builtin.include_tasks:
@@ -76,6 +88,8 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
+      tags:
+        - always
 
     - name: 执行 Java 任务
       ansible.builtin.include_tasks:
@@ -84,6 +98,8 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
+      tags:
+        - always
 
     - name: 执行 Node.js 任务
       ansible.builtin.include_tasks:
@@ -92,6 +108,8 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
+      tags:
+        - always
 
     - name: 执行 rbenv 任务
       ansible.builtin.include_tasks:
@@ -100,3 +118,5 @@
           module_defaults:
             ansible.builtin.shell:
               executable: /tmp/ansible-shell-wrapper
+      tags:
+        - always
