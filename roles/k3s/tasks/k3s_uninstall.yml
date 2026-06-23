@@ -5,14 +5,14 @@
   register: k3s_server_scripts
   tags:
     - remove_k3s
-  when: common_is_linux_os and common_is_master_node
+  when: common_is_linux_os
 
 - name: 输出 k3s server 卸载脚本检查结果
   ansible.builtin.debug:
     msg: "k3s server 卸载脚本 {{ '已存在' if k3s_server_scripts.stat.exists else '不存在' }}"
   tags:
     - remove_k3s
-  when: common_is_linux_os and common_is_master_node
+  when: common_is_linux_os
 
 - name: 检查 k3s agent 卸载脚本是否存在
   ansible.builtin.stat:
@@ -20,14 +20,14 @@
   register: k3s_agent_scripts
   tags:
     - remove_k3s
-  when: common_is_linux_os and common_is_slaves_node
+  when: common_is_linux_os
 
 - name: 输出 k3s agent 卸载脚本检查结果
   ansible.builtin.debug:
     msg: "k3s agent 卸载脚本 {{ '已存在' if k3s_agent_scripts.stat.exists else '不存在' }}"
   tags:
     - remove_k3s
-  when: common_is_linux_os and common_is_slaves_node
+  when: common_is_linux_os
 
 - name: 卸载 k3s server
   ansible.builtin.command: "sh /usr/local/bin/k3s-uninstall.sh"
@@ -37,7 +37,7 @@
     - remove_k3s
   become: true
   become_method: ansible.builtin.sudo
-  when: common_is_linux_os and common_is_master_node and k3s_server_scripts.stat.exists
+  when: common_is_linux_os and k3s_server_scripts.stat.exists
 
 - name: 卸载 k3s agent
   ansible.builtin.command: "sh /usr/local/bin/k3s-agent-uninstall.sh"
@@ -47,7 +47,7 @@
     - remove_k3s
   become: true
   become_method: ansible.builtin.sudo
-  when: common_is_linux_os and common_is_slaves_node and k3s_agent_scripts.stat.exists
+  when: common_is_linux_os and k3s_agent_scripts.stat.exists
 
 - name: 在 RedHat 上卸载 k3s-selinux
   ansible.builtin.dnf:
@@ -101,7 +101,7 @@
     - remove_stern
   become: true
   become_method: ansible.builtin.sudo
-  when: common_is_linux_os and common_is_master_node
+  when: common_is_linux_os
 
 - name: "删除 helm"
   ansible.builtin.file:
@@ -115,4 +115,4 @@
     - remove_helm
   become: true
   become_method: ansible.builtin.sudo
-  when: common_is_linux_os and common_is_master_node
+  when: common_is_linux_os

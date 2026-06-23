@@ -102,6 +102,7 @@
             (ansible_user_dir | default(common_home_root | default(''))) + '/.lima/.bin',
             (ansible_user_dir | default(common_home_root | default(''))) + '/.cargo/bin',
             (ansible_user_dir | default(common_home_root | default(''))) + '/.atuin/bin',
+            (ansible_user_dir | default(common_home_root | default(''))) + '/.nix-profile/bin',
             '/usr/local/sbin',
             '/usr/local/bin',
             '/usr/sbin',

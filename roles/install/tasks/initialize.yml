@@ -137,6 +137,7 @@
     - mongodb-mongosh
     - knot
     - telnet
+    - util-linux-user
   tags:
     - initialize
   when: common_is_centos_os
@@ -520,6 +521,25 @@
   tags:
     - initialize
   when: (common_is_linux_os or common_is_high_mac_os)
+
+- name: 在 Linux 上清除 nix 安装残留
+  ansible.builtin.shell: |
+    set -o pipefail
+    sudo systemctl stop nix-daemon.socket
+    sudo systemctl stop nix-daemon.service
+    sudo systemctl disable nix-daemon.socket
+    sudo systemctl disable nix-daemon.service
+    sudo systemctl daemon-reload
+    sudo mv /etc/bashrc.backup-before-nix /etc/bashrc
+    sudo rm -rf "/etc/nix" "/nix" "~/.nix-profile" "~/.nix-defexpr" "~/.nix-channels" "~/.local/state/nix" "~/.cache/nix" "~/.nix-profile" "~/.nix-defexpr" "~/.nix-channels" "~/.local/state/nix" "~/.cache/nix"
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - initialize
+  when:
+    - common_is_linux_os or common_is_high_mac_os
+    - install_existing_of_nix.stdout == "1"
 
 - name: 在 Linux/macOS15 上安装 nix
   ansible.builtin.shell: |

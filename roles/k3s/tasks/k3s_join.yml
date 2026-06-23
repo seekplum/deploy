@@ -9,7 +9,7 @@
     - k3s_agent
   become: true
   become_method: ansible.builtin.sudo
-  when: common_is_linux_os
+  when: common_is_linux_os and common_is_slaves_node
 
 - name: "获取 k3s server token"
   ansible.builtin.shell: |
