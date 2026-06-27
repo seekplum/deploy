@@ -1,8 +1,5 @@
 ---
 - name: 创建虚拟环境
-  ansible.builtin.include_tasks: .virtualenv.yml
-  with_items: "{{ install_virtual_envs }}"
-  loop_control:
-    loop_var: env_item
+  ansible.builtin.import_tasks: .virtualenv.yml
   tags:
     - virtualenv

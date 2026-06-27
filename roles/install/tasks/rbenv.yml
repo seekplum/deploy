@@ -28,13 +28,13 @@
   register: install_installed_of_rbenv_plugins
   changed_when: false
   tags:
-    - rbenv
+    - rbenv_plugin
 
 - name: 输出 rbenv 插件检查结果
   ansible.builtin.debug:
     msg: "rbenv 插件 ruby-build {{ '已安装' if install_installed_of_rbenv_plugins.stdout == '0' else '未安装' }}"
   tags:
-    - rbenv
+    - rbenv_plugin
 
 - name: 下载 rbenv 插件
   ansible.builtin.git:
@@ -45,7 +45,7 @@
     update: false
   when: install_installed_of_rbenv_plugins.stdout == "1"
   tags:
-    - rbenv
+    - rbenv_plugin
 
 - name: 获取系统 Ruby 版本
   ansible.builtin.shell: |
@@ -56,38 +56,38 @@
   register: install_dynamic_ruby_version
   changed_when: false
   tags:
-    - rbenv
+    - ruby
 
 - name: 设置 Ruby 版本
   ansible.builtin.set_fact:
     # install_ruby_version: "{{ install_dynamic_ruby_version.stdout | default('2.7.7', true) }}"
     install_ruby_version: "3.2.0"
   tags:
-    - rbenv
+    - ruby
 
 - name: 检查 Ruby 是否已安装
   ansible.builtin.shell: "ruby --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_installed_of_ruby
   changed_when: false
   tags:
-    - rbenv
+    - ruby
 
 - name: 输出 Ruby 检查结果
   ansible.builtin.debug:
     msg: "Ruby {{ '已安装' if install_installed_of_ruby.stdout == '0' else '未安装' }}"
   tags:
-    - rbenv
+    - ruby
 
 - name: 安装 Ruby
   ansible.builtin.command: "{{ install_rbenv_root }}/bin/rbenv install {{ install_ruby_version }} --skip-existing"
   changed_when: true
   tags:
-    - rbenv
+    - ruby
   when: install_installed_of_ruby.stdout == "1"
 
 - name: 设置全局 Ruby 版本
   ansible.builtin.command: "{{ install_rbenv_root }}/bin/rbenv global {{ install_ruby_version }} --skip-existing"
   changed_when: true
   tags:
-    - rbenv
+    - ruby
   when: install_installed_of_ruby.stdout == "1"

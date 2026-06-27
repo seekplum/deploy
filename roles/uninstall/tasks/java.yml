@@ -30,5 +30,4 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - remove_java
     - remove_maven

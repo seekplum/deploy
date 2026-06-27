@@ -7,7 +7,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - kubeadm
+    - kubeadm_hosts
   when: common_is_linux_os
 
 - name: "配置hosts"
@@ -21,7 +21,7 @@
   become_method: ansible.builtin.sudo
   loop: "{{ groups['masters'] + groups['slaves'] }}"
   tags:
-    - kubeadm
+    - kubeadm_hosts
   when: common_is_linux_os
 
 - name: "Ubuntu关闭防火墙"
@@ -30,7 +30,9 @@
     state: "stopped"
     enabled: "no"
   tags:
-    - kubeadm
+    - kubeadm_firewall
+  become: true
+  become_method: ansible.builtin.sudo
   when: common_is_ubuntu_os
 
 - name: "RedHat关闭防火墙"
@@ -39,14 +41,17 @@
     state: "stopped"
     enabled: "no"
   tags:
-    - kubeadm
+    - kubeadm_firewall
+  failed_when: false
+  become: true
+  become_method: ansible.builtin.sudo
   when: common_is_centos_os
 
 - name: "临时关闭交换分区"
   ansible.builtin.command: swapoff -a
   changed_when: false
   tags:
-    - kubeadm
+    - kubeadm_swap
   when: common_is_linux_os
 
 - name: "Linux获取交换分区名字"
@@ -54,14 +59,14 @@
   register: kubernetes_swap_name
   changed_when: false
   tags:
-    - kubeadm
+    - kubeadm_swap
   when: common_is_linux_os
 
 - name: 输出 Linux 交换分区检查结果
   ansible.builtin.debug:
     msg: "Linux 交换分区 {{ kubernetes_swap_name.stdout | default('') if (kubernetes_swap_name.stdout | default('')) != '' else '不存在' }}"
   tags:
-    - kubeadm
+    - kubeadm_swap
   when: common_is_linux_os
 
 - name: "Linux永久关闭交换分区"
@@ -70,7 +75,7 @@
     regexp: "^({{ kubernetes_swap_name.stdout }})"
     replace: "# \\1"
   tags:
-    - kubeadm
+    - kubeadm_swap
   when: common_is_linux_os and "stdout" in kubernetes_swap_name and not kubernetes_swap_name.stdout.startswith("#")
 
 # --- 内核模块加载（overlay、br_netfilter）---
@@ -81,7 +86,7 @@
     - overlay
     - br_netfilter
   tags:
-    - kubeadm
+    - kubeadm_kernel
   when: common_is_linux_os
 
 - name: "Linux持久化内核模块加载"
@@ -92,15 +97,15 @@
       overlay
       br_netfilter
   tags:
-    - kubeadm
+    - kubeadm_kernel
   when: common_is_linux_os
 
 # --- SELinux 禁用（仅 CentOS）---
 - name: "CentOS 禁用 SELinux（配置文件）"
-  ansible.builtin.selinux:
+  ansible.posix.selinux:
     state: disabled
   tags:
-    - kubeadm
+    - kubeadm_selinux
   when: common_is_centos_os
 
 - name: "CentOS 禁用 SELinux（立即生效）"
@@ -108,18 +113,14 @@
   changed_when: false
   failed_when: false
   tags:
-    - kubeadm
+    - kubeadm_selinux
   when: common_is_centos_os
 
 # --- containerd 安装与配置 ---
 - name: "配置 Docker 软件源"
-  ansible.builtin.include_tasks:
-    file: ../../common/tasks/docker-repo.yml
-    apply:
-      tags:
-        - kubeadm
+  ansible.builtin.import_tasks: ../../common/tasks/docker-repo.yml
   tags:
-    - kubeadm
+    - kubeadm_containerd
   when: common_is_linux_os
 
 - name: "Linux 安装 containerd"
@@ -127,7 +128,7 @@
     name: containerd.io
     state: present
   tags:
-    - kubeadm
+    - kubeadm_containerd
   when: common_is_linux_os
 
 - name: "Linux 生成 containerd 默认配置"
@@ -136,7 +137,7 @@
   register: kubernetes_containerd_default_config
   changed_when: false
   tags:
-    - kubeadm
+    - kubeadm_containerd
   when: common_is_linux_os
 
 - name: "Linux 创建 containerd 配置目录"
@@ -145,7 +146,7 @@
     state: directory
     mode: "0755"
   tags:
-    - kubeadm
+    - kubeadm_containerd
   when: common_is_linux_os
 
 - name: "Linux 写入 containerd 配置（SystemdCgroup + pause 镜像替换）"
@@ -158,7 +159,7 @@
          regex_replace('sandbox_image = "registry\.k8s\.io/pause:3\.[0-9]+"', 'sandbox_image = "' ~ kubernetes_pause_image ~ '"') -%}
       {{ _config }}
   tags:
-    - kubeadm
+    - kubeadm_containerd
   when: common_is_linux_os and kubernetes_containerd_default_config.stdout | default('') != ''
 
 - name: "Linux 创建镜像加速目录"
@@ -167,7 +168,7 @@
     state: directory
     mode: "0755"
   tags:
-    - kubeadm
+    - kubeadm_containerd
   when: common_is_linux_os and kubernetes_docker_mirror != ""
 
 - name: "Linux 配置镜像加速（hosts.toml）"
@@ -179,17 +180,17 @@
       [host."{{ kubernetes_docker_mirror }}"]
         capabilities = ["pull", "resolve"]
   tags:
-    - kubeadm
+    - kubeadm_containerd
   when: common_is_linux_os and kubernetes_docker_mirror != ""
 
 - name: "Linux 重启 containerd"
   ansible.builtin.systemd:
     name: containerd
     state: restarted
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
   tags:
-    - kubeadm
+    - kubeadm_repo
   when: common_is_linux_os
 
 # --- 以下为原有任务 ---
@@ -200,7 +201,7 @@
     state: present
   changed_when: false
   tags:
-    - kubeadm
+    - kubeadm_repo
   when: common_is_ubuntu_os
 
 - name: "Ubuntu修改k8s源内容"
@@ -210,7 +211,7 @@
     content: |
       deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
   tags:
-    - kubeadm
+    - kubeadm_repo
   when: common_is_ubuntu_os
 
 - name: "RedHat添加阿里源"
@@ -225,7 +226,7 @@
       EOF
   changed_when: false
   tags:
-    - kubeadm
+    - kubeadm_kernel
   when: common_is_centos_os
 
 - name: "Linux配置k8s内核参数"
@@ -238,33 +239,33 @@
       vm.swappiness=0
       net.ipv4.ip_forward = 1
   tags:
-    - kubeadm
+    - kubeadm_kernel
   when: common_is_linux_os
 
 - name: "Linux生效内核参数"
   ansible.builtin.command: sysctl --system
   changed_when: false
   tags:
-    - kubeadm
+    - kubeadm_packages
   when: common_is_linux_os
 
 - name: "RedHat安装kubeadm"
   ansible.builtin.dnf:
-    name: ["kubelet", "kubectl", "kubeadm"]
+    name: ["kubelet", "kubectl", "kubeadm", "iproute-tc"]
     state: present
     update_cache: true
   tags:
-    - kubeadm
+    - kubeadm_packages
   when: common_is_centos_os
 
 - name: "Ubuntu安装kubeadm"
   ansible.builtin.apt:
-    pkg: ["kubelet", "kubectl", "kubeadm"]
+    pkg: ["kubelet", "kubectl", "kubeadm", "iproute2"]
     state: present
     update_cache: true
     allow_change_held_packages: true
   tags:
-    - kubeadm
+    - kubeadm_runtime
   when: common_is_ubuntu_os
 
 - name: "探测 CRI 运行时 socket 路径"
@@ -282,30 +283,21 @@
   changed_when: false
   failed_when: false
   tags:
-    - kubeadm
+    - kubeadm_runtime
   when: common_is_linux_os
 
 - name: "设置 CRI socket 路径"
   ansible.builtin.set_fact:
-    kubernetes_cri_socket: "{{ '/run/containerd/containerd.sock' if kubernetes_cri_socket_find.stdout == '' else kubernetes_cri_socket_find.stdout }}"
+    kubernetes_cri_socket: "unix://{{ '/run/containerd/containerd.sock' if kubernetes_cri_socket_find.stdout == '' else kubernetes_cri_socket_find.stdout }}"
   tags:
-    - kubeadm
+    - kubeadm_runtime
   when: common_is_linux_os
 
 - name: 输出 CRI socket 检查结果
   ansible.builtin.debug:
-    msg: "CRI socket {{ kubernetes_cri_socket | default('/run/containerd/containerd.sock') }}"
+    msg: "CRI socket {{ kubernetes_cri_socket | default('unix:///run/containerd/containerd.sock') }}"
   tags:
-    - kubeadm
-  when: common_is_linux_os
-
-- name: "Linux重启Docker"
-  ansible.builtin.systemd:
-    name: "docker"
-    state: "restarted"
-    daemon_reload: true
-  tags:
-    - kubeadm
+    - kubeadm_runtime
   when: common_is_linux_os
 
 - name: "Linux重启kubelet"
@@ -315,7 +307,7 @@
     enabled: "yes"
     daemon_reload: true
   tags:
-    - kubeadm
+    - kubeadm_runtime
   when: common_is_linux_os
 
 - name: "Linux检查kubeadm-flags.env文件是否存在"
@@ -324,14 +316,14 @@
   register: kubernetes_flags_stat
   changed_when: false
   tags:
-    - kubeadm
+    - kubeadm_runtime
   when: common_is_linux_os
 
 - name: 输出 kubeadm-flags.env 检查结果
   ansible.builtin.debug:
     msg: "kubeadm-flags.env {{ '已存在' if kubernetes_flags_stat.stat.exists else '不存在' }}"
   tags:
-    - kubeadm
+    - kubeadm_runtime
   when: common_is_linux_os
 
 - name: "Linux修改kubelet cgroup类型"
@@ -341,15 +333,8 @@
     replace: "--cgroup-driver=systemd"
   failed_when: false
   tags:
-    - kubeadm
+    - kubeadm_cleanup
   when: common_is_linux_os and kubernetes_flags_stat.stat.exists
-
-# - name: "脚本方式拉取镜像"
-#   ansible.builtin.script: "pull-images.sh"
-#   changed_when: false
-#   tags:
-#     - kubeadm
-#   when: common_is_linux_os
 
 - name: "删除重复的文件"
   ansible.builtin.file:
@@ -362,7 +347,7 @@
     - "/etc/kubernetes/manifests/kube-scheduler.yaml"
     - "/etc/kubernetes/manifests/etcd.yaml"
   tags:
-    - kubeadm
+    - kubeadm_cleanup
   when: common_is_master_node
 
 - name: "修改 Master server 地址"
@@ -376,7 +361,7 @@
     - "/etc/kubernetes/controller-manager.conf"
     - "/etc/kubernetes/scheduler.conf"
   tags:
-    - kubeadm
+    - kubeadm_cleanup
   when: common_is_master_node
 
 - name: "检查CNI插件是否已经下载"
@@ -385,19 +370,19 @@
   register: kubernetes_cni_plugins_stat
   changed_when: false
   tags:
-    - kubeadm
+    - kubeadm_cni
   when: common_is_linux_os
 
 - name: 输出 CNI 插件安装包检查结果
   ansible.builtin.debug:
     msg: "CNI 插件安装包 {{ '已存在' if kubernetes_cni_plugins_stat.stat.exists else '不存在' }}"
   tags:
-    - kubeadm
+    - kubeadm_cni
   when: common_is_linux_os
 
 - name: "安装CNI插件"
   tags:
-    - kubeadm
+    - kubeadm_cni
   when: common_is_linux_os
   block:
     - name: "创建目录"
@@ -405,6 +390,12 @@
         path: "{{ kubernetes_cni_plugins_director_on_linux }}"
         state: directory
         mode: "0755"
+
+    - name: "输出 CNI 插件下载链接"
+      ansible.builtin.debug:
+        msg: "{{ kubernetes_cni_plugins_url_on_linux }}"
+      when: common_is_linux_os and not kubernetes_cni_plugins_stat.stat.exists
+
     - name: "下载CNI插件"
       ansible.builtin.get_url:
         url: "{{ kubernetes_cni_plugins_url_on_linux }}"

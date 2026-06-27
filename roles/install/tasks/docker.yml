@@ -4,55 +4,51 @@
   register: install_installed_of_docker
   changed_when: false
   tags:
-    - docker
+    - docker_check
 
 - name: 输出 Docker 检查结果
   ansible.builtin.debug:
     msg: "Docker {{ '已安装' if install_installed_of_docker.stdout == '0' else '未安装' }}"
   tags:
-    - docker
+    - docker_check
 
 - name: 检查 docker-machine 是否已安装
   ansible.builtin.shell: "docker-machine --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_installed_of_docker_machine
   changed_when: false
   tags:
-    - docker
+    - docker_check
 
 - name: 输出 docker-machine 检查结果
   ansible.builtin.debug:
     msg: "docker-machine {{ '已安装' if install_installed_of_docker_machine.stdout == '0' else '未安装' }}"
   tags:
-    - docker
+    - docker_machine
 
 - name: 检查 docker-compose 是否已安装
   ansible.builtin.shell: "docker-compose --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_installed_of_docker_compose
   changed_when: false
   tags:
-    - docker
+    - docker_compose
 
 - name: 输出 docker-compose 检查结果
   ansible.builtin.debug:
     msg: "docker-compose {{ '已安装' if install_installed_of_docker_compose.stdout == '0' else '未安装' }}"
   tags:
-    - docker
+    - docker_compose
 
 - name: "CentOS 清理旧 Docker YUM 源"
   ansible.builtin.command: "rm -f /etc/yum.repos.d/docker-ce.repo"
   tags:
-    - docker
+    - docker_repo
   changed_when: true
   when: common_is_centos_os and install_installed_of_docker.stdout == "1"
 
 - name: "CentOS 配置 Docker 软件源"
-  ansible.builtin.include_tasks:
-    file: ../../common/tasks/docker-repo.yml
-    apply:
-      tags:
-        - docker
+  ansible.builtin.import_tasks: ../../common/tasks/docker-repo.yml
   tags:
-    - docker
+    - docker_repo
   when: common_is_centos_os and install_installed_of_docker.stdout == "1"
 
 # 安装containerd
@@ -81,29 +77,36 @@
     - docker-ce-cli{{ DOCKER_CLI_VERSION | default('') }}
     - docker-ce{{ DOCKER_VERSION | default('') }}
   tags:
-    - docker
+    - docker_install
   when: common_is_centos_os and install_installed_of_docker.stdout == "1"
 
 - name: "Ubuntu 清理旧版 Docker 包"
-  ansible.builtin.command: "{{ item }}"
-  with_items:
-    - sudo apt-get autoremove -y docker docker.io containerd runc
-    - for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
+  ansible.builtin.apt:
+    name:
+      - docker
+      - docker.io
+      - docker-doc
+      - docker-compose
+      - docker-compose-v2
+      - podman-docker
+      - containerd
+      - runc
+    state: absent
+    autoremove: true
+    purge: true
   tags:
-    - docker
-  changed_when: true
+    - docker_install
+  become: true
+  become_method: ansible.builtin.sudo
+  failed_when: false
   when: common_is_ubuntu_os and install_installed_of_docker.stdout == "1"
 
 - name: "Ubuntu 配置 Docker 软件源"
-  ansible.builtin.include_tasks:
-    file: ../../common/tasks/docker-repo.yml
-    apply:
-      tags:
-        - docker
+  ansible.builtin.import_tasks: ../../common/tasks/docker-repo.yml
   vars:
     common_docker_apt_mirror: https://download.docker.com/linux/ubuntu
   tags:
-    - docker
+    - docker_repo
   when: common_is_ubuntu_os and install_installed_of_docker.stdout == "1"
 
 - name: 在 Ubuntu 上安装 Docker
@@ -117,7 +120,7 @@
     - docker-ce{{ DOCKER_VERSION | default('') }}
     - containerd.io{{ CONTAINERD_VERSION | default('') }}
   tags:
-    - docker
+    - docker_install
   failed_when: false
   become: true
   become_method: ansible.builtin.sudo
@@ -128,7 +131,7 @@
   register: install_docker_macos_result
   changed_when: install_docker_macos_result.rc == 0 and install_docker_macos_result.stdout != ""
   tags:
-    - docker
+    - docker_install
   when: common_is_mac_os and install_installed_of_docker.stdout == "1"
 
 - name: 检查 macOS Docker Desktop 是否存在
@@ -136,29 +139,36 @@
     path: /Applications/Docker.app
   register: install_macos_docker_desktop_app
   tags:
-    - docker
+    - docker_desktop
   when: common_is_mac_os
 
 - name: 输出 macOS Docker Desktop 检查结果
   ansible.builtin.debug:
     msg: "macOS Docker Desktop {{ '已存在' if install_macos_docker_desktop_app.stat.exists else '不存在' }}"
   tags:
-    - docker
+    - docker_desktop
   when: common_is_mac_os
 
 - name: 在 macOS 上安装 docker-machine
   ansible.builtin.command: "brew install docker-machine"
   changed_when: true
   tags:
-    - docker
+    - docker_machine
   when: common_is_mac_os and install_installed_of_docker_machine.stdout == "1"
 
 - name: 在 macOS 上安装 docker-compose
   ansible.builtin.command: "brew install docker-compose"
   changed_when: true
   tags:
-    - docker
+    - docker_compose
   when: common_is_mac_os and install_installed_of_docker_compose.stdout == "1"
+
+- name: 输出 Linux docker-compose 下载链接
+  ansible.builtin.debug:
+    msg: "{{ install_docker_compose_download_url }}"
+  tags:
+    - docker_compose
+  when: common_is_linux_os and install_installed_of_docker_compose.stdout == "1"
 
 - name: 在 Linux 上安装 docker-compose
   ansible.builtin.get_url:
@@ -170,7 +180,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - docker
+    - docker_compose
   when: common_is_linux_os and install_installed_of_docker_compose.stdout == "1"
 
 - name: 在 Ubuntu 或 Redhat 上启动 Docker
@@ -181,7 +191,7 @@
   register: install_docker_service_result
   failed_when: false
   tags:
-    - docker
+    - docker_service
   when: common_is_linux_os
 
 - name: 在 Linux 上备份 Docker daemon.json
@@ -195,7 +205,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - docker
+    - docker_daemon_config
   when: common_is_linux_os
 
 - name: "Linux修改docker启动配置"
@@ -205,7 +215,7 @@
     mode: "0644"
     force: true
   tags:
-    - docker
+    - docker_daemon_config
   when: common_is_linux_os
 
 - name: 检查 macOS Docker daemon.json 是否存在
@@ -213,7 +223,7 @@
     path: "{{ common_home_root }}/.docker/daemon.json"
   register: install_macos_docker_daemon_config
   tags:
-    - docker
+    - docker_daemon_config
   when:
     - common_is_mac_os
     - install_macos_docker_desktop_app.stat.exists
@@ -222,7 +232,7 @@
   ansible.builtin.debug:
     msg: "macOS Docker daemon.json {{ '已存在' if install_macos_docker_daemon_config.stat.exists else '不存在' }}"
   tags:
-    - docker
+    - docker_daemon_config
   when:
     - common_is_mac_os
     - install_macos_docker_desktop_app.stat.exists
@@ -236,7 +246,7 @@
   changed_when: false
   failed_when: false
   tags:
-    - docker
+    - docker_daemon_config
   when:
     - common_is_mac_os
     - install_macos_docker_desktop_app.stat.exists
@@ -249,7 +259,7 @@
     mode: "0644"
     force: true
   tags:
-    - docker
+    - docker_daemon_config
   when:
     - common_is_mac_os
     - install_macos_docker_desktop_app.stat.exists
@@ -258,7 +268,7 @@
   ansible.builtin.shell: osascript -e 'quit app "Docker"' && open -a Docker
   changed_when: true
   tags:
-    - docker
+    - docker_daemon_config
   when:
     - common_is_mac_os
     - install_macos_docker_desktop_app.stat.exists
@@ -267,5 +277,5 @@
 #   become: true
 #   become_method: ansible.builtin.sudo
 #   tags:
-#     - docker
+#     - docker_firewall
 #   when: common_is_mac_os

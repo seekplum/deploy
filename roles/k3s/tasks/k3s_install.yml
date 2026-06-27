@@ -1,4 +1,20 @@
 ---
+- name: 检查 Docker 是否已安装
+  ansible.builtin.shell: '(command -v docker >/dev/null 2>&1 || test -x "{{ common_home_root }}/.lima/.bin/docker") && echo 0 || echo 1'
+  register: k3s_installed_of_docker
+  changed_when: false
+  failed_when: false
+  tags:
+    - k3s_common
+  when: common_is_linux_os
+
+- name: Docker 未安装时中断 k3s 安装
+  ansible.builtin.fail:
+    msg: "Docker 未安装，请先执行 Docker 安装任务后再安装 k3s"
+  tags:
+    - k3s_common
+  when: common_is_linux_os and k3s_installed_of_docker.stdout == '1'
+
 - name: "Ubuntu关闭防火墙"
   ansible.builtin.service:
     name: "ufw"
@@ -301,7 +317,7 @@
 
 - name: 输出 stern 检查结果
   ansible.builtin.debug:
-    msg: "stern {{ '已安装' if k3s_installed_of_stern.stdout == '0' else '未安装' }}"
+    msg: "stern {{ '已安装' if (k3s_installed_of_stern.stdout | default('1')) == '0' else '未安装' }}"
   tags:
     - stern
   when: common_is_linux_os and common_is_master_node
@@ -316,12 +332,18 @@
         path: "{{ k3s_stern_package_path_on_linux }}"
       register: k3s_stern_package_linux_stat
       changed_when: false
-      when: (common_is_linux_os) and k3s_installed_of_stern.stdout == "1"
+      when: common_is_linux_os and common_is_master_node and (k3s_installed_of_stern.stdout | default('1')) == "1"
 
     - name: 输出 Linux stern 安装包检查结果
       ansible.builtin.debug:
-        msg: "Linux stern 安装包 {{ '已存在' if k3s_stern_package_linux_stat.stat.exists else '不存在' }}"
-      when: (common_is_linux_os) and k3s_installed_of_stern.stdout == "1"
+        msg: "Linux stern 安装包 {{ '已存在' if (k3s_stern_package_linux_stat.stat.exists | default(false)) else '不存在' }}"
+      when: common_is_linux_os and common_is_master_node and (k3s_installed_of_stern.stdout | default('1')) == "1"
+
+    - name: 输出 Linux stern 安装包下载链接
+      ansible.builtin.debug:
+        msg: "{{ k3s_stern_download_url_on_linux }}"
+      when: common_is_linux_os and common_is_master_node and (k3s_installed_of_stern.stdout | default('1')) == "1" and not
+        (k3s_stern_package_linux_stat.stat.exists | default(false))
 
     - name: 在 Linux 上下载 stern 安装包
       ansible.builtin.get_url:
@@ -329,13 +351,14 @@
         dest: "{{ k3s_stern_package_path_on_linux }}"
         force: false
         mode: "0644"
-      when: common_is_linux_os and common_is_master_node and k3s_installed_of_stern.stdout == "1" and not k3s_stern_package_linux_stat.stat.exists
+      when: common_is_linux_os and common_is_master_node and (k3s_installed_of_stern.stdout | default('1')) == "1" and not
+        (k3s_stern_package_linux_stat.stat.exists | default(false))
     - name: 在 Linux 上解压 stern
       ansible.builtin.unarchive:
         src: "{{ k3s_stern_package_path_on_linux }}"
         dest: "/tmp"
         remote_src: true
-      when: common_is_linux_os and common_is_master_node and k3s_installed_of_stern.stdout == "1"
+      when: common_is_linux_os and common_is_master_node and (k3s_installed_of_stern.stdout | default('1')) == "1"
     - name: 复制 stern
       ansible.builtin.copy:
         src: "/tmp/stern"
@@ -343,7 +366,7 @@
         mode: "0755"
         force: true
         remote_src: true
-      when: common_is_linux_os and common_is_master_node and k3s_installed_of_stern.stdout == "1"
+      when: common_is_linux_os and common_is_master_node and (k3s_installed_of_stern.stdout | default('1')) == "1"
 - name: 检查 Linux 上是否已有 helm 安装包
   ansible.builtin.stat:
     path: "{{ k3s_helm_package_path_on_linux }}"
@@ -380,6 +403,11 @@
     - helm
 
   block:
+    - name: 输出 Linux helm 安装包下载链接
+      ansible.builtin.debug:
+        msg: "{{ k3s_helm_download_url_on_linux }}"
+      when: common_is_linux_os and common_is_master_node and not k3s_helm_package_linux_stat.stat.exists
+
     - name: 在 Linux 上下载 helm 安装包
       ansible.builtin.get_url:
         url: "{{ k3s_helm_download_url_on_linux }}"

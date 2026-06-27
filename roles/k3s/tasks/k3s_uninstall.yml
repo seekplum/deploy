@@ -4,14 +4,14 @@
     path: /usr/local/bin/k3s-uninstall.sh
   register: k3s_server_scripts
   tags:
-    - remove_k3s
+    - remove_k3s_scripts
   when: common_is_linux_os
 
 - name: 输出 k3s server 卸载脚本检查结果
   ansible.builtin.debug:
     msg: "k3s server 卸载脚本 {{ '已存在' if k3s_server_scripts.stat.exists else '不存在' }}"
   tags:
-    - remove_k3s
+    - remove_k3s_scripts
   when: common_is_linux_os
 
 - name: 检查 k3s agent 卸载脚本是否存在
@@ -19,14 +19,14 @@
     path: /usr/local/bin/k3s-agent-uninstall.sh
   register: k3s_agent_scripts
   tags:
-    - remove_k3s
+    - remove_k3s_scripts
   when: common_is_linux_os
 
 - name: 输出 k3s agent 卸载脚本检查结果
   ansible.builtin.debug:
     msg: "k3s agent 卸载脚本 {{ '已存在' if k3s_agent_scripts.stat.exists else '不存在' }}"
   tags:
-    - remove_k3s
+    - remove_k3s_scripts
   when: common_is_linux_os
 
 - name: 卸载 k3s server
@@ -34,7 +34,7 @@
   changed_when: false
   failed_when: false
   tags:
-    - remove_k3s
+    - remove_k3s_scripts
   become: true
   become_method: ansible.builtin.sudo
   when: common_is_linux_os and k3s_server_scripts.stat.exists
@@ -44,7 +44,7 @@
   changed_when: false
   failed_when: false
   tags:
-    - remove_k3s
+    - remove_k3s_scripts
   become: true
   become_method: ansible.builtin.sudo
   when: common_is_linux_os and k3s_agent_scripts.stat.exists
@@ -55,7 +55,7 @@
     state: absent
     autoremove: true
   tags:
-    - remove_k3s
+    - remove_k3s_packages
   failed_when: false
   when: common_is_centos_os
 
@@ -65,7 +65,7 @@
     state: absent
     autoremove: true
   tags:
-    - remove_k3s
+    - remove_k3s_packages
   failed_when: false
   when: common_is_centos_os
 
@@ -84,7 +84,7 @@
     - "/usr/local/bin/ctr"
     - "/usr/local/bin/crictl"
   tags:
-    - remove_k3s
+    - remove_k3s_files
   become: true
   become_method: ansible.builtin.sudo
   when: common_is_linux_os

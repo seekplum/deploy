@@ -2,16 +2,16 @@
 # tasks file for k3s
 
 - name: 执行 k3s 卸载任务
-  ansible.builtin.include_tasks: k3s_uninstall.yml
+  ansible.builtin.import_tasks: k3s_uninstall.yml
   tags:
-    - always
+    - remove_k3s
 
 - name: 执行 k3s 安装任务
-  ansible.builtin.include_tasks: k3s_install.yml
+  ansible.builtin.import_tasks: k3s_install.yml
   tags:
-    - always
+    - k3s_install
 
 - name: 执行 k3s 节点加入任务
-  ansible.builtin.include_tasks: k3s_join.yml
+  ansible.builtin.import_tasks: k3s_join.yml
   tags:
-    - always
+    - k3s_join

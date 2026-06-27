@@ -26,6 +26,43 @@
     - java
   when: common_is_linux_os
 
+- name: 校验 Linux Java 安装包格式
+  ansible.builtin.unarchive:
+    src: "{{ install_java_package_path_on_linux }}"
+    dest: "{{ common_java_home }}"
+    remote_src: true
+    list_files: true
+  register: install_java_package_linux_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - java
+  when:
+    - common_is_linux_os
+    - install_java_package_linux_stat.stat.exists
+
+- name: 删除无效的 Linux Java 安装包
+  ansible.builtin.file:
+    path: "{{ install_java_package_path_on_linux }}"
+    state: absent
+  tags:
+    - java
+  when:
+    - common_is_linux_os
+    - install_java_package_linux_stat.stat.exists
+    - (install_java_package_linux_check.files | default([]) | length) == 0
+
+- name: 设置 Linux Java 安装包是否需要下载
+  ansible.builtin.set_fact:
+    install_java_package_linux_needs_download: >-
+      {{
+        not install_java_package_linux_stat.stat.exists or
+        (install_java_package_linux_check.files | default([]) | length) == 0
+      }}
+  tags:
+    - java
+  when: common_is_linux_os
+
 - name: 检查 Java 是否已安装
   ansible.builtin.shell: "java --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_installed_of_java
@@ -46,13 +83,34 @@
     - java
 
   block:
+    - name: 输出 Linux Java 安装包下载链接
+      ansible.builtin.debug:
+        msg: "{{ install_java_download_url_on_linux }}"
+      when: (common_is_linux_os) and install_java_package_linux_needs_download
+
     - name: 在 Linux 上下载 Java 安装包
       ansible.builtin.get_url:
         url: "{{ install_java_download_url_on_linux }}"
         dest: "{{ install_java_package_path_on_linux }}"
         force: false
         mode: "0644"
-      when: (common_is_linux_os) and not install_java_package_linux_stat.stat.exists
+        timeout: 60
+      register: install_java_download_linux_result
+      retries: 3
+      delay: 5
+      until: install_java_download_linux_result is succeeded
+      when: (common_is_linux_os) and install_java_package_linux_needs_download
+
+    - name: 校验下载后的 Linux Java 安装包格式
+      ansible.builtin.unarchive:
+        src: "{{ install_java_package_path_on_linux }}"
+        dest: "{{ common_java_home }}"
+        remote_src: true
+        list_files: true
+      changed_when: false
+      tags:
+        - java
+      when: (common_is_linux_os) and install_installed_of_java.stdout == "1"
 
     - name: 在 Linux 上解压 Java
       ansible.builtin.unarchive:
@@ -69,14 +127,14 @@
   register: install_mvn_package_linux_stat
   changed_when: false
   tags:
-    - java
+    - maven
   when: common_is_linux_os
 
 - name: 输出 Linux Maven 安装包检查结果
   ansible.builtin.debug:
     msg: "Linux Maven 安装包 {{ '已存在' if install_mvn_package_linux_stat.stat.exists else '不存在' }}"
   tags:
-    - java
+    - maven
   when: common_is_linux_os
 
 - name: 检查 Maven 是否已安装
@@ -84,26 +142,36 @@
   register: install_installed_of_mvn
   changed_when: false
   tags:
-    - java
+    - maven
   when: common_is_linux_os
 
 - name: 输出 Maven 检查结果
   ansible.builtin.debug:
     msg: "Maven {{ '已安装' if install_installed_of_mvn.stdout == '0' else '未安装' }}"
   tags:
-    - java
+    - maven
   when: common_is_linux_os
 
 - name: 安装 Maven
   tags:
-    - java
+    - maven
   block:
+    - name: 输出 Linux Maven 安装包下载链接
+      ansible.builtin.debug:
+        msg: "{{ install_mvn_download_url_on_linux }}"
+      when: (common_is_linux_os) and not install_mvn_package_linux_stat.stat.exists
+
     - name: 在 Linux 上下载 Maven 安装包
       ansible.builtin.get_url:
         url: "{{ install_mvn_download_url_on_linux }}"
         dest: "{{ install_mvn_package_path_on_linux }}"
         force: false
         mode: "0644"
+        timeout: 60
+      register: install_mvn_download_linux_result
+      retries: 3
+      delay: 5
+      until: install_mvn_download_linux_result is succeeded
       when: (common_is_linux_os) and not install_mvn_package_linux_stat.stat.exists
 
     - name: 创建 Maven 安装目录

@@ -11,7 +11,6 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - remove_initialize
     - remove_chezmoi
 
 - name: 删除 drone
@@ -24,7 +23,6 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - remove_initialize
     - remove_drone
 
 - name: 删除 act
@@ -37,7 +35,6 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - remove_initialize
     - remove_act
 
 - name: 删除 uv
@@ -50,7 +47,6 @@
     - "{{ common_home_root }}/.cache/uv"
     - "{{ common_home_root }}/.uv"
   tags:
-    - remove_initialize
     - remove_uv
 
 - name: 删除 devbox
@@ -65,7 +61,6 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - remove_initialize
     - remove_devbox
 
 - name: 卸载 nix daemon 或标记直接删除
@@ -86,7 +81,6 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - remove_initialize
     - remove_nix
 
 - name: 删除 nix 文件
@@ -104,7 +98,6 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - remove_initialize
     - remove_nix
 
 - name: 删除 direnv
@@ -118,7 +111,6 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - remove_initialize
     - remove_direnv
 
 - name: 删除 atuin
@@ -131,7 +123,6 @@
     - "{{ common_home_root }}/.config/atuin"
     - "{{ common_home_root }}/.local/share/atuin"
   tags:
-    - remove_initialize
     - remove_atuin
 
 - name: 删除 sing-box
@@ -146,7 +137,6 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - remove_initialize
     - remove_sing_box
   when: common_is_linux_os
 
@@ -158,7 +148,6 @@
     - "{{ common_home_root }}/.cargo"
     - "{{ common_home_root }}/.rustup"
   tags:
-    - remove_initialize
     - remove_cargo
 
 - name: 在 macOS 上通过 MacPorts 卸载软件包
@@ -171,7 +160,6 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - remove_initialize
     - remove_macports
   when: common_is_mac_os
 
@@ -184,6 +172,5 @@
   changed_when: uninstall_homebrew_cask_result.rc == 0
   failed_when: false
   tags:
-    - remove_initialize
     - remove_brew
   when: common_is_mac_os

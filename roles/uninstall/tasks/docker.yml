@@ -13,6 +13,21 @@
     - remove_docker
   when: common_is_linux_os
 
+- name: 停止 Docker 运行时相关服务
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  loop:
+    - docker.socket
+    - containerd
+  become: true
+  become_method: ansible.builtin.sudo
+  failed_when: false
+  tags:
+    - remove_docker
+  when: common_is_linux_os
+
 - name: 在 RedHat 上卸载 Docker
   ansible.builtin.dnf:
     name: "{{ item }}"
@@ -74,6 +89,28 @@
   tags:
     - remove_docker
   when: common_is_mac_os
+
+- name: 卸载 Docker 运行时挂载点
+  ansible.builtin.shell: |
+    set -o pipefail
+    awk '$5 ~ "^(/var/lib/docker|/var/run/docker|/run/docker)(/|$)" { print $5 }' /proc/self/mountinfo |
+      sort -r |
+      while IFS= read -r mount_point; do
+        umount -l "${mount_point}" || true
+      done
+    find /run/docker/netns /var/run/docker/netns -mindepth 1 -maxdepth 1 -type f -print 2>/dev/null |
+      while IFS= read -r netns; do
+        umount -l "${netns}" || true
+      done
+  args:
+    executable: /bin/bash
+  changed_when: false
+  failed_when: false
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_docker
+  when: common_is_linux_os
 
 - name: 删除 Docker 目录
   ansible.builtin.file:

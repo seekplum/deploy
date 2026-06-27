@@ -4,13 +4,13 @@
   register: install_installed_of_n
   changed_when: false
   tags:
-    - nodejs
+    - nodejs_n
 
 - name: 输出 n 检查结果
   ansible.builtin.debug:
     msg: "n {{ '已安装' if install_installed_of_n.stdout == '0' else '未安装' }}"
   tags:
-    - nodejs
+    - nodejs_n
 
 - name: 检查 Node.js 是否已安装
   ansible.builtin.shell: "node -v >/dev/null 2>&1 && echo 0 || echo 1"
@@ -27,7 +27,7 @@
 
 - name: 安装 Node.js
   tags:
-    - nodejs
+    - nodejs_packages
 
   block:
     - name: 安装 n

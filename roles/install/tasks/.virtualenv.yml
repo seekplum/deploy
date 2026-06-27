@@ -3,12 +3,16 @@
   ansible.builtin.stat:
     path: "{{ install_virtual_root }}/{{ env_item.version }}/bin/python"
   register: install_virtualenv_python_stat
+  loop: "{{ install_virtual_envs }}"
+  loop_control:
+    loop_var: env_item
   tags:
     - virtualenv
 
 - name: 输出虚拟环境检查结果
   ansible.builtin.debug:
-    msg: "{{ env_item.version }} 虚拟环境 {{ '已存在' if install_virtualenv_python_stat.stat.exists else '不存在' }}"
+    msg: "{{ item.env_item.version }} 虚拟环境 {{ '已存在' if item.stat.exists else '不存在' }}"
+  loop: "{{ install_virtualenv_python_stat.results }}"
   tags:
     - virtualenv
 
@@ -19,9 +23,11 @@
       --prompt {{ env_item.version }}
       --python {{ env_item.version }}
     creates: "{{ install_virtual_root }}/{{ env_item.version }}/bin/python"
+  loop: "{{ install_virtual_envs }}"
+  loop_control:
+    loop_var: env_item
   tags:
     - virtualenv
-  when: not install_virtualenv_python_stat.stat.exists
 
 - name: 复制 requirements.in
   ansible.builtin.copy:
@@ -37,29 +43,34 @@
   ansible.builtin.stat:
     path: "{{ install_virtual_root }}/{{ env_item.version }}/.requirements_installed"
   register: install_virtualenv_packages_stat
+  loop: "{{ install_virtual_envs }}"
+  loop_control:
+    loop_var: env_item
   tags:
     - virtualenv
   when: env_item.version.startswith("3.")
 
 - name: 输出虚拟环境依赖包检查结果
   ansible.builtin.debug:
-    msg: "{{ env_item.version }} 虚拟环境依赖包 {{ '已安装' if install_virtualenv_packages_stat.stat.exists else '未安装' }}"
+    msg: "{{ item.env_item.version }} 虚拟环境依赖包 {{ '已安装' if item.stat.exists else '未安装' }}"
+  loop: "{{ install_virtualenv_packages_stat.results }}"
   tags:
     - virtualenv
-  when: env_item.version.startswith("3.")
+  when: item.stat is defined
 
 - name: 安装虚拟环境依赖包
   ansible.builtin.shell: |
     set -o pipefail
     uv pip install \
-      --python "{{ install_virtual_root }}/{{ env_item.version }}/bin/python" \
+      --python "{{ install_virtual_root }}/{{ item.env_item.version }}/bin/python" \
       -r /tmp/requirements.in
-    touch "{{ install_virtual_root }}/{{ env_item.version }}/.requirements_installed"
+    touch "{{ install_virtual_root }}/{{ item.env_item.version }}/.requirements_installed"
   args:
     executable: /bin/bash
   changed_when: true
+  loop: "{{ install_virtualenv_packages_stat.results }}"
   tags:
     - virtualenv
   when:
-    - env_item.version.startswith("3.")
-    - not install_virtualenv_packages_stat.stat.exists
+    - item.stat is defined
+    - not item.stat.exists

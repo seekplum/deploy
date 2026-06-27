@@ -9,7 +9,7 @@
     - src
     - pkg
   tags:
-    - golang
+    - golang_dirs
 
 - name: 检查 Linux 上是否已有 Golang 安装包
   ansible.builtin.stat:
@@ -17,14 +17,14 @@
   register: install_go_package_linux_stat
   changed_when: false
   tags:
-    - golang
+    - golang_package
   when: common_is_linux_os
 
 - name: 输出 Linux Golang 安装包检查结果
   ansible.builtin.debug:
     msg: "Linux Golang 安装包 {{ '已存在' if install_go_package_linux_stat.stat.exists else '不存在' }}"
   tags:
-    - golang
+    - golang_package
   when: common_is_linux_os
 
 - name: 检查 macOS 上是否已有 Golang 安装包
@@ -33,14 +33,14 @@
   register: install_go_package_mac_stat
   changed_when: false
   tags:
-    - golang
+    - golang_package
   when: common_is_intel_mac_os
 
 - name: 输出 macOS Golang 安装包检查结果
   ansible.builtin.debug:
     msg: "macOS Golang 安装包 {{ '已存在' if install_go_package_mac_stat.stat.exists else '不存在' }}"
   tags:
-    - golang
+    - golang_package
   when: common_is_intel_mac_os
 
 - name: 检查 Golang 是否已安装
@@ -60,13 +60,28 @@
   tags:
     - golang
   block:
+    - name: 输出 Linux Golang 安装包下载链接
+      ansible.builtin.debug:
+        msg: "{{ install_go_download_url_on_linux }}"
+      when: common_is_linux_os and not install_go_package_linux_stat.stat.exists
+
     - name: 在 Linux 上下载 Golang 安装包
       ansible.builtin.get_url:
         url: "{{ install_go_download_url_on_linux }}"
         dest: "{{ install_go_package_path_on_linux }}"
         force: false
         mode: "0644"
-      when: common_is_linux_os and install_existing_of_go_on_linux.stdout == "1"
+        timeout: 60
+      register: install_go_download_linux_result
+      retries: 3
+      delay: 5
+      until: install_go_download_linux_result is succeeded
+      when: common_is_linux_os and not install_go_package_linux_stat.stat.exists
+
+    - name: 输出 macOS Golang 安装包下载链接
+      ansible.builtin.debug:
+        msg: "{{ install_go_download_url_on_mac }}"
+      when: common_is_intel_mac_os and not install_go_package_mac_stat.stat.exists
 
     - name: 在 macOS 上下载 Golang 安装包
       ansible.builtin.get_url:
@@ -74,7 +89,12 @@
         dest: "{{ install_go_package_path_on_mac }}"
         force: false
         mode: "0644"
-      when: common_is_intel_mac_os and install_existing_of_go_on_mac.stdout == "1"
+        timeout: 60
+      register: install_go_download_mac_result
+      retries: 3
+      delay: 5
+      until: install_go_download_mac_result is succeeded
+      when: common_is_intel_mac_os and not install_go_package_mac_stat.stat.exists
 
     - name: 在 Linux 上解压 Golang
       ansible.builtin.unarchive:

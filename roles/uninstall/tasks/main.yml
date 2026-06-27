@@ -2,36 +2,36 @@
 # tasks file for uninstall
 
 - name: 执行 zsh 卸载任务
-  ansible.builtin.include_tasks: zsh.yml
+  ansible.builtin.import_tasks: zsh.yml
   tags:
-    - always
+    - remove_zsh
 
 - name: 执行 Docker 卸载任务
-  ansible.builtin.include_tasks: docker.yml
+  ansible.builtin.import_tasks: docker.yml
   tags:
-    - always
+    - remove_docker
 
 - name: 执行初始化软件卸载任务
-  ansible.builtin.include_tasks: initialize.yml
+  ansible.builtin.import_tasks: initialize.yml
   tags:
-    - always
+    - remove_initialize
 
 - name: 执行 Node.js 卸载任务
-  ansible.builtin.include_tasks: nodejs.yml
+  ansible.builtin.import_tasks: nodejs.yml
   tags:
-    - always
+    - remove_nodejs
 
 - name: 执行 Go 卸载任务
-  ansible.builtin.include_tasks: golang.yml
+  ansible.builtin.import_tasks: golang.yml
   tags:
-    - always
+    - remove_golang
 
 - name: 执行 Java 卸载任务
-  ansible.builtin.include_tasks: java.yml
+  ansible.builtin.import_tasks: java.yml
   tags:
-    - always
+    - remove_java
 
 - name: 执行 Python Virtualenv 卸载任务
-  ansible.builtin.include_tasks: virtualenv.yml
+  ansible.builtin.import_tasks: virtualenv.yml
   tags:
-    - always
+    - remove_virtualenv

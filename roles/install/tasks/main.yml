@@ -20,103 +20,56 @@
       exec /bin/sh "$@"
 
 - name: 使用可用的 zsh 包装器执行 install 角色任务
+  module_defaults:
+    ansible.builtin.shell:
+      executable: /tmp/ansible-shell-wrapper
   block:
     - name: 执行 configure 任务
-      ansible.builtin.include_tasks:
-        file: configure.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
+      ansible.builtin.import_tasks: configure.yml
       tags:
-        - always
+        - configure
 
     - name: 执行 initialize 任务
-      ansible.builtin.include_tasks:
-        file: initialize.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
+      ansible.builtin.import_tasks: initialize.yml
       tags:
-        - always
+        - initialize
 
     - name: 执行 zsh 任务
-      ansible.builtin.include_tasks:
-        file: zsh.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
+      ansible.builtin.import_tasks: zsh.yml
       tags:
-        - always
+        - zsh
 
     - name: 执行 Python 任务
-      ansible.builtin.include_tasks:
-        file: python.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
+      ansible.builtin.import_tasks: python.yml
       tags:
-        - always
+        - python
 
     - name: 执行 virtualenv 任务
-      ansible.builtin.include_tasks:
-        file: virtualenv.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
+      ansible.builtin.import_tasks: virtualenv.yml
       tags:
-        - always
+        - virtualenv
 
     - name: 执行 Docker 任务
-      ansible.builtin.include_tasks:
-        file: docker.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
+      ansible.builtin.import_tasks: docker.yml
       tags:
-        - always
+        - docker
 
     - name: 执行 Golang 任务
-      ansible.builtin.include_tasks:
-        file: golang.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
+      ansible.builtin.import_tasks: golang.yml
       tags:
-        - always
+        - golang
 
     - name: 执行 Java 任务
-      ansible.builtin.include_tasks:
-        file: java.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
+      ansible.builtin.import_tasks: java.yml
       tags:
-        - always
+        - java
 
     - name: 执行 Node.js 任务
-      ansible.builtin.include_tasks:
-        file: nodejs.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
+      ansible.builtin.import_tasks: nodejs.yml
       tags:
-        - always
+        - nodejs
 
     - name: 执行 rbenv 任务
-      ansible.builtin.include_tasks:
-        file: rbenv.yml
-        apply:
-          module_defaults:
-            ansible.builtin.shell:
-              executable: /tmp/ansible-shell-wrapper
+      ansible.builtin.import_tasks: rbenv.yml
       tags:
-        - always
+        - rbenv

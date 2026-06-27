@@ -21,7 +21,7 @@
     # - "{{ install_java_projects }}"
     - "{{ install_packages_root }}"
   tags:
-    - configure
+    - configure_project_dirs
 
 - name: 在 macOS 上链接 VirtualBox 脚本到 PATH
   ansible.builtin.file:
@@ -34,7 +34,7 @@
     - "stop_vm.sh"
     - "replace_config.sh"
   tags:
-    - configure
+    - configure_virtualbox_scripts
   become: true
   become_method: ansible.builtin.sudo
   failed_when: false
@@ -50,7 +50,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - configure
+    - configure_ubuntu_sources
   when: common_is_ubuntu_os
 
 - name: 在 Ubuntu 上复制 apt 源列表
@@ -64,7 +64,7 @@
   with_items:
     - "sources.list"
   tags:
-    - configure
+    - configure_ubuntu_sources
   when: common_is_ubuntu_os
 
 - name: 在 Ubuntu 上复制 Git PPA 源列表
@@ -79,7 +79,7 @@
     - "mongodb-org.list"
     - "git-core-ubuntu-ppa-focal.list"
   tags:
-    - configure
+    - configure_ubuntu_sources
   when: common_is_ubuntu_os
 
 - name: 在 Redhat 上备份软件源配置
@@ -96,7 +96,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - configure
+    - configure_redhat_sources
   when: common_is_centos_os
 
 - name: 在 Redhat 上复制软件源配置
@@ -111,7 +111,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - configure
+    - configure_redhat_sources
   when: common_is_centos_os
 
 - name: 在 Redhat 上导入 GPG 密钥
@@ -122,14 +122,14 @@
   become_method: ansible.builtin.sudo
   failed_when: false
   tags:
-    - configure
+    - configure_redhat_sources
   when: common_is_centos_os
 
 - name: 在 Ubuntu 上配置开机自动执行
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - configure
+    - configure_rc_local
   when: common_is_linux_os
 
   block:
@@ -159,7 +159,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - configure
+    - configure_dns
   when: common_is_ubuntu_os
   block:
     - name: "修改DNS"

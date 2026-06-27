@@ -6,13 +6,13 @@
   register: install_existing_of_chezmoi
   changed_when: false
   tags:
-    - initialize
+    - chezmoi
 
 - name: 输出 chezmoi 检查结果
   ansible.builtin.debug:
     msg: "chezmoi {{ '已安装' if install_existing_of_chezmoi.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - chezmoi
 
 - name: 安装 chezmoi
   ansible.builtin.shell: |
@@ -24,7 +24,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - initialize
+    - chezmoi
   when: install_existing_of_chezmoi.stdout == "1"
 
 - name: 应用 chezmoi 配置
@@ -32,34 +32,34 @@
   changed_when: false
   failed_when: false
   tags:
-    - initialize
+    - chezmoi
 
 - name: 检查 macOS 是否已安装 Homebrew
   ansible.builtin.shell: "brew --version >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_existing_of_brew
   changed_when: false
   tags:
-    - initialize
+    - homebrew
   when: common_is_mac_os
 
 - name: 输出 Homebrew 检查结果
   ansible.builtin.debug:
     msg: "Homebrew {{ '已安装' if install_existing_of_brew.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - homebrew
   when: common_is_mac_os
 
 - name: 在 macOS 上安装 Homebrew
   ansible.builtin.shell: 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
   changed_when: true
   tags:
-    - initialize
+    - homebrew
   when: common_is_mac_os and install_existing_of_brew.stdout == "1"
 
 # - name: add mysql repo on Redhat
 #   shell: sudo rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
 #   tags:
-#     - initialize
+#     - mysql_repo
 #   ignore_errors: true
 #   when: common_is_centos_os
 
@@ -68,7 +68,7 @@
     https://archive.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }} -o /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{
     ansible_distribution_major_version }}
   tags:
-    - initialize
+    - redhat_base_packages
   failed_when: false
   changed_when: false
   when: common_is_centos_os
@@ -76,6 +76,12 @@
 - name: 在 Redhat 上换源
   ansible.builtin.shell: |
     set -o pipefail
+    changed=0
+    if grep -qE '^(mirrorlist=|metalink=|# ?baseurl=https://repo.almalinux.org|#baseurl=https://download.example/pub|#baseurl=https://download.fedoraproject.org/pub)' \
+      /etc/yum.repos.d/almalinux*.repo /etc/yum.repos.d/epel*.repo 2>/dev/null; then
+      changed=1
+    fi
+
     sed -i -e 's|^mirrorlist=|#mirrorlist=|g' \
       -e 's|^# baseurl=https://repo.almalinux.org|baseurl=https://mirrors.aliyun.com|g' \
       /etc/yum.repos.d/almalinux*.repo
@@ -85,67 +91,113 @@
       -e 's|^#baseurl=https://download.fedoraproject.org/pub|baseurl=https://mirrors.aliyun.com|g' \
       /etc/yum.repos.d/epel*.repo
 
-    dnf install epel-release -y
+    if [ "${changed}" = "1" ]; then
+      dnf install epel-release -y
+    fi
+    echo "changed=${changed}"
   args:
     executable: /bin/bash
+  register: install_redhat_repo_mirror_result
   tags:
-    - initialize
+    - redhat_base_packages
   failed_when: false
+  changed_when: "'changed=1' in install_redhat_repo_mirror_result.stdout"
   become: true
   become_method: ansible.builtin.sudo
   when: common_is_centos_os
 
+- name: 在 Redhat 上安装基础包仓库工具
+  ansible.builtin.dnf:
+    name:
+      - epel-release
+      - yum-utils
+    state: present
+    update_cache: false
+  tags:
+    - redhat_base_packages
+  when: common_is_centos_os
+
+- name: 在 Redhat 上启用开发包仓库
+  ansible.builtin.shell: |
+    set -o pipefail
+    repo_id=""
+    for candidate in crb powertools PowerTools; do
+      if dnf repolist all --quiet | awk '{print $1}' | grep -qx "${candidate}"; then
+        repo_id="${candidate}"
+        break
+      fi
+    done
+
+    if [ -z "${repo_id}" ]; then
+      echo "repo=none"
+      exit 0
+    fi
+
+    if dnf repolist enabled --quiet | awk '{print $1}' | grep -qx "${repo_id}"; then
+      echo "changed=0 repo=${repo_id}"
+    else
+      dnf config-manager --set-enabled "${repo_id}"
+      echo "changed=1 repo=${repo_id}"
+    fi
+  args:
+    executable: /bin/bash
+  register: install_redhat_devel_repo_result
+  changed_when: "'changed=1' in install_redhat_devel_repo_result.stdout"
+  tags:
+    - redhat_base_packages
+  when: common_is_centos_os
+
 - name: 在 Redhat 上安装基础软件包
   ansible.builtin.dnf:
-    name: "{{ item }}"
+    name:
+      - zip
+      - unzip
+      # - util-linux-user
+      - epel-release
+      - gcc
+      - gcc-c++
+      - zlib
+      - zlib-devel
+      - libffi-devel
+      - libyaml-devel
+      - sqlite-devel
+      - readline-devel
+      - rsync
+      - git
+      - bzip2
+      - bzip2-devel
+      #    - python-setuptools
+      #    - python-devel
+      - wget
+      - screen
+      - make
+      - cmake
+      - tree
+      - sshpass
+      - openssl-devel
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+      # - haveged
+      # - the_silver_searcher
+      - patch
+      - pcre-devel
+      - ripgrep
+      - mongodb-mongosh
+      - knot
+      - telnet
+      - util-linux-user
     state: present
-    update_cache: true
+    update_cache: false
     # nobest: true
-  with_items:
-    - zip
-    - unzip
-    # - util-linux-user
-    - epel-release
-    - gcc
-    - gcc-c++
-    - zlib
-    - zlib-devel
-    - libffi-devel
-    - sqlite-devel
-    - readline-devel
-    - rsync
-    - git
-    - bzip2
-    - bzip2-devel
-    #    - python-setuptools
-    #    - python-devel
-    - wget
-    - screen
-    - make
-    - cmake
-    - tree
-    - sshpass
-    - openssl-devel
-    - yum-utils
-    - device-mapper-persistent-data
-    - lvm2
-    # - haveged
-    # - the_silver_searcher
-    - patch
-    - pcre-devel
-    - ripgrep
-    - mongodb-mongosh
-    - knot
-    - telnet
-    - util-linux-user
   tags:
-    - initialize
+    - redhat_base_packages
   when: common_is_centos_os
 
 # - name: install pip on Redhat
 #   shell: yum -y install epel-release python-pip
 #   tags:
-#     - initialize
+#     - redhat_pip_install
 #   when: common_is_centos_os
 
 # sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys <Key>
@@ -165,7 +217,7 @@
   args:
     executable: /bin/bash
   tags:
-    - initialize
+    - ubuntu_base_packages
   register: install_mongodb_gpg_key_result
   changed_when: "'server-6.0.asc exists' not in install_mongodb_gpg_key_result.stdout"
   failed_when: false
@@ -181,7 +233,7 @@
     - E363C90F8F1B6217
     - A1715D88E1DF1F24
   tags:
-    - initialize
+    - ubuntu_base_packages
   failed_when: false
   become: true
   become_method: ansible.builtin.sudo
@@ -243,7 +295,7 @@
     update_cache: true
     cache_valid_time: 86400
   tags:
-    - initialize
+    - ubuntu_base_packages
   failed_when: false
   become: true
   become_method: ansible.builtin.sudo
@@ -255,7 +307,7 @@
   changed_when: install_xcode_select_result.rc == 0 and install_xcode_select_result.stdout != ""
   failed_when: false
   tags:
-    - initialize
+    - macos_base_packages
   when: common_is_mac_os
 
 - name: 清除 brew 残留锁 & 临时文件
@@ -269,7 +321,7 @@
   changed_when: false
   failed_when: false
   tags:
-    - initialize
+    - macos_base_packages
   when: common_is_mac_os
 
 - name: 信任brew源
@@ -281,7 +333,7 @@
     - mongodb/brew
     - sunnyyoung/tap
   tags:
-    - initialize
+    - macos_base_packages
   when: common_is_mac_os
 
 - name: 在 macOS 上安装基础软件包
@@ -315,7 +367,7 @@
     state: present
   failed_when: false
   tags:
-    - initialize
+    - macos_base_packages
   when: common_is_mac_os
 
 - name: 检查 macOS Cask 应用是否已存在
@@ -330,7 +382,7 @@
       app_path: "/Applications/Warp.app"
   register: install_macos_cask_apps
   tags:
-    - initialize
+    - macos_cask_apps
   when: common_is_mac_os
 
 - name: 输出 macOS Cask 应用检查结果
@@ -338,7 +390,7 @@
     msg: "{{ item.item.name }} {{ '已存在' if item.stat.exists else '不存在' }}"
   loop: "{{ install_macos_cask_apps.results }}"
   tags:
-    - initialize
+    - macos_cask_apps
   when: common_is_mac_os
 
 - name: 在 macOS 上安装 Cask 软件包
@@ -352,7 +404,7 @@
     - "'already an App at' not in install_cask_install_result.stderr"
   register: install_cask_install_result
   tags:
-    - initialize
+    - macos_cask_apps
   when:
     - common_is_mac_os
     - not item.stat.exists
@@ -370,14 +422,14 @@
   register: install_macports_installed
   changed_when: false
   tags:
-    - initialize
+    - macports
   when: common_is_mac_os
 
 - name: 输出 MacPorts 检查结果
   ansible.builtin.debug:
     msg: "MacPorts {{ '已安装' if install_macports_installed.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - macports
   when: common_is_mac_os
 
 - name: 在 macOS 上通过 MacPorts 安装软件包
@@ -397,7 +449,7 @@
   changed_when: "'is installed' not in install_macports_package_result.stdout"
   failed_when: false
   tags:
-    - initialize
+    - macports
   when: common_is_mac_os and install_macports_installed.stdout == "0"
 
 - name: 检查 drone 是否已安装
@@ -405,13 +457,13 @@
   register: install_existing_of_drone
   changed_when: false
   tags:
-    - initialize
+    - drone
 
 - name: 输出 drone 检查结果
   ansible.builtin.debug:
     msg: "drone {{ '已安装' if install_existing_of_drone.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - drone
 
 - name: 安装 drone
   ansible.builtin.shell: |
@@ -427,7 +479,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - initialize
+    - drone
   when: install_existing_of_drone.stdout == "1"
 
 - name: 检查 act 是否已安装
@@ -435,13 +487,13 @@
   register: install_existing_of_act
   changed_when: false
   tags:
-    - initialize
+    - act
 
 - name: 输出 act 检查结果
   ansible.builtin.debug:
     msg: "act {{ '已安装' if install_existing_of_act.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - act
 
 - name: 安装 act
   ansible.builtin.shell: |
@@ -454,7 +506,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - initialize
+    - act
   when: install_existing_of_act.stdout == "1"
 
 - name: 检查 uv 是否已安装
@@ -462,13 +514,13 @@
   register: install_existing_of_uv
   changed_when: false
   tags:
-    - initialize
+    - uv
 
 - name: 输出 uv 检查结果
   ansible.builtin.debug:
     msg: "uv {{ '已安装' if install_existing_of_uv.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - uv
 
 - name: 安装 uv
   ansible.builtin.shell: |
@@ -478,7 +530,7 @@
     executable: /bin/bash
   changed_when: true
   tags:
-    - initialize
+    - uv
   when: install_existing_of_uv.stdout == "1"
 
 - name: 检查 devbox 是否已安装
@@ -486,13 +538,13 @@
   register: install_existing_of_devbox
   changed_when: false
   tags:
-    - initialize
+    - devbox
 
 - name: 输出 devbox 检查结果
   ansible.builtin.debug:
     msg: "devbox {{ '已安装' if install_existing_of_devbox.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - devbox
 
 - name: 安装 devbox
   ansible.builtin.shell: |
@@ -504,7 +556,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - initialize
+    - devbox
   when: install_existing_of_devbox.stdout == "1"
 
 - name: 检查 nix 是否已安装
@@ -512,14 +564,14 @@
   register: install_existing_of_nix
   changed_when: false
   tags:
-    - initialize
+    - nix
   when: (common_is_linux_os or common_is_high_mac_os)
 
 - name: 输出 nix 检查结果
   ansible.builtin.debug:
     msg: "nix {{ '已安装' if install_existing_of_nix.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - nix
   when: (common_is_linux_os or common_is_high_mac_os)
 
 - name: 在 Linux 上清除 nix 安装残留
@@ -536,9 +588,32 @@
     executable: /bin/bash
   changed_when: true
   tags:
-    - initialize
+    - nix
   when:
     - common_is_linux_os or common_is_high_mac_os
+    - install_existing_of_nix.stdout == "1"
+
+- name: 在 RedHat 上禁用 SELinux 以安装 nix
+  ansible.posix.selinux:
+    state: disabled
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - nix
+  when:
+    - common_is_centos_os
+    - install_existing_of_nix.stdout == "1"
+
+- name: 在 RedHat 上临时关闭 SELinux 以安装 nix
+  ansible.builtin.command: setenforce 0
+  changed_when: false
+  failed_when: false
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - nix
+  when:
+    - common_is_centos_os
     - install_existing_of_nix.stdout == "1"
 
 - name: 在 Linux/macOS15 上安装 nix
@@ -549,7 +624,7 @@
     executable: /bin/bash
   changed_when: true
   tags:
-    - initialize
+    - nix
   when:
     - common_is_linux_os or common_is_high_mac_os
     - install_existing_of_nix.stdout == "1"
@@ -559,14 +634,14 @@
   register: install_existing_of_legacy_nix
   changed_when: false
   tags:
-    - initialize
+    - nix
   when: common_is_mac_os and not common_is_high_mac_os
 
 - name: 输出旧版 nix 检查结果
   ansible.builtin.debug:
     msg: "nix {{ '已安装' if install_existing_of_legacy_nix.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - nix
   when: common_is_mac_os and not common_is_high_mac_os
 
 - name: 在 MacOS13 上安装 nix
@@ -577,7 +652,7 @@
     executable: /bin/bash
   changed_when: true
   tags:
-    - initialize
+    - nix
   when:
     - common_is_mac_os and not common_is_high_mac_os
     - install_existing_of_legacy_nix.stdout == "1"
@@ -591,7 +666,7 @@
   become: true
   become_method: ansible.builtin.sudo
   tags:
-    - initialize
+    - nix
   when: common_is_mac_os
 
 - name: 检查 direnv 是否已安装
@@ -599,13 +674,13 @@
   register: install_existing_of_direnv
   changed_when: false
   tags:
-    - initialize
+    - direnv
 
 - name: 输出 direnv 检查结果
   ansible.builtin.debug:
     msg: "direnv {{ '已安装' if install_existing_of_direnv.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - direnv
 
 - name: 安装 direnv
   ansible.builtin.shell: |
@@ -616,7 +691,7 @@
     executable: /bin/bash
   changed_when: true
   tags:
-    - initialize
+    - direnv
   when: install_existing_of_direnv.stdout == "1"
 
 - name: 检查 atuin 是否已安装
@@ -624,13 +699,13 @@
   register: install_existing_of_atuin
   changed_when: false
   tags:
-    - initialize
+    - atuin
 
 - name: 输出 atuin 检查结果
   ansible.builtin.debug:
     msg: "atuin {{ '已安装' if install_existing_of_atuin.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - atuin
 
 - name: 安装 atuin
   ansible.builtin.shell: |
@@ -641,7 +716,7 @@
     executable: /bin/bash
   changed_when: true
   tags:
-    - initialize
+    - atuin
   when: install_existing_of_atuin.stdout == "1"
 
 - name: 检查 sing-box 是否已安装
@@ -649,14 +724,14 @@
   register: install_existing_of_sing_box
   changed_when: false
   tags:
-    - initialize
+    - sing_box
   when: common_is_linux_os
 
 - name: 输出 sing-box 检查结果
   ansible.builtin.debug:
     msg: "sing-box {{ '已安装' if install_existing_of_sing_box.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - sing_box
   when: common_is_linux_os
 
 - name: 安装 sing-box
@@ -667,7 +742,7 @@
     executable: /bin/bash
   changed_when: true
   tags:
-    - initialize
+    - sing_box
   when:
     - common_is_linux_os
     - install_existing_of_sing_box.stdout == "1"
@@ -677,13 +752,13 @@
   register: install_existing_of_cargo
   changed_when: false
   tags:
-    - initialize
+    - cargo
 
 - name: 输出 cargo 检查结果
   ansible.builtin.debug:
     msg: "cargo {{ '已安装' if install_existing_of_cargo.stdout == '0' else '未安装' }}"
   tags:
-    - initialize
+    - cargo
 
 - name: 安装 cargo
   ansible.builtin.shell: |
@@ -693,7 +768,7 @@
     executable: /bin/bash
   changed_when: true
   tags:
-    - initialize
+    - cargo
   when: install_existing_of_cargo.stdout == "1"
 
 - name: 检查 rustup 默认工具链是否已设置
@@ -706,13 +781,13 @@
   changed_when: false
   failed_when: false
   tags:
-    - initialize
+    - cargo
 
 - name: 输出 rustup 默认工具链检查结果
   ansible.builtin.debug:
     msg: "rustup 默认工具链 {{ '已设置为 stable' if install_rustup_default_needed.stdout == '0' else '未设置为 stable' }}"
   tags:
-    - initialize
+    - cargo
 
 - name: 设置 rustup 默认工具链为 stable
   ansible.builtin.shell: "rustup default stable 2>/dev/null || true"
@@ -720,7 +795,7 @@
   changed_when: install_rustup_default_needed.stdout == "1"
   failed_when: false
   tags:
-    - initialize
+    - cargo
   when: install_rustup_default_needed.stdout == "1"
 
 - name: 通过 cargo 安装软件包
@@ -742,5 +817,5 @@
   changed_when: "'is installed' not in install_cargo_package_result.stdout"
   failed_when: false
   tags:
-    - initialize
+    - cargo
   when: install_existing_of_cargo.stdout == "0" or install_existing_of_cargo.stdout == "1"

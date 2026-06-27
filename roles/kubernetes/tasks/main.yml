@@ -2,16 +2,16 @@
 # tasks file for kubernetes
 
 - name: 执行 kubeadm 卸载任务
-  ansible.builtin.include_tasks: kubeadm_uninstall.yml
+  ansible.builtin.import_tasks: kubeadm_uninstall.yml
   tags:
-    - always
+    - remove_kubeadm
 
 - name: 执行 kubeadm 安装任务
-  ansible.builtin.include_tasks: kubeadm_install.yml
+  ansible.builtin.import_tasks: kubeadm_install.yml
   tags:
-    - always
+    - kubeadm
 
 - name: 执行 kubeadm 节点加入任务
-  ansible.builtin.include_tasks: kubeadm_join.yml
+  ansible.builtin.import_tasks: kubeadm_join.yml
   tags:
-    - always
+    - join_kubeadm

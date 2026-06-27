@@ -7,6 +7,7 @@
       - ansible_user_id
       - ansible_user_dir
       - ansible_env
+      - ansible_system
       - ansible_architecture
       - ansible_distribution_version
       - ansible_default_ipv4
