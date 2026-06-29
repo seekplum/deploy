@@ -187,6 +187,9 @@
       - knot
       - telnet
       - util-linux-user
+      - colima
+      - docker
+      - docker-compose
     state: present
     update_cache: false
     # nobest: true
