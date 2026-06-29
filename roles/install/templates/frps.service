@@ -1,0 +1,13 @@
+[Unit]
+Description=Frp Server Service
+After=network.target
+
+[Service]
+Type=simple
+User={{ common_login_user }}
+WorkingDirectory={{ common_frp_download_dir }}
+ExecStart={{ common_frp_download_dir }}/frps -c {{ common_frp_download_dir }}/frps.toml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

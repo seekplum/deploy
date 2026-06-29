@@ -12,3 +12,8 @@ common_pip_extra_index_url: "https://pypi.org/simple"
 common_pip_extra_trusted_host: "pypi.org"
 common_python3_version: 3.13.13
 common_go_version: 1.23.4
+common_platform_suffix: "{{ 'darwin_arm64' if ansible_os_family == 'Darwin' else 'linux_amd64' }}"
+common_frp_version: "0.60.0"
+common_frp_download_dir: "{{ common_home_root }}/frp"
+common_frp_download_url: "https://github.com/fatedier/frp/releases/download/v{{ common_frp_version }}/frp_{{ common_frp_version }}_{{ common_platform_suffix }}.tar.gz"
+common_frp_extracted_name: "frp_{{ common_frp_version }}_{{ common_platform_suffix }}"

@@ -722,6 +722,165 @@
     - atuin
   when: install_existing_of_atuin.stdout == "1"
 
+- name: 输出 frp 安装变量
+  ansible.builtin.debug:
+    msg:
+      - "frp 版本: {{ common_frp_version }}"
+      - "frp 安装目录: {{ common_frp_download_dir }}"
+      - "frp 下载URL: {{ common_frp_download_url }}"
+  tags:
+    - frp
+  when: common_is_ubuntu_os or common_is_mac_os
+
+- name: 检查 frps 是否已安装
+  ansible.builtin.shell: "command -v frps >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_frp
+  changed_when: false
+  tags:
+    - frp
+  when: common_is_ubuntu_os or common_is_mac_os
+
+- name: 输出 frps 检查结果
+  ansible.builtin.debug:
+    msg: "frps {{ '已安装' if install_existing_of_frp.stdout == '0' else '未安装' }}"
+  tags:
+    - frp
+  when: common_is_ubuntu_os or common_is_mac_os
+
+- name: 创建 frp 下载目录
+  ansible.builtin.file:
+    path: "{{ common_frp_download_dir }}"
+    state: directory
+    mode: "0755"
+  tags:
+    - frp
+  when:
+    - common_is_ubuntu_os or common_is_mac_os
+    - install_existing_of_frp.stdout == "1"
+
+- name: 检查 frp 安装包是否已存在
+  ansible.builtin.stat:
+    path: "{{ common_frp_download_dir }}/{{ common_frp_extracted_name }}.tar.gz"
+  register: install_frp_package_stat
+  tags:
+    - frp
+  when:
+    - common_is_ubuntu_os or common_is_mac_os
+    - install_existing_of_frp.stdout == "1"
+
+- name: 下载 frp 安装包
+  ansible.builtin.get_url:
+    url: "{{ common_frp_download_url }}"
+    dest: "{{ common_frp_download_dir }}/{{ common_frp_extracted_name }}.tar.gz"
+    mode: "0644"
+  tags:
+    - frp
+  when:
+    - common_is_ubuntu_os or common_is_mac_os
+    - install_existing_of_frp.stdout == "1"
+    - not install_frp_package_stat.stat.exists
+
+- name: 解压 frp 安装包
+  ansible.builtin.shell: |
+    set -o pipefail
+    cd "{{ common_frp_download_dir }}"
+    tar -zxf "{{ common_frp_extracted_name }}.tar.gz"
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - frp
+  when:
+    - common_is_ubuntu_os or common_is_mac_os
+    - install_existing_of_frp.stdout == "1"
+
+- name: 安装 frps 到系统路径
+  ansible.builtin.shell: |
+    set -o pipefail
+    extracted_dir="{{ common_frp_download_dir }}/{{ common_frp_extracted_name }}"
+    cp "${extracted_dir}/frps" "{{ common_frp_download_dir }}/frps"
+    cp "${extracted_dir}/frpc" "{{ common_frp_download_dir }}/frpc"
+    sudo install "{{ common_frp_download_dir }}/frps" /usr/local/bin
+  args:
+    executable: /bin/bash
+  changed_when: true
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - frp
+  when:
+    - common_is_ubuntu_os or common_is_mac_os
+    - install_existing_of_frp.stdout == "1"
+
+- name: 复制 frps.service 启动脚本
+  ansible.builtin.template:
+    src: "frps.service"
+    dest: "/etc/systemd/system/frps.service"
+    mode: "0755"
+    force: true
+    backup: false
+  failed_when: false
+  tags:
+    - frp
+  when:
+    - common_is_ubuntu_os
+    - install_existing_of_frp.stdout == "1"
+
+- name: 重新加载 systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - frp
+  when:
+    - common_is_ubuntu_os
+    - install_existing_of_frp.stdout == "1"
+
+- name: 启用并启动 frps 服务
+  ansible.builtin.systemd:
+    name: frps
+    enabled: true
+    state: started
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - frp
+  when:
+    - common_is_ubuntu_os
+    - install_existing_of_frp.stdout == "1"
+
+- name: 创建 macOS LaunchAgents 目录
+  ansible.builtin.file:
+    path: "{{ common_home_root }}/Library/LaunchAgents"
+    state: directory
+    mode: "0755"
+  tags:
+    - frp
+  when:
+    - common_is_mac_os
+    - install_existing_of_frp.stdout == "1"
+
+- name: 卸载已存在的 frpc 服务
+  ansible.builtin.shell: "launchctl unload {{ common_home_root }}/Library/LaunchAgents/frpc.plist 2>/dev/null || true"
+  changed_when: false
+  failed_when: false
+  tags:
+    - frp
+  when:
+    - common_is_mac_os
+    - install_existing_of_frp.stdout == "1"
+
+- name: 加载并启动 frpc 服务
+  ansible.builtin.command: "launchctl load {{ common_home_root }}/Library/LaunchAgents/frpc.plist"
+  changed_when: true
+  failed_when: false
+  tags:
+    - frp
+  when:
+    - common_is_mac_os
+    - install_existing_of_frp.stdout == "1"
+
 - name: 检查 sing-box 是否已安装
   ansible.builtin.shell: "command -v sing-box >/dev/null 2>&1 && echo 0 || echo 1"
   register: install_existing_of_sing_box
