@@ -5,12 +5,12 @@ install_gopath: "{{ common_home_root }}/GolangProjects"
 install_web_projects: "{{ common_home_root }}/WebProjects"
 install_python_projects: "{{ common_home_root }}/PythonProjects"
 install_java_projects: "{{ common_home_root }}/JavaProjects"
-install_go_package_path_on_linux: "{{ common_home_root }}/go{{ common_go_version }}.linux-amd64.tar.gz"
-install_go_package_path_on_mac: "{{ common_home_root }}/go{{ common_go_version }}.darwin-amd64.tar.gz"
+install_go_package_path_on_linux: "{{ common_home_root }}/go{{ common_go_version }}.{{ common_platform_suffix2 }}.tar.gz"
+install_go_package_path_on_mac: "{{ common_home_root }}/go{{ common_go_version }}.{{ common_platform_suffix }}.tar.gz"
 install_java_package_path_on_linux: "{{ common_home_root }}/OpenJDK8U-jdk_x64_linux_hotspot_8u412b08.tar.gz"
 install_mvn_package_path_on_linux: "{{ common_home_root }}/apache-maven-3.8.8-bin.tar.gz"
-install_go_download_url_on_mac: "https://go.dev/dl/go{{ common_go_version }}.darwin-amd64.tar.gz"
-install_go_download_url_on_linux: "https://go.dev/dl/go{{ common_go_version }}.linux-amd64.tar.gz"
+install_go_download_url_on_mac: "https://go.dev/dl/go{{ common_go_version }}.{{ common_platform_suffix }}.tar.gz"
+install_go_download_url_on_linux: "https://go.dev/dl/go{{ common_go_version }}.{{ common_platform_suffix2 }}.tar.gz"
 # https://www.oracle.com/java/technologies/downloads/#java8
 # 需要登录Oracle才能下载
 install_java_download_url_on_linux: "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u412-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u412b08.tar.gz"
@@ -29,3 +29,7 @@ install_docker_compose_download_url: >-
   https://github.com/docker/compose/releases/download/
   {{ DOCKER_COMPOSE_VERSION | default("v2.24.2") }}/
   docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}
+install_frp_version: "0.60.0"
+install_frp_download_url: "https://github.com/fatedier/frp/releases/download/v{{ install_frp_version }}/frp_{{ install_frp_version }}_{{ common_platform_suffix }}.tar.gz"
+install_frp_extracted_name: "frp_{{ install_frp_version }}_{{ common_platform_suffix }}"
+install_frp_package_path: "{{ common_home_root }}/{{ install_frp_extracted_name }}.tar.gz"

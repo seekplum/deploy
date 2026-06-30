@@ -34,7 +34,9 @@
 - name: "输出节点操作系统"
   ansible.builtin.debug:
     msg:
-      节点名称: "{{ ansible_hostname }}"
+      节点名称: "{{ inventory_hostname }}"
+      节点主机名: "{{ ansible_hostname }}"
+      所属主机组: "{{ group_names }}"
       系统家族: "{{ ansible_os_family }}"
       系统版本: "{{ ansible_distribution_version | default('未知') }}"
       CPU架构: "{{ ansible_architecture | default('未知') }}"
@@ -55,6 +57,8 @@
     common_is_common_node: '{{ "common" in group_names }}'
     common_is_master_node: '{{ "masters" in group_names }}'
     common_is_slaves_node: '{{ "slaves" in group_names }}'
+    common_is_frp_server_node: "{{ local_frp_server_nodes is defined and inventory_hostname in local_frp_server_nodes }}"
+    common_is_frp_client_node: "{{ local_frp_client_nodes is defined and inventory_hostname in local_frp_client_nodes }}"
   tags:
     - common
     - always
@@ -63,11 +67,11 @@
 - name: "输出节点类型"
   ansible.builtin.debug:
     msg:
-      节点名称: "{{ ansible_hostname }}"
-      所属主机组: "{{ group_names }}"
       是否通用节点: "{{ '是' if common_is_common_node else '否' }}"
       是否Master节点: "{{ '是' if common_is_master_node else '否' }}"
       是否Slave节点: "{{ '是' if common_is_slaves_node else '否' }}"
+      是否FRP服务端节点: "{{ '是' if common_is_frp_server_node else '否' }}"
+      是否FRP客户端节点: "{{ '是' if common_is_frp_client_node else '否' }}"
   tags:
     - common
     - always

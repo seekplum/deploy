@@ -140,6 +140,73 @@
     - remove_sing_box
   when: common_is_linux_os
 
+- name: 停止 frps 服务
+  ansible.builtin.systemd:
+    name: frps
+    state: stopped
+    enabled: false
+  become: true
+  become_method: ansible.builtin.sudo
+  failed_when: false
+  tags:
+    - remove_frp
+  when:
+    - common_is_frp_server_node
+    - common_is_linux_os
+
+- name: 停止 frpc 服务 (Linux)
+  ansible.builtin.systemd:
+    name: frpc
+    state: stopped
+    enabled: false
+  become: true
+  become_method: ansible.builtin.sudo
+  failed_when: false
+  tags:
+    - remove_frp
+  when:
+    - common_is_frp_client_node
+    - common_is_linux_os
+
+- name: 停止 frpc 服务 (macOS)
+  ansible.builtin.shell: "launchctl unload {{ common_home_root }}/Library/LaunchAgents/frpc.plist 2>/dev/null || true"
+  changed_when: false
+  failed_when: false
+  tags:
+    - remove_frp
+  when:
+    - common_is_frp_client_node
+    - common_is_mac_os
+
+- name: 重新加载 systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+  become_method: ansible.builtin.sudo
+  failed_when: false
+  tags:
+    - remove_frp
+  when:
+    - common_is_frp_server_node or common_is_frp_client_node
+    - common_is_linux_os
+
+- name: 删除 frp 服务文件及二进制
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/systemd/system/frps.service
+    - /etc/systemd/system/frpc.service
+    - /usr/local/bin/frps
+    - /usr/local/bin/frpc
+    - "{{ common_home_root }}/Library/LaunchAgents/frpc.plist"
+    - "{{ common_frp_download_dir }}"
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - remove_frp
+  when: common_is_frp_server_node or common_is_frp_client_node
+
 - name: 删除 Rust 和 cargo
   ansible.builtin.file:
     path: "{{ item }}"

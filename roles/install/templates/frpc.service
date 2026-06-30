@@ -1,0 +1,14 @@
+[Unit]
+Description=Frp Client Service
+After=network.target
+
+[Service]
+Type=simple
+User={{ common_login_user }}
+WorkingDirectory={{ common_frp_download_dir }}
+ExecStart={{ common_frp_download_dir }}/frpc -c {{ common_frp_download_dir }}/frpc.toml
+Restart=on-failure
+RestartSec=5s                  # 网络断开时每 5 秒自动尝试重连
+
+[Install]
+WantedBy=multi-user.target

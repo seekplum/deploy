@@ -18,6 +18,8 @@
         exec /bin/sh -c "$1"
       fi
       exec /bin/sh "$@"
+  tags:
+    - always
 
 - name: 使用可用的 zsh 包装器执行 install 角色任务
   module_defaults:

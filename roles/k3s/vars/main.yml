@@ -1,10 +1,10 @@
 ---
 # vars file for k3s
 k3s_helm_version: "v3.7.1"
-k3s_helm_package_path_on_linux: "{{ common_home_root }}/helm-{{ k3s_helm_version }}-linux-amd64.tar.gz"
-k3s_helm_download_url_on_linux: "https://get.helm.sh/helm-{{ k3s_helm_version }}-linux-amd64.tar.gz"
+k3s_helm_package_path_on_linux: "{{ common_home_root }}/helm-{{ k3s_helm_version }}-{{ common_platform_suffix2 }}.tar.gz"
+k3s_helm_download_url_on_linux: "https://get.helm.sh/helm-{{ k3s_helm_version }}-{{ common_platform_suffix2 }}.tar.gz"
 k3s_stern_version: "1.22.0"
 k3s_stern_release_base_url: "https://github.com/stern/stern/releases/download"
 k3s_stern_download_url_on_linux: >-
-  {{ k3s_stern_release_base_url }}/v{{ k3s_stern_version }}/stern_{{ k3s_stern_version }}_linux_amd64.tar.gz
-k3s_stern_package_path_on_linux: "{{ common_home_root }}/stern_{{ k3s_stern_version }}_linux_amd64.tar.gz"
+  {{ k3s_stern_release_base_url }}/v{{ k3s_stern_version }}/stern_{{ k3s_stern_version }}_{{ common_platform_suffix }}.tar.gz
+k3s_stern_package_path_on_linux: "{{ common_home_root }}/stern_{{ k3s_stern_version }}_{{ common_platform_suffix }}.tar.gz"

@@ -109,7 +109,7 @@
     state: absent
     force: true
   with_items:
-    - "{{ common_home_root }}/linux-amd64"
+    - "{{ common_home_root }}/{{ common_platform_suffix2 }}"
     - "/usr/local/bin/helm"
   tags:
     - remove_helm
