@@ -1051,3 +1051,81 @@
   tags:
     - cargo
   when: install_existing_of_cargo.stdout == "0" or install_existing_of_cargo.stdout == "1"
+
+- name: 检查 cfst 是否已安装
+  ansible.builtin.shell: "command -v cfst >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_cfst
+  changed_when: false
+  tags:
+    - cfst
+
+- name: 输出 cfst 检查结果
+  ansible.builtin.debug:
+    msg: "cfst {{ '已安装' if install_existing_of_cfst.stdout == '0' else '未安装' }}"
+  tags:
+    - cfst
+
+- name: 创建 cfst 安装目录
+  ansible.builtin.file:
+    path: "{{ install_cfst_download_dir }}"
+    state: directory
+    mode: "0755"
+  tags:
+    - cfst
+  when: install_existing_of_cfst.stdout == "1"
+
+- name: 检查 cfst 安装包是否已存在
+  ansible.builtin.stat:
+    path: "{{ install_cfst_package_path }}"
+  register: install_cfst_package_stat
+  tags:
+    - cfst
+  when: install_existing_of_cfst.stdout == "1"
+
+- name: 下载 cfst 安装包
+  ansible.builtin.get_url:
+    url: "{{ install_cfst_download_url }}"
+    dest: "{{ install_cfst_package_path }}"
+    mode: "0644"
+  tags:
+    - cfst
+  when:
+    - install_existing_of_cfst.stdout == "1"
+    - not install_cfst_package_stat.stat.exists
+
+- name: 解压并安装 cfst (Linux)
+  ansible.builtin.shell: |
+    set -o pipefail
+    cd "{{ install_cfst_download_dir }}"
+    tar -zxf "{{ install_cfst_package_path }}"
+    chmod +x cfst
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - cfst
+  when:
+    - install_existing_of_cfst.stdout == "1"
+    - common_is_linux_os
+
+- name: 解压并安装 cfst (macOS)
+  ansible.builtin.shell: |
+    set -o pipefail
+    cd "{{ install_cfst_download_dir }}"
+    ditto -x -k "{{ install_cfst_package_path }}" .
+    chmod +x cfst
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - cfst
+  when:
+    - install_existing_of_cfst.stdout == "1"
+    - common_is_mac_os
+
+- name: 输出 cfst 安装路径
+  ansible.builtin.debug:
+    msg: "cfst 已安装到 {{ install_cfst_download_dir }}/cfst"
+  tags:
+    - cfst
+  when: install_existing_of_cfst.stdout == "1"
