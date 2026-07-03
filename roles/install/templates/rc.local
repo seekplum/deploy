@@ -2,7 +2,7 @@
 
 set -e
 LOG_FILE="{{ common_home_root }}/mystart.log"
-SCRIPTS_FILES="{{ common_home_root }}/packages/mystart.sh"
+SCRIPTS_FILES="{{ common_packages_root }}/mystart.sh"
 USER="{{ common_login_user }}"
 
 function start() {

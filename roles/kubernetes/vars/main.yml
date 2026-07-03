@@ -4,6 +4,6 @@
 kubernetes_cni_plugins_version: "v1.0.1"
 kubernetes_cni_plugins_director_on_linux: "/opt/cni/bin"
 kubernetes_cni_plugins_name_on_linux: "cni-plugins-{{ common_platform_suffix2 }}-{{ kubernetes_cni_plugins_version }}.tgz"
-kubernetes_cni_plugins_path_on_linux: "{{ common_home_root }}/{{ kubernetes_cni_plugins_name_on_linux }}"
+kubernetes_cni_plugins_path_on_linux: "{{ common_packages_root }}/{{ kubernetes_cni_plugins_name_on_linux }}"
 kubernetes_cni_plugins_url_on_linux: "https://github.com/containernetworking/plugins/releases/download/{{ kubernetes_cni_plugins_version }}/{{ kubernetes_cni_plugins_name_on_linux
   }}"

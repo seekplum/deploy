@@ -366,6 +366,7 @@
       - kubernetes-cli
       - telnet
       - colima
+      - stern
       - docker
       - docker-compose
       - docker-buildx

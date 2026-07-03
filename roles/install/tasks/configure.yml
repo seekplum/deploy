@@ -19,13 +19,13 @@
     # - "{{ install_python_projects }}"
     # - "{{ install_web_projects }}"
     # - "{{ install_java_projects }}"
-    - "{{ install_packages_root }}"
+    - "{{ common_packages_root }}"
   tags:
     - configure_project_dirs
 
 - name: 在 macOS 上链接 VirtualBox 脚本到 PATH
   ansible.builtin.file:
-    src: "{{ install_packages_root }}/{{ item }}"
+    src: "{{ common_packages_root }}/{{ item }}"
     dest: "/usr/local/bin/{{ item.replace('.sh', '') }}"
     state: link
     force: false # 避免原主机文件被覆盖

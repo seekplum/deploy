@@ -2,10 +2,11 @@
 # vars file for common
 common_home_root: "{{ ansible_user_dir }}" # 登陆用户的 home 目录
 common_login_user: "{{ ansible_user_id }}"
+common_packages_root: "{{ common_home_root }}/packages"
 common_soft_install_root: "/usr/local"
 common_goroot: "{{ common_soft_install_root }}/go"
 common_java_home: "{{ common_soft_install_root }}/java"
-common_mvn_home: "{{ common_home_root }}/packages/apache-maven-3.8.8"
+common_mvn_home: "{{ common_packages_root }}/apache-maven-3.8.8"
 common_pip_index_url: "https://mirrors.aliyun.com/pypi/simple"
 common_pip_trusted_host: "mirrors.aliyun.com"
 common_pip_extra_index_url: "https://pypi.org/simple"
@@ -14,4 +15,4 @@ common_python3_version: 3.13.13
 common_go_version: 1.23.4
 common_platform_suffix: "{{ 'darwin' if ansible_os_family == 'Darwin' else 'linux' }}_{{ 'arm64' if ansible_architecture == 'arm64' else 'amd64' }}"
 common_platform_suffix2: "{{ common_platform_suffix | replace('_', '-') }}"
-common_frp_download_dir: "{{ common_home_root }}/frp"
+common_frp_download_dir: "{{ common_packages_root }}/frp"
