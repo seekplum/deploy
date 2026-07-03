@@ -187,9 +187,6 @@
       - knot
       - telnet
       - util-linux-user
-      - colima
-      - docker
-      - docker-compose
       - net-tools
     state: present
     update_cache: false
@@ -363,17 +360,57 @@
       - maccy
       - mongodb-community
       - redis
-      - lima
       - showkey
       - sunnyyoung/tap/wechattweak
       - yamlfmt
       - kubernetes-cli
       - telnet
+      - colima
+      - docker
+      - docker-compose
+      - docker-buildx
+      - net-tools
     state: present
   failed_when: false
   tags:
     - macos_base_packages
   when: common_is_mac_os
+
+- name: 创建 macOS Docker 插件目录
+  ansible.builtin.file:
+    path: "{{ common_home_root }}/.docker/cli-plugins"
+    state: directory
+    mode: "0755"
+  tags:
+    - macos_base_packages
+  when: common_is_mac_os
+
+- name: 检查 brew 安装的 docker-buildx 是否存在
+  ansible.builtin.stat:
+    path: /opt/homebrew/opt/docker-buildx/bin/docker-buildx
+  register: install_macos_docker_buildx_stat
+  tags:
+    - macos_base_packages
+  when: common_is_mac_os
+
+- name: 输出 brew 安装的 docker-buildx 检查结果
+  ansible.builtin.debug:
+    msg: "brew docker-buildx {{ '已存在' if install_macos_docker_buildx_stat.stat.exists else '不存在' }}"
+  tags:
+    - macos_base_packages
+  when: common_is_mac_os
+
+- name: 链接 brew 安装的 docker-buildx 到 Docker 插件目录
+  ansible.builtin.file:
+    src: /opt/homebrew/opt/docker-buildx/bin/docker-buildx
+    dest: "{{ common_home_root }}/.docker/cli-plugins/docker-buildx"
+    state: link
+    force: true
+  tags:
+    - macos_base_packages
+  when:
+    - common_is_mac_os
+    - install_macos_docker_buildx_stat.stat.exists
 
 - name: 检查 macOS Cask 应用是否已存在
   ansible.builtin.stat:
