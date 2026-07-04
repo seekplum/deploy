@@ -371,6 +371,7 @@
       - docker-compose
       - docker-buildx
       - net-tools
+      - mysql-client
     state: present
   failed_when: false
   tags:

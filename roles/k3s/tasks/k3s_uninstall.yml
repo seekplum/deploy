@@ -69,6 +69,42 @@
   failed_when: false
   when: common_is_centos_os
 
+- name: 运行 k3s-killall.sh 卸载残留挂载
+  ansible.builtin.command: "sh /usr/local/bin/k3s-killall.sh"
+  changed_when: false
+  failed_when: false
+  tags:
+    - remove_k3s_files
+  become: true
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os
+
+- name: 查找 k3s 残留挂载点
+  ansible.builtin.shell: |
+    set -o pipefail
+    mount | grep -oE '/var/lib/(rancher|kubelet)[^ ]*' | sort -r
+  args:
+    executable: /bin/bash
+  register: k3s_residual_mounts
+  changed_when: false
+  failed_when: false
+  tags:
+    - remove_k3s_files
+  become: true
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os
+
+- name: 卸载 k3s 残留挂载点
+  ansible.builtin.command: "umount -f {{ item }}"
+  with_items: "{{ k3s_residual_mounts.stdout_lines }}"
+  changed_when: false
+  failed_when: false
+  tags:
+    - remove_k3s_files
+  become: true
+  become_method: ansible.builtin.sudo
+  when: common_is_linux_os and k3s_residual_mounts.stdout_lines | length > 0
+
 - name: "删除文件"
   ansible.builtin.file:
     path: "{{ item }}"
@@ -78,6 +114,7 @@
     - "{{ common_home_root }}/.kube/"
     - "/etc/rancher"
     - "/var/lib/rancher"
+    - "/var/lib/kubelet"
     - "/usr/local/bin/k3s-killall.sh"
     - "/usr/local/bin/k3s"
     - "/usr/local/bin/kubectl"
