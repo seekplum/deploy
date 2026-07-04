@@ -80,7 +80,32 @@
     - "git-format-staged"
     - "pnpm"
     - "ts-node"
+    - "bun"
   tags:
     - nodejs
   become: true
   become_method: ansible.builtin.sudo
+
+- name: 检查 bun 是否已安装
+  ansible.builtin.shell: "command -v bun >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_bun
+  changed_when: false
+  tags:
+    - bun
+
+- name: 输出 bun 检查结果
+  ansible.builtin.debug:
+    msg: "bun {{ '已安装' if install_existing_of_bun.stdout == '0' else '未安装' }}"
+  tags:
+    - bun
+
+- name: 安装 bun
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -fsSL https://bun.net.cn/install | bash
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - bun
+  when: install_existing_of_bun.stdout == "1"
