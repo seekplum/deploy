@@ -152,7 +152,6 @@
     name:
       - zip
       - unzip
-      # - util-linux-user
       - epel-release
       - gcc
       - gcc-c++
@@ -166,22 +165,20 @@
       - git
       - bzip2
       - bzip2-devel
-      #    - python-setuptools
-      #    - python-devel
       - wget
       - screen
       - make
       - cmake
       - tree
       - sshpass
-      - openssl-devel
       - yum-utils
       - device-mapper-persistent-data
       - lvm2
       # - haveged
       # - the_silver_searcher
       - patch
-      - pcre-devel
+      # - pcre-devel
+      - kernel-modules-extra
       - ripgrep
       - mongodb-mongosh
       - knot

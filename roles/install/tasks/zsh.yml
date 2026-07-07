@@ -96,12 +96,32 @@
       changed_when: true
       when: install_installed_of_oh_my_zsh.stdout == "1"
 
-    - name: 下载 zsh 自动建议插件
-      ansible.builtin.git:
-        repo: git@github.com:zsh-users/zsh-autosuggestions
+    - name: 下载 zsh 自动建议插件压缩包
+      ansible.builtin.get_url:
+        url: https://github.com/zsh-users/zsh-autosuggestions/archive/refs/heads/master.tar.gz
+        dest: /tmp/zsh-autosuggestions-master.tar.gz
+        force: false
+        mode: "0644"
+        timeout: 60
+      register: install_zsh_autosuggestions_download
+      retries: 3
+      delay: 5
+      until: install_zsh_autosuggestions_download is succeeded
+      when: install_installed_of_oh_my_zsh_autosuggestions.stdout == "1"
+
+    - name: 创建 zsh 自动建议插件目录
+      ansible.builtin.file:
+        path: "{{ common_home_root }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+        state: directory
+        mode: "0755"
+      when: install_installed_of_oh_my_zsh_autosuggestions.stdout == "1"
+
+    - name: 解压 zsh 自动建议插件
+      ansible.builtin.unarchive:
+        src: /tmp/zsh-autosuggestions-master.tar.gz
         dest: "{{ common_home_root }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
-        accept_hostkey: true
-        version: master
+        remote_src: true
+        extra_opts: [--strip-components=1]
       when: install_installed_of_oh_my_zsh_autosuggestions.stdout == "1"
 - name: 修改默认终端 shell
   ansible.builtin.command: "chsh -s /bin/zsh {{ ansible_user_id }}"
