@@ -290,6 +290,7 @@
       - rbenv
       - libyaml-dev
       - net-tools
+      - mysql-client
     state: present
     update_cache: true
     cache_valid_time: 86400
@@ -358,7 +359,7 @@
       - mongodb-community
       - redis
       - showkey
-      - sunnyyoung/tap/wechattweak
+      # - sunnyyoung/tap/wechattweak
       - yamlfmt
       - kubernetes-cli
       - telnet
@@ -369,6 +370,7 @@
       - docker-buildx
       - net-tools
       - mysql-client
+      - coreutils
     state: present
   failed_when: false
   tags:
