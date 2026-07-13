@@ -192,7 +192,6 @@
     dest: /usr/local/bin/docker-compose
     mode: "0755"
     force: false
-  failed_when: false
   become: true
   become_method: ansible.builtin.sudo
   tags:

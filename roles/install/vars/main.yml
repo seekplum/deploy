@@ -23,10 +23,7 @@ install_ruby_build_repository: "git@github.com:rbenv/ruby-build.git"
 install_virtual_root: "{{ common_packages_root }}/pythonenv"
 install_virtual_envs:
   - version: "{{ common_python3_version }}"
-install_docker_compose_download_url: >-
-  https://github.com/docker/compose/releases/download/
-  {{ DOCKER_COMPOSE_VERSION | default("v2.24.2") }}/
-  docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}
+install_docker_compose_download_url: "https://github.com/docker/compose/releases/download/{{ DOCKER_COMPOSE_VERSION | default('v2.24.2') }}/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}"
 install_frp_version: "0.60.0"
 install_frp_download_url: "https://github.com/fatedier/frp/releases/download/v{{ install_frp_version }}/frp_{{ install_frp_version }}_{{ common_platform_suffix }}.tar.gz"
 install_frp_extracted_name: "frp_{{ install_frp_version }}_{{ common_platform_suffix }}"

@@ -3,6 +3,8 @@
   ansible.builtin.set_fact:
     install_backup_date: "{{ lookup('pipe', 'date +%Y%m%d') }}"
     install_backup_epoch: "{{ lookup('pipe', 'date +%s') }}"
+  tags:
+    - always
 
 - name: 安装 install 角色的 shell 包装器
   ansible.builtin.copy:

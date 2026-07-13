@@ -5,6 +5,7 @@
 *.swap
 *.pid
 .cache/*
+.coverage
 test.py
 *.retry
 test.*
