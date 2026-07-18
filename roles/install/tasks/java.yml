@@ -34,7 +34,6 @@
     list_files: true
   register: install_java_package_linux_check
   changed_when: false
-  failed_when: false
   tags:
     - java
   when:

@@ -2,7 +2,6 @@
 - name: "重置集群"
   ansible.builtin.command: kubeadm reset -f
   changed_when: false
-  failed_when: false
   tags:
     - kubeadm_reset
   when: common_is_linux_os
@@ -26,7 +25,6 @@
     executable: /bin/bash
   register: kubernetes_kubeadm_port_cleanup
   changed_when: "'killed=' in kubernetes_kubeadm_port_cleanup.stdout"
-  failed_when: false
   tags:
     - kubeadm_master_init
   when: common_is_master_node
@@ -67,7 +65,6 @@
   ansible.builtin.command: "{{ kubernetes_kubeadm_init_command }}"
   register: kubernetes_kubeadm_init
   changed_when: true
-  failed_when: false
   tags:
     - kubeadm_master_init
   when: common_is_master_node
@@ -113,7 +110,6 @@
     executable: /bin/bash
   register: kubernetes_calico_install
   changed_when: true
-  failed_when: false
   tags:
     - kubeadm_master_init
   when: common_is_master_node and (kubernetes_admin_conf_stat.stat.exists | default(false))

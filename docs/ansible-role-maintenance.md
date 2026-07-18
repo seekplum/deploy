@@ -317,6 +317,8 @@ args:
 
 - name: 查询 helm 发布列表
   ansible.builtin.command: helm list --all-namespaces
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
   changed_when: false
   failed_when: false
 ```

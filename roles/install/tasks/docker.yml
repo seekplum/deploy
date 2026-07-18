@@ -98,7 +98,6 @@
     - docker_install
   become: true
   become_method: ansible.builtin.sudo
-  failed_when: false
   when: common_is_ubuntu_os and install_installed_of_docker.stdout == "1"
 
 - name: "Ubuntu 配置 Docker 软件源"
@@ -121,7 +120,6 @@
     - containerd.io{{ CONTAINERD_VERSION | default('') }}
   tags:
     - docker_install
-  failed_when: false
   become: true
   become_method: ansible.builtin.sudo
   when: common_is_ubuntu_os and install_installed_of_docker.stdout == "1"
@@ -207,7 +205,6 @@
     state: "started"
     enabled: true
   register: install_docker_service_result
-  failed_when: false
   tags:
     - docker_service
   when: common_is_linux_os
@@ -219,7 +216,6 @@
     remote_src: true
     mode: preserve
   changed_when: false
-  failed_when: false
   become: true
   become_method: ansible.builtin.sudo
   tags:
@@ -262,7 +258,6 @@
     remote_src: true
     mode: preserve
   changed_when: false
-  failed_when: false
   tags:
     - docker_daemon_config
   when:

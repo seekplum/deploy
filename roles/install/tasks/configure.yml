@@ -118,37 +118,49 @@
     state: present
   become: true
   become_method: ansible.builtin.sudo
+  failed_when: false
   tags:
     - configure_redhat_sources
   when: common_is_centos_os
 
-- name: 在 Ubuntu 上配置开机自动执行
+- name: 复制 /etc/my-rc.local 启动脚本
+  ansible.builtin.template:
+    src: "rc.local"
+    dest: "/etc/my-rc.local"
+    mode: "0755"
+    force: true
+    backup: false
+  become: true
+  become_method: ansible.builtin.sudo
+  failed_when: false
+  tags:
+    - configure_rc_local
+
+- name: 在 Linux 上复制 my-rc-local.service 服务文件
+  ansible.builtin.copy:
+    src: "rc-local.service"
+    dest: "/etc/systemd/system/my-rc-local.service"
+    mode: "0755"
+    force: true
+    backup: false
   become: true
   become_method: ansible.builtin.sudo
   tags:
     - configure_rc_local
   when: common_is_linux_os
 
-  block:
-    - name: 复制 my-rc-local.service 服务文件
-      ansible.builtin.copy:
-        src: "rc-local.service"
-        dest: "/etc/systemd/system/my-rc-local.service"
-        mode: "0755"
-        force: true
-        backup: false
-    - name: 复制 /etc/my-rc.local 启动脚本
-      ansible.builtin.template:
-        src: "rc.local"
-        dest: "/etc/my-rc.local"
-        mode: "0755"
-        force: true
-        backup: false
-    - name: 启动 my-rc-local 服务
-      ansible.builtin.service:
-        name: "my-rc-local"
-        state: "started"
-        enabled: true
+- name: 在 Linux 上启动 my-rc-local 服务
+  ansible.builtin.service:
+    name: "my-rc-local"
+    state: "started"
+    enabled: true
+  become: true
+  become_method: ansible.builtin.sudo
+  failed_when: false
+  tags:
+    - configure_rc_local
+  when: common_is_linux_os
+
 - name: 配置DNS
   become: true
   become_method: ansible.builtin.sudo

@@ -42,7 +42,6 @@
     enabled: "no"
   tags:
     - kubeadm_firewall
-  failed_when: false
   become: true
   become_method: ansible.builtin.sudo
   when: common_is_centos_os
@@ -111,7 +110,6 @@
 - name: "CentOS 禁用 SELinux（立即生效）"
   ansible.builtin.command: setenforce 0
   changed_when: false
-  failed_when: false
   tags:
     - kubeadm_selinux
   when: common_is_centos_os
@@ -281,7 +279,6 @@
     executable: /bin/bash
   register: kubernetes_cri_socket_find
   changed_when: false
-  failed_when: false
   tags:
     - kubeadm_runtime
   when: common_is_linux_os
@@ -331,7 +328,6 @@
     path: /var/lib/kubelet/kubeadm-flags.env
     regexp: "^(--cgroup-driver=[a-zA-Z]*)"
     replace: "--cgroup-driver=systemd"
-  failed_when: false
   tags:
     - kubeadm_cleanup
   when: common_is_linux_os and kubernetes_flags_stat.stat.exists
@@ -350,12 +346,11 @@
     - kubeadm_cleanup
   when: common_is_master_node
 
-- name: "修改 Master server 地址"
-  ansible.builtin.replace:
+- name: "检查 Master server 配置文件是否存在"
+  ansible.builtin.stat:
     path: "{{ item }}"
-    regexp: "^(server: https://.*:6443)"
-    replace: "server: https://{{ ansible_default_ipv4.address }}:6443"
-  failed_when: false
+  register: kubernetes_master_server_config_stats
+  changed_when: false
   with_items:
     - "/etc/kubernetes/kubelet.conf"
     - "/etc/kubernetes/controller-manager.conf"
@@ -363,6 +358,24 @@
   tags:
     - kubeadm_cleanup
   when: common_is_master_node
+
+- name: 输出 Master server 配置文件检查结果
+  ansible.builtin.debug:
+    msg: "{{ item.item }} {{ '已存在' if item.stat.exists else '不存在，跳过修改' }}"
+  loop: "{{ kubernetes_master_server_config_stats.results | default([]) }}"
+  tags:
+    - kubeadm_cleanup
+  when: common_is_master_node
+
+- name: "修改 Master server 地址"
+  ansible.builtin.replace:
+    path: "{{ item.item }}"
+    regexp: "^(server: https://.*:6443)"
+    replace: "server: https://{{ ansible_default_ipv4.address }}:6443"
+  loop: "{{ kubernetes_master_server_config_stats.results | default([]) }}"
+  tags:
+    - kubeadm_cleanup
+  when: common_is_master_node and item.stat.exists
 
 - name: "检查CNI插件是否已经下载"
   ansible.builtin.stat:

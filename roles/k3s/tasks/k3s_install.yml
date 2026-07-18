@@ -3,7 +3,6 @@
   ansible.builtin.shell: '(command -v docker >/dev/null 2>&1 || test -x "{{ common_home_root }}/.lima/.bin/docker") && echo 0 || echo 1'
   register: k3s_installed_of_docker
   changed_when: false
-  failed_when: false
   tags:
     - k3s_common
   when: common_is_linux_os
@@ -33,7 +32,6 @@
     enabled: "no"
   tags:
     - k3s_common
-  failed_when: false
   become: true
   become_method: ansible.builtin.sudo
   when: common_is_centos_os
@@ -211,7 +209,6 @@
   become: true
   become_method: ansible.builtin.sudo
   changed_when: false
-  failed_when: false
   when: common_is_linux_os
 
 - name: 在 RedHat 上安装 k3s-selinux
@@ -221,7 +218,6 @@
     disable_gpg_check: true
   tags:
     - k3s_common
-  failed_when: false
   when: common_is_centos_os
 
 - name: 复制 k3s server 配置文件
@@ -280,7 +276,6 @@
     state: "started"
     enabled: "yes"
   register: k3s_service_result
-  failed_when: false
   tags:
     - k3s_server
   when: common_is_linux_os and common_is_master_node
@@ -447,9 +442,10 @@
 
 - name: 查询 helm 发布列表
   ansible.builtin.command: helm list --all-namespaces
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
   register: k3s_helm_release_info
   changed_when: false
-  failed_when: false
   tags:
     - helm
   when: common_is_linux_os and common_is_master_node

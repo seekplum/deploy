@@ -73,7 +73,6 @@
     executable: /bin/bash
   register: install_node_package_result
   changed_when: "'is installed' not in install_node_package_result.stdout"
-  failed_when: false
   with_items:
     - "yarn"
     - "copilot-api"

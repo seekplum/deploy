@@ -30,7 +30,6 @@
 - name: 应用 chezmoi 配置
   ansible.builtin.shell: "chezmoi init && chezmoi apply --force"
   changed_when: false
-  failed_when: false
   tags:
     - chezmoi
 
@@ -69,7 +68,6 @@
     ansible_distribution_major_version }}
   tags:
     - redhat_base_packages
-  failed_when: false
   changed_when: false
   when: common_is_centos_os
 
@@ -100,7 +98,6 @@
   register: install_redhat_repo_mirror_result
   tags:
     - redhat_base_packages
-  failed_when: false
   changed_when: "'changed=1' in install_redhat_repo_mirror_result.stdout"
   become: true
   become_method: ansible.builtin.sudo
@@ -218,7 +215,6 @@
     - ubuntu_base_packages
   register: install_mongodb_gpg_key_result
   changed_when: "'server-6.0.asc exists' not in install_mongodb_gpg_key_result.stdout"
-  failed_when: false
   become: true
   become_method: ansible.builtin.sudo
   when: common_is_ubuntu_os
@@ -232,7 +228,6 @@
     - A1715D88E1DF1F24
   tags:
     - ubuntu_base_packages
-  failed_when: false
   become: true
   become_method: ansible.builtin.sudo
   when: common_is_ubuntu_os
@@ -296,7 +291,6 @@
     cache_valid_time: 86400
   tags:
     - ubuntu_base_packages
-  failed_when: false
   become: true
   become_method: ansible.builtin.sudo
   when: common_is_ubuntu_os
@@ -305,7 +299,6 @@
   ansible.builtin.shell: "xcode-select -v >/dev/null 2>&1 || xcode-select --install"
   register: install_xcode_select_result
   changed_when: install_xcode_select_result.rc == 0 and install_xcode_select_result.stdout != ""
-  failed_when: false
   tags:
     - macos_base_packages
   when: common_is_mac_os
@@ -534,7 +527,6 @@
     - knot
   register: install_macports_package_result
   changed_when: "'is installed' not in install_macports_package_result.stdout"
-  failed_when: false
   tags:
     - macports
   when: common_is_mac_os and install_macports_installed.stdout == "0"
@@ -694,7 +686,6 @@
 - name: 在 RedHat 上临时关闭 SELinux 以安装 nix
   ansible.builtin.command: setenforce 0
   changed_when: false
-  failed_when: false
   become: true
   become_method: ansible.builtin.sudo
   tags:
@@ -823,7 +814,7 @@
   tags:
     - frp
   when:
-    - common_is_frp_server_node
+    - common_is_frp_server_node or common_is_frp_client_node
     - common_is_linux_os
 
 - name: 输出 frps 检查结果
@@ -885,7 +876,6 @@
     state: stopped
   become: true
   become_method: ansible.builtin.sudo
-  failed_when: false
   tags:
     - frp
   when:
@@ -898,7 +888,6 @@
     state: stopped
   become: true
   become_method: ansible.builtin.sudo
-  failed_when: false
   tags:
     - frp
   when:
@@ -908,7 +897,6 @@
 - name: 停止 frpc 服务 (macOS)
   ansible.builtin.shell: "launchctl unload {{ common_home_root }}/Library/LaunchAgents/frpc.plist 2>/dev/null || true"
   changed_when: false
-  failed_when: false
   tags:
     - frp
   when:
@@ -951,7 +939,6 @@
     mode: "0755"
     force: true
     backup: false
-  failed_when: false
   tags:
     - frp
   when:
@@ -965,7 +952,6 @@
     mode: "0755"
     force: true
     backup: false
-  failed_when: false
   tags:
     - frp
   when:
@@ -1022,7 +1008,6 @@
 - name: 卸载已存在的 frpc 服务 (macOS)
   ansible.builtin.shell: "launchctl unload {{ common_home_root }}/Library/LaunchAgents/frpc.plist 2>/dev/null || true"
   changed_when: false
-  failed_when: false
   tags:
     - frp
   when:
@@ -1032,7 +1017,6 @@
 - name: 加载并启动 frpc 服务 (macOS)
   ansible.builtin.command: "launchctl load {{ common_home_root }}/Library/LaunchAgents/frpc.plist"
   changed_when: true
-  failed_when: false
   tags:
     - frp
   when:
@@ -1099,7 +1083,6 @@
     executable: /bin/bash
   register: install_rustup_default_needed
   changed_when: false
-  failed_when: false
   tags:
     - cargo
 
@@ -1113,7 +1096,6 @@
   ansible.builtin.shell: "rustup default stable 2>/dev/null || true"
   register: install_rustup_default_result
   changed_when: install_rustup_default_needed.stdout == "1"
-  failed_when: false
   tags:
     - cargo
   when: install_rustup_default_needed.stdout == "1"
@@ -1135,7 +1117,6 @@
     - tokei
   register: install_cargo_package_result
   changed_when: "'is installed' not in install_cargo_package_result.stdout"
-  failed_when: false
   tags:
     - cargo
   when: install_existing_of_cargo.stdout == "0" or install_existing_of_cargo.stdout == "1"
