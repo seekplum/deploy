@@ -310,20 +310,6 @@
     - macos_base_packages
   when: common_is_mac_os
 
-- name: 清除 brew 残留锁 & 临时文件
-  ansible.builtin.shell: |
-    rm -rf ~/Library/Caches/Homebrew/*.incomplete
-    rm -rf ~/Library/Caches/Homebrew/*.lock
-    rm -rf /private/tmp/.brew_lock
-    brew cleanup --force 2>/dev/null ||
-    pkill -f "brew install" 2>/dev/null || true
-    pkill -f "brew" 2>/dev/null || true
-  changed_when: false
-  failed_when: false
-  tags:
-    - macos_base_packages
-  when: common_is_mac_os
-
 - name: 信任brew源
   community.general.homebrew_tap:
     name: "{{ item }}"
@@ -336,7 +322,7 @@
     - macos_base_packages
   when: common_is_mac_os
 
-- name: 在 macOS 上安装基础软件包
+- name: 在 macOS 上安装基础 formula
   community.general.homebrew:
     name:
       - wget
@@ -353,9 +339,7 @@
       - esolitos/ipa/sshpass
       - knot
       - go
-      - zulu@8
       - lua
-      - maccy
       - mongodb-community
       - redis
       - showkey
@@ -368,14 +352,74 @@
       - docker
       - docker-compose
       - docker-buildx
-      - net-tools
       - mysql-client
       - coreutils
     state: present
-  failed_when: false
+    force_formula: true
+  environment: "{{ common_homebrew_environment | default({}) }}"
   tags:
     - macos_base_packages
   when: common_is_mac_os
+
+- name: 在 macOS 上安装基础 cask
+  ansible.builtin.shell: |
+    set -o pipefail
+    cask_json="$(brew info --cask --json=v2 "{{ item }}")"
+    printf '%s' "${cask_json}" | /usr/bin/python3 -c '
+    import json
+    import os
+    import subprocess
+    import sys
+
+    cask = json.load(sys.stdin)["casks"][0]
+    if cask.get("installed"):
+        raise SystemExit(0)
+
+    for artifact in cask.get("artifacts", []):
+        for app in artifact.get("app", []):
+            target = artifact.get("target") or os.path.join("/Applications", app)
+            if os.path.exists(target):
+                raise SystemExit(0)
+        for uninstall in artifact.get("uninstall", []):
+            pkgutil = uninstall.get("pkgutil")
+            if pkgutil and subprocess.run(["/usr/sbin/pkgutil", "--pkg-info", pkgutil], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                raise SystemExit(0)
+
+    raise SystemExit(1)
+    '
+  loop:
+    - zulu@8
+    - maccy
+  register: install_macos_cask_check_result
+  changed_when: false
+  failed_when: install_macos_cask_check_result.rc not in [0, 1]
+  environment: "{{ common_homebrew_environment | default({}) }}"
+  tags:
+    - macos_base_packages
+  when: common_is_mac_os
+
+- name: 生成未安装的 macOS cask 列表
+  ansible.builtin.set_fact:
+    install_macos_cask_names: >-
+      {{
+        install_macos_cask_check_result.results
+        | selectattr('rc', 'equalto', 1)
+        | map(attribute='item')
+        | list
+      }}
+  tags:
+    - macos_base_packages
+  when: common_is_mac_os
+
+- name: 安装未安装的 macOS cask
+  community.general.homebrew_cask:
+    name: "{{ install_macos_cask_names }}"
+    state: present
+    sudo_password: "{{ ansible_become_password | default(ansible_become_pass | default(omit)) }}"
+  environment: "{{ common_homebrew_environment | default({}) }}"
+  tags:
+    - macos_base_packages
+  when: common_is_mac_os and install_macos_cask_names | length > 0
 
 - name: 创建 macOS Docker 插件目录
   ansible.builtin.file:
@@ -778,14 +822,18 @@
   changed_when: false
   tags:
     - frp
-  when: common_is_frp_server_node or common_is_frp_client_node
+  when:
+    - common_is_frp_server_node
+    - common_is_linux_os
 
 - name: 输出 frps 检查结果
   ansible.builtin.debug:
     msg: "frps {{ '已安装' if install_existing_of_frp.stdout == '0' else '未安装' }}"
   tags:
     - frp
-  when: common_is_frp_server_node or common_is_frp_client_node
+  when:
+    - common_is_frp_server_node
+    - common_is_linux_os
 
 - name: 创建 frp 下载目录
   ansible.builtin.file:
@@ -880,6 +928,7 @@
     - frp
   when:
     - common_is_frp_server_node
+    - common_is_linux_os
 
 - name: 安装 frpc
   ansible.builtin.shell: |
@@ -907,6 +956,7 @@
     - frp
   when:
     - common_is_frp_server_node
+    - common_is_linux_os
 
 - name: 复制 frpc.service 启动脚本
   ansible.builtin.template:

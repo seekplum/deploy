@@ -25,7 +25,7 @@
 
 - name: 在 macOS 上链接 VirtualBox 脚本到 PATH
   ansible.builtin.file:
-    src: "{{ common_packages_root }}/{{ item }}"
+    src: "{{ common_packages_root }}/bin/{{ item }}"
     dest: "/usr/local/bin/{{ item.replace('.sh', '') }}"
     state: link
     force: false # 避免原主机文件被覆盖
@@ -37,7 +37,6 @@
     - configure_virtualbox_scripts
   become: true
   become_method: ansible.builtin.sudo
-  failed_when: false
   when: common_is_mac_os
 
 - name: 在 Ubuntu 上导入 GPG 密钥
@@ -92,7 +91,6 @@
     - "wandisco-git.repo"
     - "mongodb.repo"
   changed_when: false
-  failed_when: false
   become: true
   become_method: ansible.builtin.sudo
   tags:
@@ -120,7 +118,6 @@
     state: present
   become: true
   become_method: ansible.builtin.sudo
-  failed_when: false
   tags:
     - configure_redhat_sources
   when: common_is_centos_os
@@ -140,7 +137,6 @@
         mode: "0755"
         force: true
         backup: false
-      failed_when: false
     - name: 复制 /etc/my-rc.local 启动脚本
       ansible.builtin.template:
         src: "rc.local"
@@ -148,13 +144,11 @@
         mode: "0755"
         force: true
         backup: false
-      failed_when: false
     - name: 启动 my-rc-local 服务
       ansible.builtin.service:
         name: "my-rc-local"
         state: "started"
         enabled: true
-      failed_when: false
 - name: 配置DNS
   become: true
   become_method: ansible.builtin.sudo

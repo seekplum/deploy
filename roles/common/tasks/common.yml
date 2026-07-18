@@ -58,7 +58,8 @@
     common_is_master_node: '{{ "masters" in group_names }}'
     common_is_slaves_node: '{{ "slaves" in group_names }}'
     common_is_frp_server_node: "{{ local_frp_server_nodes is defined and inventory_hostname in local_frp_server_nodes }}"
-    common_is_frp_client_node: "{{ local_frp_client_nodes is defined and inventory_hostname in local_frp_client_nodes }}"
+    common_is_frp_client_node: "{{ local_frp_client_nodes is defined and inventory_hostname in local_frp_client_nodes or local_frp_client_names is defined and ansible_hostname
+      in local_frp_client_names }}"
   tags:
     - common
     - always
@@ -85,15 +86,35 @@
     executable: /bin/bash
   register: common_login_path_result
   changed_when: false
-  failed_when: false
   tags:
     - common
     - always
   when: common_done_once_role is not defined
 
+- name: 获取目标节点登录 shell Homebrew 环境
+  ansible.builtin.shell: |
+    set -o pipefail
+    {{ ansible_env.SHELL | default('/bin/sh') }} -lic 'env' |
+      awk -F= '/^(HOMEBREW_(API_DOMAIN|BOTTLE_DOMAIN|DOWNLOAD_CONCURRENCY|NO_AUTO_UPDATE|NO_ENV_HINTS)|ALL_PROXY|HTTP_PROXY|HTTPS_PROXY|all_proxy|http_proxy|https_proxy)=/ { print }'
+  args:
+    executable: /bin/bash
+  register: common_homebrew_environment_result
+  changed_when: false
+  when: common_is_mac_os and common_done_once_role is not defined
+  tags:
+    - common
+    - always
+
 - name: 生成目标节点环境变量
   ansible.builtin.set_fact:
     common_target_home: "{{ ansible_user_dir | default(common_home_root | default('')) }}"
+    common_homebrew_environment: >-
+      {{
+        dict(
+          common_homebrew_environment_result.stdout_lines | default([])
+          | map('split', '=', 1)
+        )
+      }}
     common_target_path: >-
       {{
         (
