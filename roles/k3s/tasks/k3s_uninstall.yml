@@ -120,6 +120,9 @@
     - "/usr/local/bin/kubectl"
     - "/usr/local/bin/ctr"
     - "/usr/local/bin/crictl"
+    - "/usr/bin/kubectl"
+    - "/usr/bin/ctr"
+    - "/usr/bin/crictl"
   tags:
     - remove_k3s_files
   become: true

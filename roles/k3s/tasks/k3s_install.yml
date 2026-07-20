@@ -286,9 +286,9 @@
   register: k3s_pods_info
   changed_when: false
   with_items:
-    - /usr/local/bin/kubectl get nodes,cs -o wide
-    - /usr/local/bin/kubectl --namespace kube-system get pods -o wide
-    - /usr/local/bin/kubectl get all --all-namespaces
+    - kubectl get nodes,cs -o wide
+    - kubectl --namespace kube-system get pods -o wide
+    - kubectl get all --all-namespaces
   tags:
     - k3s_server
   become: true
