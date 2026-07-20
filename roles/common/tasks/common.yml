@@ -58,8 +58,7 @@
     common_is_master_node: '{{ "masters" in group_names }}'
     common_is_slaves_node: '{{ "slaves" in group_names }}'
     common_is_frp_server_node: "{{ local_frp_server_nodes is defined and inventory_hostname in local_frp_server_nodes }}"
-    common_is_frp_client_node: "{{ local_frp_client_nodes is defined and inventory_hostname in local_frp_client_nodes or local_frp_client_names is defined and ansible_hostname
-      in local_frp_client_names }}"
+    common_is_frp_client_node: "{{ (local_frp_client_nodes is defined and inventory_hostname in local_frp_client_nodes) or (local_frp_client_names is defined and ansible_hostname in local_frp_client_names) }}"
   tags:
     - common
     - always

@@ -819,7 +819,6 @@
     - frp
   when:
     - common_is_frp_server_node or common_is_frp_client_node
-    - common_is_linux_os
 
 - name: 输出 frps 检查结果
   ansible.builtin.debug:
@@ -827,8 +826,7 @@
   tags:
     - frp
   when:
-    - common_is_frp_server_node
-    - common_is_linux_os
+    - common_is_frp_server_node or common_is_frp_client_node
 
 - name: 创建 frp 下载目录
   ansible.builtin.file:
@@ -960,6 +958,7 @@
     - frp
   when:
     - common_is_frp_client_node
+    - common_is_linux_os
 
 - name: 重新加载 systemd
   ansible.builtin.systemd:
