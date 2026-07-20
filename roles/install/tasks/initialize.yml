@@ -146,45 +146,46 @@
 
 - name: 在 Redhat 上安装基础软件包
   ansible.builtin.dnf:
-    name:
-      - zip
-      - unzip
-      - epel-release
-      - gcc
-      - gcc-c++
-      - zlib
-      - zlib-devel
-      - libffi-devel
-      - libyaml-devel
-      - sqlite-devel
-      - readline-devel
-      - rsync
-      - git
-      - bzip2
-      - bzip2-devel
-      - wget
-      - screen
-      - make
-      - cmake
-      - tree
-      - sshpass
-      - yum-utils
-      - device-mapper-persistent-data
-      - lvm2
-      # - haveged
-      # - the_silver_searcher
-      - patch
-      # - pcre-devel
-      - kernel-modules-extra
-      - ripgrep
-      - mongodb-mongosh
-      - knot
-      - telnet
-      - util-linux-user
-      - net-tools
+    name: "{{ item }}"
     state: present
     update_cache: false
     # nobest: true
+  loop:
+    - zip
+    - unzip
+    - epel-release
+    - gcc
+    - gcc-c++
+    - zlib
+    - zlib-devel
+    - libffi-devel
+    - libyaml-devel
+    - sqlite-devel
+    - readline-devel
+    - rsync
+    - git
+    - bzip2
+    - bzip2-devel
+    - wget
+    - screen
+    - make
+    - cmake
+    - tree
+    - sshpass
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+    # - haveged
+    # - the_silver_searcher
+    - patch
+    # - pcre-devel
+    - kernel-modules-extra
+    - ripgrep
+    - mongodb-mongosh
+    - knot
+    - telnet
+    - util-linux-user
+    - net-tools
   tags:
     - redhat_base_packages
   when: common_is_centos_os
@@ -234,61 +235,62 @@
 
 - name: 在 Ubuntu 上安装基础软件包
   ansible.builtin.apt:
-    pkg:
-      - curl
-      - jq
-      - gcc
-      - rsync
-      - git
-      - bzip2
-      - python3-setuptools
-      - python3-dev
-      - wget
-      - screen
-      - make
-      - cmake
-      - tree
-      - sshpass
-      - build-essential
-      - libssl-dev
-      - zlib1g-dev
-      - libbz2-dev
-      - libreadline-dev
-      - libsqlite3-dev
-      - llvm
-      - libncurses5-dev
-      - software-properties-common
-      - haveged
-      - silversearcher-ag
-      - apt-transport-https
-      # - ca-certificates
-      - gnupg-agent
-      - gnupg2
-      - python3-apt
-      - libffi-dev
-      - pinentry-gtk2
-      - python3-tk
-      - tk-dev
-      - libpcre3-dev
-      - ripgrep
-      - mongodb-mongosh
-      - knot-dnsutils
-      - keychain
-      - sqlite3
-      - groovy
-      - shfmt
-      - shellcheck
-      - unzip
-      - age
-      - certbot
-      - python3-certbot-nginx
-      - rbenv
-      - libyaml-dev
-      - net-tools
-      - mysql-client
+    pkg: "{{ item }}"
     state: present
     update_cache: true
     cache_valid_time: 86400
+  loop:
+    - curl
+    - jq
+    - gcc
+    - rsync
+    - git
+    - bzip2
+    - python3-setuptools
+    - python3-dev
+    - wget
+    - screen
+    - make
+    - cmake
+    - tree
+    - sshpass
+    - build-essential
+    - libssl-dev
+    - zlib1g-dev
+    - libbz2-dev
+    - libreadline-dev
+    - libsqlite3-dev
+    - llvm
+    - libncurses5-dev
+    - software-properties-common
+    - haveged
+    - silversearcher-ag
+    - apt-transport-https
+    # - ca-certificates
+    - gnupg-agent
+    - gnupg2
+    - python3-apt
+    - libffi-dev
+    - pinentry-gtk2
+    - python3-tk
+    - tk-dev
+    - libpcre3-dev
+    - ripgrep
+    - mongodb-mongosh
+    - knot-dnsutils
+    - keychain
+    - sqlite3
+    - groovy
+    - shfmt
+    - shellcheck
+    - unzip
+    - age
+    - certbot
+    - python3-certbot-nginx
+    - rbenv
+    - libyaml-dev
+    - net-tools
+    - mysql-client
   tags:
     - ubuntu_base_packages
   become: true
@@ -317,38 +319,40 @@
 
 - name: 在 macOS 上安装基础 formula
   community.general.homebrew:
-    name:
-      - wget
-      - tree
-      - zlib
-      - sqlite
-      - the_silver_searcher
-      - gnupg
-      - pinentry-mac
-      - ripgrep
-      - age
-      - shfmt
-      - shellcheck
-      - esolitos/ipa/sshpass
-      - knot
-      - go
-      - lua
-      - mongodb-community
-      - redis
-      - showkey
-      # - sunnyyoung/tap/wechattweak
-      - yamlfmt
-      - kubernetes-cli
-      - telnet
-      - colima
-      - stern
-      - docker
-      - docker-compose
-      - docker-buildx
-      - mysql-client
-      - coreutils
+    name: "{{ item }}"
     state: present
+    update_homebrew: false
     force_formula: true
+  loop:
+    - wget
+    - tree
+    - zlib
+    - sqlite
+    - the_silver_searcher
+    - gnupg
+    - pinentry-mac
+    - ripgrep
+    - age
+    - shfmt
+    - shellcheck
+    - esolitos/ipa/sshpass
+    - knot
+    - go
+    - lua
+    - mongodb-community
+    - redis
+    - showkey
+    # - sunnyyoung/tap/wechattweak
+    - yamlfmt
+    - kubernetes-cli
+    - telnet
+    - colima
+    - stern
+    - docker
+    - docker-compose
+    - docker-buildx
+    - mysql-client
+    - coreutils
   environment: "{{ common_homebrew_environment | default({}) }}"
   tags:
     - macos_base_packages
