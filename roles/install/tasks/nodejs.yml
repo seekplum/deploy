@@ -44,8 +44,8 @@
       become: true
       become_method: ansible.builtin.sudo
 
-    - name: 修改目录权限
-      ansible.builtin.shell: "chown -R $(whoami):$(id -g -n) /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share"
+    - name: 安装 Node.js 版本
+      ansible.builtin.command: "/usr/local/n/bin/n {{ install_node_version }}"
       changed_when: true
       when: install_installed_of_node.stdout == "1"
       tags:
@@ -53,10 +53,9 @@
       become: true
       become_method: ansible.builtin.sudo
 
-    - name: 安装 Node.js 版本
-      ansible.builtin.command: "/usr/local/n/bin/n {{ install_node_version }}"
+    - name: 修改目录权限
+      ansible.builtin.shell: "chown -R $(whoami):$(id -g -n) /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share /usr/local/n"
       changed_when: true
-      when: install_installed_of_node.stdout == "1"
       tags:
         - nodejs
       become: true
