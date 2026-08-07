@@ -541,12 +541,14 @@
   changed_when: false
   tags:
     - drone
+  when: common_is_develop_node
 
 - name: 输出 drone 检查结果
   ansible.builtin.debug:
     msg: "drone {{ '已安装' if install_existing_of_drone.stdout == '0' else '未安装' }}"
   tags:
     - drone
+  when: common_is_develop_node
 
 - name: 安装 drone
   ansible.builtin.shell: |
@@ -563,7 +565,9 @@
   become_method: ansible.builtin.sudo
   tags:
     - drone
-  when: install_existing_of_drone.stdout == "1"
+  when:
+    - common_is_develop_node
+    - install_existing_of_drone.stdout == "1"
 
 - name: 检查 act 是否已安装
   ansible.builtin.shell: "command -v act >/dev/null 2>&1 && echo 0 || echo 1"
@@ -571,12 +575,15 @@
   changed_when: false
   tags:
     - act
+  when: common_is_develop_node
 
 - name: 输出 act 检查结果
   ansible.builtin.debug:
     msg: "act {{ '已安装' if install_existing_of_act.stdout == '0' else '未安装' }}"
   tags:
     - act
+  when:
+    - common_is_develop_node
 
 - name: 安装 act
   ansible.builtin.shell: |
@@ -590,7 +597,37 @@
   become_method: ansible.builtin.sudo
   tags:
     - act
-  when: install_existing_of_act.stdout == "1"
+  when:
+    - common_is_develop_node
+    - install_existing_of_act.stdout == "1"
+
+- name: 检查 opencode 是否已安装
+  ansible.builtin.shell: "command -v opencode >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_opencode
+  changed_when: false
+  tags:
+    - opencode
+
+- name: 输出 opencode 检查结果
+  ansible.builtin.debug:
+    msg: "opencode {{ '已安装' if install_existing_of_opencode.stdout == '0' else '未安装' }}"
+  tags:
+    - opencode
+
+- name: 安装 opencode
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -fsSL https://opencode.ai/install | bash
+  args:
+    executable: /bin/bash
+  changed_when: true
+  become: true
+  become_method: ansible.builtin.sudo
+  tags:
+    - opencode
+  when:
+    - common_is_develop_node
+    - install_existing_of_opencode.stdout == "1"
 
 - name: 检查 uv 是否已安装
   ansible.builtin.shell: "command -v uv >/dev/null 2>&1 && echo 0 || echo 1"
@@ -622,12 +659,16 @@
   changed_when: false
   tags:
     - devbox
+  when:
+    - common_is_develop_node
 
 - name: 输出 devbox 检查结果
   ansible.builtin.debug:
     msg: "devbox {{ '已安装' if install_existing_of_devbox.stdout == '0' else '未安装' }}"
   tags:
     - devbox
+  when:
+    - common_is_develop_node
 
 - name: 安装 devbox
   ansible.builtin.shell: |
@@ -640,7 +681,9 @@
   become_method: ansible.builtin.sudo
   tags:
     - devbox
-  when: install_existing_of_devbox.stdout == "1"
+  when:
+    - common_is_develop_node
+    - install_existing_of_devbox.stdout == "1"
 
 - name: 检查 nix 是否已安装
   ansible.builtin.shell: "command -v nix >/dev/null 2>&1 && echo 0 || echo 1"
@@ -648,14 +691,18 @@
   changed_when: false
   tags:
     - nix
-  when: (common_is_linux_os or common_is_high_mac_os)
+  when:
+    - common_is_develop_node
+    - (common_is_linux_os or common_is_high_mac_os)
 
 - name: 输出 nix 检查结果
   ansible.builtin.debug:
     msg: "nix {{ '已安装' if install_existing_of_nix.stdout == '0' else '未安装' }}"
   tags:
     - nix
-  when: (common_is_linux_os or common_is_high_mac_os)
+  when:
+    - common_is_develop_node
+    - (common_is_linux_os or common_is_high_mac_os)
 
 - name: 在 Linux 上清除 nix 安装残留
   ansible.builtin.shell: |
@@ -673,6 +720,7 @@
   tags:
     - nix
   when:
+    - common_is_develop_node
     - common_is_linux_os or common_is_high_mac_os
     - install_existing_of_nix.stdout == "1"
 
@@ -684,6 +732,7 @@
   tags:
     - nix
   when:
+    - common_is_develop_node
     - common_is_centos_os
     - install_existing_of_nix.stdout == "1"
 
@@ -695,6 +744,7 @@
   tags:
     - nix
   when:
+    - common_is_develop_node
     - common_is_centos_os
     - install_existing_of_nix.stdout == "1"
 
@@ -708,6 +758,7 @@
   tags:
     - nix
   when:
+    - common_is_develop_node
     - common_is_linux_os or common_is_high_mac_os
     - install_existing_of_nix.stdout == "1"
 
@@ -717,14 +768,18 @@
   changed_when: false
   tags:
     - nix
-  when: common_is_mac_os and not common_is_high_mac_os
+  when:
+    - common_is_develop_node
+    - common_is_mac_os and not common_is_high_mac_os
 
 - name: 输出旧版 nix 检查结果
   ansible.builtin.debug:
     msg: "nix {{ '已安装' if install_existing_of_legacy_nix.stdout == '0' else '未安装' }}"
   tags:
     - nix
-  when: common_is_mac_os and not common_is_high_mac_os
+  when:
+    - common_is_develop_node
+    - common_is_mac_os and not common_is_high_mac_os
 
 - name: 在 MacOS13 上安装 nix
   ansible.builtin.shell: |
@@ -736,6 +791,7 @@
   tags:
     - nix
   when:
+    - common_is_develop_node
     - common_is_mac_os and not common_is_high_mac_os
     - install_existing_of_legacy_nix.stdout == "1"
 
@@ -749,7 +805,9 @@
   become_method: ansible.builtin.sudo
   tags:
     - nix
-  when: common_is_mac_os
+  when:
+    - common_is_develop_node
+    - common_is_mac_os
 
 - name: 检查 direnv 是否已安装
   ansible.builtin.shell: "command -v direnv >/dev/null 2>&1 && echo 0 || echo 1"
@@ -757,12 +815,16 @@
   changed_when: false
   tags:
     - direnv
+  when:
+    - common_is_develop_node
 
 - name: 输出 direnv 检查结果
   ansible.builtin.debug:
     msg: "direnv {{ '已安装' if install_existing_of_direnv.stdout == '0' else '未安装' }}"
   tags:
     - direnv
+  when:
+    - common_is_develop_node
 
 - name: 安装 direnv
   ansible.builtin.shell: |
@@ -774,7 +836,9 @@
   changed_when: true
   tags:
     - direnv
-  when: install_existing_of_direnv.stdout == "1"
+  when:
+    - common_is_develop_node
+    - install_existing_of_direnv.stdout == "1"
 
 - name: 检查 atuin 是否已安装
   ansible.builtin.shell: "command -v atuin >/dev/null 2>&1 && echo 0 || echo 1"
@@ -1032,14 +1096,18 @@
   changed_when: false
   tags:
     - sing_box
-  when: common_is_linux_os
+  when:
+    - common_is_server_node
+    - common_is_linux_os
 
 - name: 输出 sing-box 检查结果
   ansible.builtin.debug:
     msg: "sing-box {{ '已安装' if install_existing_of_sing_box.stdout == '0' else '未安装' }}"
   tags:
     - sing_box
-  when: common_is_linux_os
+  when:
+    - common_is_server_node
+    - common_is_linux_os
 
 - name: 安装 sing-box
   ansible.builtin.shell: |
@@ -1051,6 +1119,7 @@
   tags:
     - sing_box
   when:
+    - common_is_server_node
     - common_is_linux_os
     - install_existing_of_sing_box.stdout == "1"
 
@@ -1130,12 +1199,16 @@
   changed_when: false
   tags:
     - cfst
+  when:
+    - common_is_develop_node
 
 - name: 输出 cfst 检查结果
   ansible.builtin.debug:
     msg: "cfst {{ '已安装' if install_existing_of_cfst.stdout == '0' else '未安装' }}"
   tags:
     - cfst
+  when:
+    - common_is_develop_node
 
 - name: 创建 cfst 安装目录
   ansible.builtin.file:
@@ -1144,7 +1217,9 @@
     mode: "0755"
   tags:
     - cfst
-  when: install_existing_of_cfst.stdout == "1"
+  when:
+    - common_is_develop_node
+    - install_existing_of_cfst.stdout == "1"
 
 - name: 检查 cfst 安装包是否已存在
   ansible.builtin.stat:
@@ -1152,7 +1227,9 @@
   register: install_cfst_package_stat
   tags:
     - cfst
-  when: install_existing_of_cfst.stdout == "1"
+  when:
+    - common_is_develop_node
+    - install_existing_of_cfst.stdout == "1"
 
 - name: 下载 cfst 安装包
   ansible.builtin.get_url:
@@ -1162,6 +1239,7 @@
   tags:
     - cfst
   when:
+    - common_is_develop_node
     - install_existing_of_cfst.stdout == "1"
     - not install_cfst_package_stat.stat.exists
 
@@ -1177,6 +1255,7 @@
   tags:
     - cfst
   when:
+    - common_is_develop_node
     - install_existing_of_cfst.stdout == "1"
     - common_is_linux_os
 
@@ -1192,6 +1271,7 @@
   tags:
     - cfst
   when:
+    - common_is_develop_node
     - install_existing_of_cfst.stdout == "1"
     - common_is_mac_os
 
@@ -1200,4 +1280,6 @@
     msg: "cfst 已安装到 {{ install_cfst_download_dir }}/cfst"
   tags:
     - cfst
-  when: install_existing_of_cfst.stdout == "1"
+  when:
+    - common_is_develop_node
+    - install_existing_of_cfst.stdout == "1"

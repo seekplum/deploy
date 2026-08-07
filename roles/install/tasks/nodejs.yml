@@ -63,10 +63,10 @@
 - name: 安装 Node.js 全局软件包
   ansible.builtin.shell: |
     set -o pipefail
-    if [ "$(npm list -g --depth=0 "{{ item }}" | grep -c "{{ item }}")" -eq 0 ]; then
-      npm install -g "{{ item }}"
-    else
+    if [ "$(npm list -g --depth=0 "{{ item }}" | grep -c "{{ item }}")" -gt 0 ] || [ $(command -v "{{ item }}") ]; then
       echo "{{ item }} is installed"
+    else
+      npm install -g "{{ item }}"
     fi
   args:
     executable: /bin/bash

@@ -57,6 +57,8 @@
     common_is_common_node: '{{ "common" in group_names }}'
     common_is_master_node: '{{ "masters" in group_names }}'
     common_is_slaves_node: '{{ "slaves" in group_names }}'
+    common_is_server_node: "{{ local_server_nodes is defined and inventory_hostname in local_server_nodes }}"
+    common_is_develop_node: "{{ local_develop_nodes is defined and inventory_hostname in local_develop_nodes }}"
     common_is_frp_server_node: "{{ local_frp_server_nodes is defined and inventory_hostname in local_frp_server_nodes }}"
     common_is_frp_client_node: "{{ (local_frp_client_nodes is defined and inventory_hostname in local_frp_client_nodes) or (local_frp_client_names is defined and ansible_hostname in local_frp_client_names) }}"
   tags:
@@ -70,6 +72,8 @@
       是否通用节点: "{{ '是' if common_is_common_node else '否' }}"
       是否Master节点: "{{ '是' if common_is_master_node else '否' }}"
       是否Slave节点: "{{ '是' if common_is_slaves_node else '否' }}"
+      是否服务器节点: "{{ '是' if common_is_server_node else '否' }}"
+      是否开发环境节点: "{{ '是' if common_is_develop_node else '否' }}"
       是否FRP服务端节点: "{{ '是' if common_is_frp_server_node else '否' }}"
       是否FRP客户端节点: "{{ '是' if common_is_frp_client_node else '否' }}"
   tags:
