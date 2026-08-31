@@ -88,7 +88,6 @@
     remote_src: true
     mode: preserve
   with_items:
-    - "wandisco-git.repo"
     - "mongodb.repo"
   changed_when: false
   become: true
@@ -104,7 +103,6 @@
     mode: "0644"
     force: true
   with_items:
-    - "wandisco-git.repo"
     - "mongodb.repo"
   become: true
   become_method: ansible.builtin.sudo

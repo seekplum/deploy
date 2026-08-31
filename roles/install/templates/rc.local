@@ -3,16 +3,15 @@
 set -e
 LOG_FILE="{{ common_packages_root }}/logs/mystart.log"
 SCRIPTS_FILES="{{ common_packages_root }}/bin/mystart.sh"
-USER="{{ common_login_user }}"
 
 function start() {
-    sudo -u ${USER} echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local start" >> ${LOG_FILE}
-    sudo -u ${USER} bash ${SCRIPTS_FILES} start | tee -a ${LOG_FILE}
+    echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local start" >> ${LOG_FILE}
+    bash ${SCRIPTS_FILES} start | tee -a ${LOG_FILE}
 }
 
 function stop() {
-    sudo -u ${USER} echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local stop" >> ${LOG_FILE}
-    sudo -u ${USER} bash ${SCRIPTS_FILES} stop | tee -a ${LOG_FILE}
+    echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local stop" >> ${LOG_FILE}
+    bash ${SCRIPTS_FILES} stop | tee -a ${LOG_FILE}
 }
 
 function print_help() {
