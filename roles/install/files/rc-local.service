@@ -13,14 +13,15 @@
 Description=/etc/my-rc.local Compatibility
 Documentation=man:systemd-rc-local-generator(8)
 ConditionFileIsExecutable=/etc/my-rc.local
-After=network.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
-Type=forking
+Type=oneshot
 ExecStart=/etc/my-rc.local start
-TimeoutSec=0
+ExecStop=/etc/my-rc.local stop
 RemainAfterExit=yes
-GuessMainPID=no
+TimeoutSec=0
 
 [Install]
 WantedBy=multi-user.target

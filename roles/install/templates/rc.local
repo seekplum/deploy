@@ -1,42 +1,53 @@
 #!/bin/bash
 
-set -e
+set -o pipefail
+
 LOG_FILE="{{ common_packages_root }}/logs/mystart.log"
 SCRIPTS_FILES="{{ common_packages_root }}/bin/mystart.sh"
 
+function _get_now() {
+    echo "$(date +"%F %T")"
+}
+
 function start() {
-    echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local start" >> ${LOG_FILE}
-    bash ${SCRIPTS_FILES} start | tee -a ${LOG_FILE}
+    echo "$(_get_now) my-rc.local start" >>"${LOG_FILE}"
+    bash "${SCRIPTS_FILES}" start 2>&1 | tee -a "${LOG_FILE}"
 }
 
 function stop() {
-    echo "$(date +'%Y-%m-%d %H:%M:%S') my-rc.local stop" >> ${LOG_FILE}
-    bash ${SCRIPTS_FILES} stop | tee -a ${LOG_FILE}
+    echo "$(_get_now) my-rc.local stop" >>"${LOG_FILE}"
+    bash "${SCRIPTS_FILES}" stop 2>&1 | tee -a "${LOG_FILE}"
+}
+function status() {
+    bash "${SCRIPTS_FILES}" status
 }
 
 function print_help() {
-    echo "Usage: bash $0 {start|stop|restart}"
+    echo "Usage: bash $0 {start|stop|restart|status}"
     echo "e.g: $0 start"
 }
 
-
 case "$1" in
-  start)
-        start
-        ;;
-  stop)
-        stop
-        ;;
-  restart)
-        stop
-        sleep 3
-        start
-        ;;
-  ""|-h|--help)
-        print_help  # 参数为空时执行
-        ;;
-  *)  # 匹配都失败执行
-        print_help
+start)
+    start
+    ;;
+stop)
+    stop
+    ;;
+status)
+    status
+    ;;
+restart)
+    stop
+    sleep 3
+    start
+    ;;
+"" | -h | --help)
+    print_help # 参数为空时执行
+    ;;
+*) # 匹配都失败执行
+    print_help
+    ;;
 esac
 
 exit 0

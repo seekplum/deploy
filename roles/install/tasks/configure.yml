@@ -23,6 +23,26 @@
   tags:
     - configure_project_dirs
 
+- name: 给日志目录应用 var_log_t 标签
+  community.general.sefcontext:
+    target: "{{ common_packages_root }}/logs(/.*)?"
+    setype: var_log_t
+    state: present
+  when:
+    - ansible_selinux is defined
+    - ansible_selinux.status == "enabled"
+  tags:
+    - configure_logs_tag
+
+- name: 刷新 SELinux 上下文
+  ansible.builtin.command: restorecon -R {{ common_packages_root }}/logs
+  changed_when: false
+  when:
+    - ansible_selinux is defined
+    - ansible_selinux.status == "enabled"
+  tags:
+    - configure_logs_tag
+
 - name: 在 macOS 上链接 VirtualBox 脚本到 PATH
   ansible.builtin.file:
     src: "{{ common_packages_root }}/bin/{{ item }}"

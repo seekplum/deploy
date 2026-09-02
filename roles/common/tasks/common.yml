@@ -60,7 +60,8 @@
     common_is_server_node: "{{ local_server_nodes is defined and inventory_hostname in local_server_nodes }}"
     common_is_develop_node: "{{ local_develop_nodes is defined and inventory_hostname in local_develop_nodes }}"
     common_is_frp_server_node: "{{ local_frp_server_nodes is defined and inventory_hostname in local_frp_server_nodes }}"
-    common_is_frp_client_node: "{{ (local_frp_client_nodes is defined and inventory_hostname in local_frp_client_nodes) or (local_frp_client_names is defined and ansible_hostname in local_frp_client_names) }}"
+    common_is_frp_client_node: "{{ (local_frp_client_nodes is defined and inventory_hostname in local_frp_client_nodes) or (local_frp_client_names is defined and
+      ansible_hostname in local_frp_client_names) }}"
   tags:
     - common
     - always
