@@ -107,3 +107,27 @@
   tags:
     - bun
   when: install_existing_of_bun.stdout == "1"
+
+- name: 检查 fnm 是否已安装
+  ansible.builtin.shell: "command -v fnm >/dev/null 2>&1 && echo 0 || echo 1"
+  register: install_existing_of_fnm
+  changed_when: false
+  tags:
+    - fnm
+
+- name: 输出 fnm 检查结果
+  ansible.builtin.debug:
+    msg: "fnm {{ '已安装' if install_existing_of_fnm.stdout == '0' else '未安装' }}"
+  tags:
+    - fnm
+
+- name: 安装 fnm
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -fsSL https://fnm.vercel.app/install | bash
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags:
+    - fnm
+  when: install_existing_of_fnm.stdout == "1"
