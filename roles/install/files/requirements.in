@@ -16,3 +16,4 @@ ipython
 ipykernel
 cookiecutter
 bump-my-version
+rich
